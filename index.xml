@@ -22,14 +22,5 @@
 ಕಾಲೇಜಿನ ಕೊನೆಯ ದಿನ. ಕಾಲೇಜಿನ ಮುಂಭಾಗದಲ್ಲಿ ಹುಚ್ಚನಂತೆ ಗೆಳೆಯರ ಮುಂದೆ ನಿಂತಿದ್ದೆ. ಸುದೀರ್ಘ ಕೊನೆಯ ಹರಟೆಯ ನಂತರ, ಎಲ್ಲರಿಗೂ ಕೈಬೀಸಿ, ಬೇಡದ ಮನಸ್ಸಿನಿಂದ ಭಾರದ ಹೆಜ್ಜೆ ಹಾಕುತ ಬಸ್ಸೇರಿ ಕುಳಿತೆ. ಹಿಂದಿರುಗುವ ದೀರ್ಘ 8 ಗಂಟೆಗಳ ಅವಧಿಯಲ್ಲಿ ಕಳೆದ 2 ವರ್ಷದ ನೆನಪುಗಳನ್ನು ಮೆಲುಕು ಹಾಕಿದೆ. 2 ವರ್ಷದ ಹಿಂದೆ ನಡೆದ ಘಟನೆಗಳು ನನ್ನೆದುರು ಸುರುಳಿ ಬಿಚ್ಚಿದವು. ಅಂದು ರವಿವಾರ. ಕಾಲೇಜಿನ ಮೊದಲ ಔಟಿಂಗ್‍ನಲ್ಲಿ ದಿಕ್ಕು ಗೊತ್ತಿರದ ಊರಿನಲ್ಲಿ ಒಂದು ದಿನದ ಗೆಳೆತನವಿದ್ದ ಗೆಳೆಯನೊಂದಿಗೆ ಹೊರಟಿದ್ದೆ. ಇಬ್ಬರ ಸ್ನೇಹಕ್ಕೆ ಕಾರಣ ‘ಪಲಾಯನ’. ಕಾಲೇಜಿನ ವಾತಾವರಣಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳದ ಇಬ್ಬರೂ ಕಾಲೇಜಿನಿಂದ ಮನೆಗೆ ‘ಪಲಾಯನ’ದ ಕನಸಿಗೆ ಒಬ್ಬರಿಗೊಬ್ಬರು ಕಿವಿಯಾಗಿದ್ದೆವು.</description>
     </item>
     
-    <item>
-      <title>Using Programming Languages for teaching</title>
-      <link>https://akash-akya.github.io/post/programming-for-teaching/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://akash-akya.github.io/post/programming-for-teaching/</guid>
-      <description>Introduction About SICP Similarity between formal language and programming language strengths and weakness of programming language and formal language Ambiguity Use of languages, quote chomsky regarding development of languages Language as internal communication tool What can we gain from programming languages? Tool for understanding as its unambiguous For self understanding Science Physics Mathematics For communicating with other, mathematics already doing this For abstraction Recursive nature of the formal language Abstraction example using SICP exercise Example working at higher level, such as picture language Church numerical For art Sonic Pi example Generative Art example Disadvantages Language syntax complexity As a solution, Scheme/Lisp Why?</description>
-    </item>
-    
   </channel>
 </rss>
