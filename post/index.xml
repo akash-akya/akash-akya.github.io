@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Just Another Blog.</title>
+    <title>Posts on Just another blog!</title>
     <link>https://akash-akya.github.io/post/</link>
-    <description>Recent content in Posts on Just Another Blog.</description>
+    <description>Recent content in Posts on Just another blog!</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
@@ -20,6 +20,15 @@
       <guid>https://akash-akya.github.io/post/college-days/</guid>
       <description>ಕಾಲೇಜಿನ ದ್ವಿವಾರ್ಷಿಕ ಪತ್ರಿಕೆಗಾಗಿ 2013ರಲ್ಲಿ ರಚಿಸಿದ್ದು
 ಕಾಲೇಜಿನ ಕೊನೆಯ ದಿನ. ಕಾಲೇಜಿನ ಮುಂಭಾಗದಲ್ಲಿ ಹುಚ್ಚನಂತೆ ಗೆಳೆಯರ ಮುಂದೆ ನಿಂತಿದ್ದೆ. ಸುದೀರ್ಘ ಕೊನೆಯ ಹರಟೆಯ ನಂತರ, ಎಲ್ಲರಿಗೂ ಕೈಬೀಸಿ, ಬೇಡದ ಮನಸ್ಸಿನಿಂದ ಭಾರದ ಹೆಜ್ಜೆ ಹಾಕುತ ಬಸ್ಸೇರಿ ಕುಳಿತೆ. ಹಿಂದಿರುಗುವ ದೀರ್ಘ 8 ಗಂಟೆಗಳ ಅವಧಿಯಲ್ಲಿ ಕಳೆದ 2 ವರ್ಷದ ನೆನಪುಗಳನ್ನು ಮೆಲುಕು ಹಾಕಿದೆ. 2 ವರ್ಷದ ಹಿಂದೆ ನಡೆದ ಘಟನೆಗಳು ನನ್ನೆದುರು ಸುರುಳಿ ಬಿಚ್ಚಿದವು. ಅಂದು ರವಿವಾರ. ಕಾಲೇಜಿನ ಮೊದಲ ಔಟಿಂಗ್‍ನಲ್ಲಿ ದಿಕ್ಕು ಗೊತ್ತಿರದ ಊರಿನಲ್ಲಿ ಒಂದು ದಿನದ ಗೆಳೆತನವಿದ್ದ ಗೆಳೆಯನೊಂದಿಗೆ ಹೊರಟಿದ್ದೆ. ಇಬ್ಬರ ಸ್ನೇಹಕ್ಕೆ ಕಾರಣ ‘ಪಲಾಯನ’. ಕಾಲೇಜಿನ ವಾತಾವರಣಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳದ ಇಬ್ಬರೂ ಕಾಲೇಜಿನಿಂದ ಮನೆಗೆ ‘ಪಲಾಯನ’ದ ಕನಸಿಗೆ ಒಬ್ಬರಿಗೊಬ್ಬರು ಕಿವಿಯಾಗಿದ್ದೆವು.</description>
+    </item>
+    
+    <item>
+      <title>Import in Racket&#39;s sicp</title>
+      <link>https://akash-akya.github.io/post/racket-sicp-util/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://akash-akya.github.io/post/racket-sicp-util/</guid>
+      <description>I recently started reading Structure and Interpretation of Computer Programs or sicp for short. It&#39;s wonderfully well written. can&#39;t recommend it enough. I&#39;m using racket scheme for doing the exercises. because along with support for sicp it also has awesome picture language1. You can even just copy paste the code, It works without a any change. There is one caveat though. Some basic functions such as square are not defined in the language.</description>
     </item>
     
   </channel>

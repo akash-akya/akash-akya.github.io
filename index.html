@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Just Another Blog.</title>
+    <title>Just another blog!</title>
 
         <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <meta name="description" content="">
     <meta name="keywords" content="">
-    <meta name="author" content="">
-        <meta property="og:title" content="Just Another Blog." />
+    <meta name="author" content="Akash">
+        <meta property="og:title" content="Just another blog!" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://akash-akya.github.io/" />
     
 
-    <link href="https://akash-akya.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Just Another Blog." />
+    <link href="https://akash-akya.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Just another blog!" />
     <link rel="shortcut icon" href="/favicon.png">
 
     <link href="https://akash-akya.github.io/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
@@ -35,7 +35,7 @@
     <div id="header-outer" class="outer">
         <div id="header-inner" class="inner">
             <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
-            <a id="logo" class="logo-text" href="https://akash-akya.github.io/">Just Another Blog.</a>
+            <a id="logo" class="logo-text" href="https://akash-akya.github.io/">Just another blog!</a>
             <nav id="main-nav">
                 
             </nav>
@@ -83,6 +83,40 @@
             </div>
         </article>
         
+        <article class="article article-type-post" itemscope itemprop="blogPost">
+            <div class="article-inner">
+                
+                
+                <header class="article-header">
+                    <h1 itemprop="name"><a class="article-title" href="/post/racket-sicp-util/">Import in Racket&#39;s sicp</a></h1>
+                </header>
+                
+                <div class="article-meta">
+                    <a href="/post/racket-sicp-util/" class="article-date">
+                        <time datetime='0001-01-01T00:00:00.000&#43;00:00' itemprop="datePublished">0001-01-01</time>
+                    </a>
+                    
+                    
+                    
+                    <div class="article-comment-link-wrap">
+                        <a href="/post/racket-sicp-util/#disqus_thread" class="article-comment-link">Comments</a>
+                    </div>
+                    
+                </div>
+                <div class="article-entry" itemprop="articleBody">
+                    <p>
+                        
+                    I recently started reading Structure and Interpretation of Computer Programs or sicp for short. It's wonderfully well written. can't recommend it enough. I'm using racket scheme for doing the exercises. because along with support for sicp it also has awesome picture language1. You can even just copy paste the code, It works without a any change. There is one caveat though. Some basic functions such as square are not defined in the language.
+                    </p>
+                    <p class="article-more-link">
+                        <a href="/post/racket-sicp-util/">Read More</a>
+                    </p>
+                </div>
+
+                
+            </div>
+        </article>
+        
 
         
 
@@ -90,13 +124,17 @@
     <footer id="footer">
     <div class="outer">
         <div id="footer-info" class="inner">
-            &copy; 2018 Just Another Blog.&nbsp;
-            Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with theme <a href="https://github.com/carsonip/hugo-theme-minos">Minos</a>
+          Akash Hiremath
+          &nbsp;   •  &nbsp;
+          2018
+          &nbsp; •  &nbsp;
+          Licensed under GPLv3&nbsp;
+            
         </div>
     </div>
     
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/tomorrow-night.min.css" integrity="sha256-2wL88NKUqvJi/ExflDzkzUumjUM73mcK2gBvBBeLvTk=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/tomorrow.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js" integrity="sha256-KbfTjB0WZ8vvXngdpJGY3Yp3xKk+tttbqClO11anCIU=" crossorigin="anonymous"></script>
     <script>hljs.initHighlightingOnLoad();</script>
 
@@ -110,8 +148,13 @@
                 header.classList.add('mobile-on');
             }
         });
+
+      $(document).ready(function() {
+          $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
+      });
     </script>
 </footer>
+
 </div>
 </body>
 </html>
