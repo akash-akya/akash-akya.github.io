@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Nunito|Quicksand|');
+@import url('https://fonts.googleapis.com/css?family=Nunito|Quicksand|DejaVu+Sans+Mono|');
 
 html,
 body,
@@ -823,7 +823,7 @@ a.article-title:hover,
 }
 .article-entry pre,
 .article-entry code {
-  font-family: "Source Code Pro", Consolas, Monaco, Menlo, Consolas, monospace, '华文中宋';
+  font-family: "DejaVu Sans Mono", Consolas, Monaco, Menlo, Consolas, monospace, '华文中宋';
   font-size: 15px
 }
 .article-entry code {
