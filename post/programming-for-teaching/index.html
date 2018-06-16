@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Programming languages for teaching // Just another blog!</title>
+
+        <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="Akash">
+        <meta property="og:title" content="Programming languages for teaching" />
+    <meta property="og:description" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://akash-akya.github.io/post/programming-for-teaching/" />
+    
+
+    <link href="" rel="alternate" type="application/rss+xml" title="Just another blog!" />
+    <link rel="shortcut icon" href="/favicon.png">
+
+    <link href="https://akash-akya.github.io/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
+    <link href="https://akash-akya.github.io/webfonts/source-code-pro/main.css" rel="stylesheet" type="text/css">
+
+    
+    <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/dejavu-sans-mono" type="text/css"/>
+
+    
+
+    <link rel="stylesheet" href="https://akash-akya.github.io/css/style.css">
+
+    <link rel="stylesheet" href="https://akash-akya.github.io/css/styles/github.css">
+
+    <script src="https://akash-akya.github.io/js/highlight.pack.js"></script>
+
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+
+    <meta name="generator" content="Hugo 0.41" />
+</head>
+
+
+<body>
+<div id="container">
+    <header id="header">
+    <div id="header-outer" class="outer">
+        <div id="header-inner" class="inner">
+            <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
+            <a id="logo" class="logo-text" href="https://akash-akya.github.io/">Just another blog!</a>
+            <nav id="main-nav">
+                
+            </nav>
+            <nav id="sub-nav">
+                <div id="search-form-wrap">
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+    <section id="main" class="outer">
+        <article class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        <header class="article-header">
+            <h1 class="article-title" itemprop="name">Programming languages for teaching</h1>
+        </header>
+        
+        <div class="article-meta">
+            <a href="/post/programming-for-teaching/" class="article-date">
+                <time datetime='2018-06-11T11:34:51.000&#43;05:30' itemprop="datePublished">2018-06-11</time>
+            </a>
+            
+            
+            <div class="post-categories">
+                <div class="article-category">
+                    
+                    
+                    <a class="article-category-link" href="https://akash-akya.github.io//categories/programming">programming</a>
+                    
+                </div>
+            </div>
+            
+            
+            <div class="article-comment-link-wrap">
+                <a href="/post/programming-for-teaching/#disqus_thread" class="article-comment-link">Comments</a>
+            </div>
+            
+        </div>
+        <div class="article-entry" itemprop="articleBody">
+            <p>While reading <a href="http://sarabander.github.io/sicp/" title="Structure and Interpretation of Computer Programs">Structure and Interpretation of Computer Programs</a> book
+(sicp for short), I'm amazed by how well the topics are described.
+Why other topics are not explained in such a manner? At first look the
+book looks like it's about programming, it's actually more than
+that. Even though I still at chapter 3, I'm already in love with the
+book. Among other things it truly changes the way of thinking in
+general. All these things got me into thinking what made sicp so
+special? I think among other things it's the explaining things with a
+mixture of natural language and a formal language. switching between
+them whenever necessary. Natural language for explaining and formal
+languages for explaining "definite" topics. The formal language I mean
+programming language. As I'm interested in linguistics, I have been
+thinking why not use this ability of programming languages to teach
+other things as well and get the same benefit?. I firmly believe this
+is to be true. Below are the few points which I think backs up the
+claim. This idea may not be something new. Mainly I'm writing this to
+get the complete overview of the topic and have a discussion with
+other others to improve my understanding.</p>
+
+<h2 id="premises">Premises</h2>
+
+<p>The key difference between natural language and formal language is ambiguity or inexactness. Its surprising to see how we even make sense of any sentence. The framing of words, sentences, sounds(phonetics)
+ everything is full of special cases. There is no single rule for these things. The natural language I mean the language we all learn, not the one thought in school, which is more of standardized language. See <a href="https://en.wikipedia.org/wiki/Constructed_language" title="constructed language">constructed language</a>.</p>
+
+<p>Ambiguity in natural languages mainly due to its reliance on context to make sense. When someone says "Write your name", it's grammatically correct but it's unclear whether he is asking to write the name of the person or to write "your name". Though we make sense of sentences like this daily. Formal languages are exactly opposite in this regard. By definition they are unambiguous. A formal language sentence can't have two different meanings. That's why we have a special formal language for mathematics.</p>
+
+<h2 id="programming-language">Programming language</h2>
+
+<p>When we think of programming language we usually think of "telling"
+computer what to do. Programming languages now are separated enough
+from the computer that we can now write programs without actually
+understanding how the computer works.</p>
+
+<h2 id="so-what">So what?</h2>
+
+<p>Just as natural language serves as a tool for thinking, We can use a programming language to understand things better or easier as a tool for education. We can use a programming language to understand things which are 'exact' in nature. We have mathematics for the exact same reason
+ but I think a programming language huge benefit over it. not only that
+ mathematics have various confusing different notations (does <code>d(x+1)/dx</code>
+ means division or differentiation) it also unifies all different
+ notation for describing things which are 'exact'.</p>
+
+<h2 id="how">How?</h2>
+
+<h3 id="for-understanding">For understanding.</h3>
+
+<p>DSL (Domain Specific Language) with and <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop" title="REPL">REPL</a> kind of environment is the best tool to just try out
+different possibilities. Take the example of understanding kinetics. In the
+current model of teaching students are thought some rules and formulas
+and some cliches examples and expected to understand and get
+intuition. Instead, if you provide an environment with proper DSL for the
+topic (maybe be a fancy animation), students can explore possibilities to
+get the intuition of the topic. One might ask "why bother with a
+programming language? a simple UI with GUI elements such as seek-bar and an input box to change parameter is more than enough!". but only so much
+you can do with the limited combination, instead if we provide the ability to
+combine different things (such as try different formula itself),
+students can try different combinations of the rules and figure out why
+things are the way they are. What we are essentially giving here is
+the ability to "change" & "define" the rules not play along with the
+rules. This cannot be fully realized without a language for combining
+things, languages recursive nature is very essential in combination so
+that we can combine different things.</p>
+
+<h3 id="for-experimenting">For experimenting</h3>
+
+<p>To understand a topic experimenting with it is essential, current
+model of teaching provide very less importance to experimenting,
+programming languages might fill that gap and give easy means to
+'experiment' and pattern match the results.</p>
+
+<h3 id="for-expressing">For expressing</h3>
+
+<p>I often find myself struggling to explain topics which are like
+formula or mathsy, almost always I end of saying words from
+programming language and verbs, Having common languages explain these
+sort of things might solve this problem. Maths fill this void but
+partially because of lack of uniformity, A common programming language
+might fill this gap. It can like a natural language for explaining
+different thing.</p>
+
+<h3 id="as-a-tool-to-hide-the-complexity">As a tool to hide the complexity</h3>
+
+<p>Almost all high-level programming language has a weapon called
+"Abstraction" to fight complexity. Abstraction is a tool to hide
+complexity by separating thinking into layers. This aspect can be
+utilized to make teaching focused on one topic or layer. Maybe by
+having a DSL. Explaining the topics incrementally make the topic at
+hand simple and focused. sicp have a various example illustrating
+this. Especially picture language, explaining the combination of drawing
+first and then explaining the drawing primitive. This forces us to
+think why we have to define primitives in the first place. finding
+square root is the best example on how things can be explained
+incrementally. And gradually explaining the fixed point formula is
+arguably the best way to explain things. Though abstraction is not unique
+to a programming language, programming language forces us to think in a certain way and draws the clear line between layers of abstraction.
+From my personal experience understanding & implementing church
+numerical such an eye-opening experience, I recommend it to everyone. I
+think It is possible because of clear abstraction.</p>
+
+<h3 id="for-evaluation">For evaluation</h3>
+
+<p>We are evaluating students understanding based on their "explanation"
+of the topic or asking for things they "remember". I don't think
+explanation actually reveal about students understanding, something
+practical might be better in this regard, for example for evaluating
+same kinetics understanding, we can give an environment with slightly
+different DSL and can ask to show or create something in that
+environment based on the understanding. This may not be perfect but
+better than the current approach.</p>
+
+<h3 id="just-as-a-language-for-its-own-sake">Just as a language, for its own sake!</h3>
+
+<p>same as natural languages, we can explore programming language to
+create/express art. There are already various examples which use
+programming language as a tool to create something. For example <a href="https://sonic-pi.net/" title="sonic
+pi">sonic
+pi</a> for sound processing & <a href="https://processing.org/" title="processing">processing</a> for generative art and all kind
+of visual art.</p>
+
+<h2 id="what-languages-should-we-use">What languages should we use?</h2>
+
+<p>All this fine and dandy only if we have a simple language. If teaching language itself is a big hurdle then there is no point in doing so. Current programming languages are more focused towards
+ "programming", We need something more 'simple'(no pointer, operators etc). As this is a tool for explaining general topics. I think something like Lisp fits perfectly. Its simple enough that basic syntax can be explained in 4-5 hours and its homoiconic nature blurs the line between code and data distinction which is essential <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">1</a></sup>. obviously, I'm biased by sicp, the point is it's not about the language exact syntax<sup class="footnote-ref" id="fnref:3"><a href="#fn:3">2</a></sup>.</p>
+
+<h2 id="final-thoughts">Final thoughts</h2>
+
+<p>There no doubt that we understand some topic better with a different
+ approach or explained using a different medium (for example, <a href="https://www.youtube.com/watch?v=WUvTyaaNkzM&amp;list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr" title="Explaining
+ calculus visually">Explaining
+ calculus visually</a>). The languages we use might actually <a href="https://en.wikipedia.org/wiki/Language_and_thought" title="affect our thinking">affect our thinking</a>. We just have to try. Using programming language for teaching is already explored. For example <a href="https://en.wikipedia.org/wiki/Scratch_(programming_language)" title="scratch">scratch</a> (But goal is different
+ though).  Maybe using formal language is not that effective in practice or maybe teaching the language itself is a big problem. But I
+ think it's worth exploring</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:2">See sicp examples for the same <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+
+<li id="fn:3">Lisp is infamous as "Lots of Irritating Stupid Parentheses" <a class="footnote-return" href="#fnref:3"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
+        </div>
+
+        
+        
+        
+
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+        <script>
+            (function() {
+                var $toc = $('#TableOfContents');
+                if ($toc.length > 0) {
+                    var $window = $(window);
+
+                    function onScroll(){
+                        var currentScroll = $window.scrollTop();
+                        var h = $('.article-entry h1, .article-entry h2, .article-entry h3, .article-entry h4, .article-entry h5, .article-entry h6');
+                        var id = "";
+                        h.each(function (i, e) {
+                            e = $(e);
+                            if (e.offset().top - 10 <= currentScroll) {
+                                id = e.attr('id');
+                            }
+                        });
+                        var active = $toc.find('a.active');
+                        if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                        active.each(function (i, e) {
+                            $(e).removeClass('active').siblings('ul').hide();
+                        });
+                        $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                            $(e).children('a').addClass('active').siblings('ul').show();
+                        });
+                    }
+
+                    $window.on('scroll', onScroll);
+                    $(document).ready(function() {
+                        $toc.find('a').parent('li').find('ul').hide();
+                        onScroll();
+                        document.getElementsByClassName('article-toc')[0].style.display = '';
+                    });
+                }
+            })();
+        </script>
+        
+
+
+        
+    </div>
+    <nav id="article-nav">
+    
+    <a href="/post/college-days/" id="article-nav-newer" class="article-nav-link-wrap">
+        <div class="article-nav-title"><span>&lt;</span>&nbsp;
+            ಆ ದಿನಗಳು
+        </div>
+    </a>
+    
+    
+</nav>
+</article>
+
+        
+            <div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "akash-hiremath" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        
+    </section>
+    <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+          <a href="https://github.com/akash-akya">Akash Hiremath</a>
+          &nbsp;   •  &nbsp;
+          2018
+          &nbsp; •  &nbsp;
+          Licensed under GPLv3&nbsp;
+            
+        </div>
+    </div>
+    
+
+    
+    <script>
+        document.getElementById('main-nav-toggle').addEventListener('click', function () {
+            var header = document.getElementById('header');
+            if (header.classList.contains('mobile-on')) {
+                header.classList.remove('mobile-on');
+            } else {
+                header.classList.add('mobile-on');
+            }
+        });
+    </script>
+</footer>
+
+</div>
+</body>
+</html>

@@ -11,5 +11,14 @@
 	<atom:link href="https://akash-akya.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
+    <item>
+      <title>Programming</title>
+      <link>https://akash-akya.github.io/categories/programming/</link>
+      <pubDate>Mon, 11 Jun 2018 11:34:51 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/categories/programming/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>
