@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
-    <lastBuildDate>Thu, 14 Jun 2018 20:00:51 +0530</lastBuildDate>
+    <lastBuildDate>Mon, 18 Jun 2018 14:43:22 +0530</lastBuildDate>
     
 	<atom:link href="https://akash-akya.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>About</title>
+      <link>https://akash-akya.github.io/about/</link>
+      <pubDate>Mon, 18 Jun 2018 14:43:22 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/about/</guid>
+      <description>Akash Hiremath I&amp;rsquo;m a programmer living in Bengaluru. I&amp;rsquo;m passionate about many things. This blog is created with the intention of aggregating notes on these interests in a place. Content may vary from useful tip to an opinion or rant.
+Github</description>
+    </item>
     
     <item>
       <title>Import in Racket&#39;s sicp</title>
