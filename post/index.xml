@@ -18,7 +18,7 @@
       <pubDate>Thu, 14 Jun 2018 20:00:51 +0530</pubDate>
       
       <guid>https://akash-akya.github.io/post/racket-sicp-util/</guid>
-      <description>I recently started reading Structure and Interpretation of Computer Programs or sicp for short. It&#39;s wonderfully well written. can&#39;t recommend it enough. I&#39;m using racket scheme for doing the exercises. because along with support for sicp it also has awesome picture language1. You can even just copy paste the code, It works without a any change. There is one caveat though. Some basic functions such as square are not defined in the language.</description>
+      <description>I recently started reading Structure and Interpretation of Computer Programs or sicp for short. It&#39;s wonderfully well written. Can&#39;t recommend it enough. I&#39;m using racket scheme for doing the exercises. Along with support for sicp it also has awesome picture language1. You can run the code without any change. There is one caveat though. Some basic functions such as square are not defined in the language. So every time you need those functions you have to explicitly define it.</description>
     </item>
     
     <item>

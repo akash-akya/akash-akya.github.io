@@ -84,18 +84,19 @@
         <div class="article-entry" itemprop="articleBody">
             <p>I recently <a href="https://github.com/akash-akya/sicp-exercises" title="started">started</a> reading <a href="http://sarabander.github.io/sicp/" title="Structure and Interpretation of Computer
 Programs">Structure and Interpretation of Computer
-Programs</a> or sicp for short. It's wonderfully well written. can't
+Programs</a> or sicp for short. It's wonderfully well written. Can't
 recommend it enough. I'm using racket scheme for doing the
-exercises. because along with support for sicp it also has awesome
-<a href="https://docs.racket-lang.org/sicp-manual/index.html" title="picture language">picture language</a><sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>. You can even just copy paste the code, It
-works without a any change. There is one caveat though. Some basic
-functions such as square are not defined in the language. So every
-time you need those functions you have to define it in that file. I
-needed functionality to import the files so that I can create
-<code>utility.scm</code> file containing basic functions, then import
-it whenever required. Racket has <code>(require ...)</code> but it doesn't work for
-sicp language. Turns out there is one more function for that, which
-works in sicp language.</p>
+exercises. Along with support for sicp it also has awesome <a href="https://docs.racket-lang.org/sicp-manual/index.html" title="picture
+language">picture
+language</a><sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>. You can run the code without any change. There is one
+caveat though. Some basic functions such as square are not defined in
+the language. So every time you need those functions you have to
+explicitly define it. What I needed was functionality to import the
+files so that I can create <code>utility.scm</code> file containing
+basic functions, then import it whenever required. Racket has <code>(require
+...)</code> but it doesn't work for sicp language since its not a part of
+core functionality provided by racket. Turns out there is other
+function for that in core, which works in sicp language.</p>
 
 <p>In utility.scm</p>
 
