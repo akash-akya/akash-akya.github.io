@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Nunito|Quicksand|Inconsolata|');
+@import url('https://fonts.googleapis.com/css?family=Helvetica Neue|Quicksand|Inconsolata|');
 
 html,
 body,
@@ -114,10 +114,9 @@ body,
   height: 100%;
 }
 html {
-  background-color: #fffff0;
 }
 body {
-  font: 18px 'Nunito', 'STZhongsong', '华文中宋', 'Microsoft Yahei', serif;
+  font: 18px 'Helvetica Neue', 'STZhongsong', '华文中宋', 'Microsoft Yahei', serif;
   -webkit-text-size-adjust: 100%;
 }
 .outer {
@@ -326,7 +325,7 @@ a.article-title:hover,
   display: none;
   font-size: 16px;
   margin-left: -15px;
-  font-family: Nunito;
+  font-family: 'Helvetica Neue';
 }
 #main-nav-toggle:before {
   content: "\f0c9";
