@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Helvetica Neue|Quicksand|Inconsolata|');
+@import url('https://fonts.googleapis.com/css?family=Inconsolata|');
 
 html,
 body,
@@ -116,7 +116,7 @@ body,
 html {
 }
 body {
-  font: 18px 'Helvetica Neue', 'STZhongsong', '华文中宋', 'Microsoft Yahei', serif;
+  font: 20px 'charter', 'STZhongsong', '华文中宋', 'Microsoft Yahei', serif;
   -webkit-text-size-adjust: 100%;
 }
 .outer {
