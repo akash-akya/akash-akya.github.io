@@ -134,15 +134,14 @@ Normal order</a>.</p>
 <p>So I have two options to delay the execution</p>
 
 <ul>
-<li>Wrap the call in a lambda & unwrap it the assert function</li>
+<li>Pass quoted expressions, evaluate with <code>eval</code> at runtime.</li>
 <li>Write a macro!</li>
 </ul>
 
-<p>The first option will work but you have to wrap all of the arguments
-in a lambda <b>everytime</b> you call assert function. meh.</p>
+<p>The first option will work but you have to quote the arguments
+every time. Quoted expressions won't look natural assert statements.</p>
 
-<p>Now we are left at the mercy of macros! good news is its very
-simple. Thanks to <a href="https://docs.racket-lang.org/guide/macros.html?q=macro#%28tech._macro%29" title="awesome documentation">awesome documentation</a>. But there is a catch. Since
+<p>Using macro is not hard either. Thanks to <a href="https://docs.racket-lang.org/guide/macros.html?q=macro#%28tech._macro%29" title="awesome documentation">awesome documentation</a>. But there is a catch. Since
 we aren't using <code>#lang racket</code>, we can not use macro
 constructs. Solution? just import <code>racket/base</code>!</p>
 
@@ -154,19 +153,24 @@ constructs. Solution? just import <code>racket/base</code>!</p>
 <p>In utility.scm</p>
 
 <pre><code class="language-scheme">(define (success lhs rhs)
-  (display &quot;Passed...&quot;))
+  (display &quot;✔ &quot;)
+  (display lhs) (display &quot; = &quot;) (display rhs))
 
-(define (failure lhs rhs)
-  (display &quot;Failed!  &quot;)
-  (display lhs)
-  (display &quot;  =  &quot;)
-  (display rhs))
+(define (failure lhs rhs lhs-result rhs-result)
+  (display &quot;✖ &quot;)
+  (display lhs) (display &quot; = &quot;) (display rhs)
+  (newline)
+  (display &quot;    Left  : &quot;) (display lhs-result)
+  (newline)
+  (display &quot;    Right : &quot;) (display rhs-result))
 
 (define-syntax-rule (test-equal lhs rhs)
   (let ((qlhs (quote lhs))
-        (qrhs (quote rhs)))
-    (cond [(equal? lhs rhs) (success qlhs qrhs)]
-          [else (failure qlhs qrhs)])
+        (qrhs (quote rhs))
+        (lhs-result lhs)
+        (rhs-result rhs))
+    (cond [(equal? lhs-result rhs-result) (success qlhs qrhs)]
+          [else (failure qlhs qrhs lhs-result rhs-result)])
     (newline)))
 </code></pre>
 
