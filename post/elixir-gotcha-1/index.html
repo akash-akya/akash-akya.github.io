@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Elixir Gotcha #1 // Just another blog!</title>
+
+        <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="Akash">
+        <meta property="og:title" content="Elixir Gotcha #1" />
+    <meta property="og:description" content="" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://akash-akya.github.io/post/elixir-gotcha-1/" />
+
+
+    <link href="" rel="alternate" type="application/rss+xml" title="Just another blog!" />
+    <link rel="shortcut icon" href="/favicon.png">
+
+    <link href="https://akash-akya.github.io/webfonts/ptserif/main.css" rel='stylesheet' type='text/css'>
+    <link href="https://akash-akya.github.io/webfonts/source-code-pro/main.css" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+    <link rel="stylesheet" href="https://akash-akya.github.io/css/style.css">
+
+    <link rel="stylesheet" href="https://akash-akya.github.io/css/styles/github.css">
+
+    <script src="https://akash-akya.github.io/js/highlight.pack.js"></script>
+
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+
+    <meta name="generator" content="Hugo 0.41" />
+</head>
+
+
+<body>
+<div id="container">
+    <header id="header">
+    <div id="header-outer" class="outer">
+        <div id="header-inner" class="inner">
+            <a id="main-nav-toggle" class="nav-icon" href="javascript:;"></a>
+            <a id="logo" class="logo-text" href="https://akash-akya.github.io/">Just another blog!</a>
+            <nav id="main-nav">
+
+                <a class="main-nav-link" href="/about/">About</a>
+
+            </nav>
+            <nav id="sub-nav">
+                <div id="search-form-wrap">
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+
+    <section id="main" class="outer">
+        <article class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+
+        <header class="article-header">
+            <h1 class="article-title" itemprop="name">Elixir Gotcha #1</h1>
+        </header>
+
+        <div class="article-meta">
+            <a href="/post/elixir-gotcha-1/" class="article-date">
+                <time datetime='2018-09-21T19:50:57.000&#43;05:30' itemprop="datePublished">2018-09-21</time>
+            </a>
+
+
+
+            <div class="article-comment-link-wrap">
+                <a href="/post/elixir-gotcha-1/#disqus_thread" class="article-comment-link">Comments</a>
+            </div>
+
+        </div>
+        <div class="article-entry" itemprop="articleBody">
+
+
+<p>Can you guess the output of this code snippet?</p>
+
+<pre><code class="language-elixir">def baz(_a) do
+    puts &quot;baz/1&quot;
+end
+
+def baz(_a, _b) do
+    puts &quot;baz/2&quot;
+end
+
+baz(name: &quot;foo&quot;, age: 30)
+</code></pre>
+
+<p>Answer is <code>baz/1</code>.</p>
+
+<p>If you have worked with elixir for some time you will know about keyword lists. Hex docs define it as, <em>Keyword is a list of two-element tuples where the first element of the tuple is an atom and the second element can be any value.</em></p>
+
+<p>Elixir different syntax for keyword lists. To summarize, both of the following statements are same</p>
+
+<pre><code class="language-elixir"> [{:foo, 1}, {:bar, 2}]
+ [foo: 1, bar: 2]
+</code></pre>
+
+<p>Whats interesting is, if you are passing keyword list as argument in function call you can ignore the square brackets. These are same</p>
+
+<pre><code class="language-elixir"> function([{:foo, 1}, {:bar, 2}])
+ function([foo: 1, bar: 2])
+ function(foo: 1, bar: 2)
+</code></pre>
+
+<p>The shorter versions are just the syntactic sugar for first one. Elixir compiler converts them to comprehensive version. Coming back to the question, when compiler see <code>baz(name: &quot;foo&quot;, age: 30)</code>. It tries to evaluate arguments before making function call. In this case compiler sees arguments <code>name: &quot;foo&quot;, age: 30</code> as keyword list in short form. It treat it as <code>[{:name, &quot;foo&quot;}, {:age, 30}]</code>. Function call becomes <code>baz([{:name, &quot;foo&quot;}, {:age, 30}])</code> hence the output <code>baz/1</code>.</p>
+
+<h3 id="bonus">Bonus</h3>
+
+<h4 id="guess-the-output">Guess the output</h4>
+
+<pre><code class="language-elixir">baz(&quot;Hello Elixir&quot;, name: &quot;foo&quot;, age: 30)
+baz(name: &quot;foo&quot;, age: 30, &quot;Hello Elixir&quot;)
+</code></pre>
+
+<h4 id="output">Output</h4>
+
+<ol>
+<li><code>baz/2</code></li>
+<li><code>** (SyntaxError) syntax error before: &quot;Hello Elixir&quot;</code></li>
+</ol>
+
+        </div>
+
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+        <script>
+            (function() {
+                var $toc = $('#TableOfContents');
+                if ($toc.length > 0) {
+                    var $window = $(window);
+
+                    function onScroll(){
+                        var currentScroll = $window.scrollTop();
+                        var h = $('.article-entry h1, .article-entry h2, .article-entry h3, .article-entry h4, .article-entry h5, .article-entry h6');
+                        var id = "";
+                        h.each(function (i, e) {
+                            e = $(e);
+                            if (e.offset().top - 10 <= currentScroll) {
+                                id = e.attr('id');
+                            }
+                        });
+                        var active = $toc.find('a.active');
+                        if (active.length == 1 && active.eq(0).attr('href') == '#' + id) return true;
+
+                        active.each(function (i, e) {
+                            $(e).removeClass('active').siblings('ul').hide();
+                        });
+                        $toc.find('a[href="#' + id + '"]').parentsUntil('#TableOfContents').each(function (i, e) {
+                            $(e).children('a').addClass('active').siblings('ul').show();
+                        });
+                    }
+
+                    $window.on('scroll', onScroll);
+                    $(document).ready(function() {
+                        $toc.find('a').parent('li').find('ul').hide();
+                        onScroll();
+                        document.getElementsByClassName('article-toc')[0].style.display = '';
+                    });
+                }
+            })();
+        </script>
+
+
+
+
+    </div>
+    <nav id="article-nav">
+
+
+    <a href="/about/" id="article-nav-older" class="article-nav-link-wrap">
+        <div class="article-nav-title">About&nbsp;<span>&gt;</span></div>
+    </a>
+
+</nav>
+</article>
+
+
+            <div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+
+
+
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "akash-hiremath" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+    </section>
+    <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+          <a href="/about">Akash Hiremath</a>
+          &nbsp;   •  &nbsp;
+          2018
+          &nbsp; •  &nbsp;
+          Licensed under GPLv3&nbsp;
+
+        </div>
+    </div>
+
+
+
+    <script>
+        document.getElementById('main-nav-toggle').addEventListener('click', function () {
+            var header = document.getElementById('header');
+            if (header.classList.contains('mobile-on')) {
+                header.classList.remove('mobile-on');
+            } else {
+                header.classList.add('mobile-on');
+            }
+        });
+    </script>
+</footer>
+
+</div>
+</body>
+</html>
