@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Elixir on Just another blog</title>
+    <link>https://akash-akya.github.io/tags/elixir/</link>
+    <description>Recent content in Elixir on Just another blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
+    <lastBuildDate>Fri, 21 Sep 2018 19:50:57 +0530</lastBuildDate>
+    
+	<atom:link href="https://akash-akya.github.io/tags/elixir/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Elixir Gotcha #1</title>
+      <link>https://akash-akya.github.io/post/elixir-gotcha-1/</link>
+      <pubDate>Fri, 21 Sep 2018 19:50:57 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/post/elixir-gotcha-1/</guid>
+      <description>Can you guess the output of this code snippet?
+def baz(_a) do puts &amp;quot;baz/1&amp;quot; end def baz(_a, _b) do puts &amp;quot;baz/2&amp;quot; end baz(name: &amp;quot;foo&amp;quot;, age: 30)  Answer is baz/1.
+If you have worked with elixir for some time you will know about keyword lists. Hex docs define it as, Keyword is a list of two-element tuples where the first element of the tuple is an atom and the second element can be any value.</description>
+    </item>
+    
+  </channel>
+</rss>

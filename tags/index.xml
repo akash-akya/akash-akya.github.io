@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tags on Just another blog!</title>
+    <title>Tags on Just another blog</title>
     <link>https://akash-akya.github.io/tags/</link>
-    <description>Recent content in Tags on Just another blog!</description>
+    <description>Recent content in Tags on Just another blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
+    <lastBuildDate>Fri, 21 Sep 2018 19:50:57 +0530</lastBuildDate>
     
 	<atom:link href="https://akash-akya.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Elixir</title>
+      <link>https://akash-akya.github.io/tags/elixir/</link>
+      <pubDate>Fri, 21 Sep 2018 19:50:57 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/tags/elixir/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Programming</title>
+      <link>https://akash-akya.github.io/tags/programming/</link>
+      <pubDate>Fri, 21 Sep 2018 19:50:57 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/tags/programming/</guid>
+      <description></description>
+    </item>
     
   </channel>
 </rss>

@@ -1,65 +1,65 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Just another blog!</title>
+    <title>Just another blog</title>
     <link>https://akash-akya.github.io/</link>
-    <description>Recent content on Just another blog!</description>
+    <description>Recent content on Just another blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
     <lastBuildDate>Fri, 21 Sep 2018 19:50:57 +0530</lastBuildDate>
-
-        <atom:link href="https://akash-akya.github.io/index.xml" rel="self" type="application/rss+xml" />
-
-
+    
+	<atom:link href="https://akash-akya.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
     <item>
       <title>Elixir Gotcha #1</title>
       <link>https://akash-akya.github.io/post/elixir-gotcha-1/</link>
       <pubDate>Fri, 21 Sep 2018 19:50:57 +0530</pubDate>
-
+      
       <guid>https://akash-akya.github.io/post/elixir-gotcha-1/</guid>
       <description>Can you guess the output of this code snippet?
-<code>def baz(_a) do puts &amp;quot;baz/1&amp;quot; end def baz(_a, _b) do puts &amp;quot;baz/2&amp;quot; end baz(name: &amp;quot;foo&amp;quot;, age: 30)</code>  If your answer is <b>baz/2</b>, then you are wrong.
+def baz(_a) do puts &amp;quot;baz/1&amp;quot; end def baz(_a, _b) do puts &amp;quot;baz/2&amp;quot; end baz(name: &amp;quot;foo&amp;quot;, age: 30)  Answer is baz/1.
 If you have worked with elixir for some time you will know about keyword lists. Hex docs define it as, Keyword is a list of two-element tuples where the first element of the tuple is an atom and the second element can be any value.</description>
     </item>
-
+    
     <item>
-      <title>About</title>
+      <title>Akash Hiremath</title>
       <link>https://akash-akya.github.io/about/</link>
       <pubDate>Mon, 18 Jun 2018 14:43:22 +0530</pubDate>
-
+      
       <guid>https://akash-akya.github.io/about/</guid>
-      <description>Akash Hiremath I&amp;rsquo;m a programmer living in Bengaluru. I&amp;rsquo;m passionate about many things. This blog is created with the intention of aggregating notes on these interests in a place. Content may vary from useful tip to an opinion or rant.
+      <description>I&amp;rsquo;m a programmer living in Bengaluru. I&amp;rsquo;m passionate about many things. This blog is collection of my reactions to these random interests.
 Github</description>
     </item>
-
+    
     <item>
       <title>Import in Racket&#39;s sicp</title>
       <link>https://akash-akya.github.io/post/racket-sicp-util/</link>
       <pubDate>Thu, 14 Jun 2018 20:00:51 +0530</pubDate>
-
+      
       <guid>https://akash-akya.github.io/post/racket-sicp-util/</guid>
       <description>I recently started reading Structure and Interpretation of Computer Programs or sicp for short. It&#39;s wonderfully well written. Can&#39;t recommend it enough. I&#39;m using racket scheme for doing the exercises. Along with support for sicp it also has awesome picture language1. You can run the code without any change. There is one caveat though. Some basic functions such as square are not defined in the language. So every time you need those functions you have to explicitly define it.</description>
     </item>
-
+    
     <item>
       <title>ಆ ದಿನಗಳು</title>
       <link>https://akash-akya.github.io/post/college-days/</link>
       <pubDate>Mon, 11 Jun 2018 23:54:51 +0530</pubDate>
-
+      
       <guid>https://akash-akya.github.io/post/college-days/</guid>
       <description>ಕಾಲೇಜಿನ ದ್ವಿವಾರ್ಷಿಕ ಪತ್ರಿಕೆಗಾಗಿ 2013ರಲ್ಲಿ ರಚಿಸಿದ್ದು
 ಕಾಲೇಜಿನ ಕೊನೆಯ ದಿನ. ಕಾಲೇಜಿನ ಮುಂಭಾಗದಲ್ಲಿ ಹುಚ್ಚನಂತೆ ಗೆಳೆಯರ ಮುಂದೆ ನಿಂತಿದ್ದೆ. ಸುದೀರ್ಘ ಕೊನೆಯ ಹರಟೆಯ ನಂತರ, ಎಲ್ಲರಿಗೂ ಕೈಬೀಸಿ, ಬೇಡದ ಮನಸ್ಸಿನಿಂದ ಭಾರದ ಹೆಜ್ಜೆ ಹಾಕುತ ಬಸ್ಸೇರಿ ಕುಳಿತೆ. ಹಿಂದಿರುಗುವ ದೀರ್ಘ 8 ಗಂಟೆಗಳ ಅವಧಿಯಲ್ಲಿ ಕಳೆದ 2 ವರ್ಷದ ನೆನಪುಗಳನ್ನು ಮೆಲುಕು ಹಾಕಿದೆ. 2 ವರ್ಷದ ಹಿಂದೆ ನಡೆದ ಘಟನೆಗಳು ನನ್ನೆದುರು ಸುರುಳಿ ಬಿಚ್ಚಿದವು. ಅಂದು ರವಿವಾರ. ಕಾಲೇಜಿನ ಮೊದಲ ಔಟಿಂಗ್‍ನಲ್ಲಿ ದಿಕ್ಕು ಗೊತ್ತಿರದ ಊರಿನಲ್ಲಿ ಒಂದು ದಿನದ ಗೆಳೆತನವಿದ್ದ ಗೆಳೆಯನೊಂದಿಗೆ ಹೊರಟಿದ್ದೆ. ಇಬ್ಬರ ಸ್ನೇಹಕ್ಕೆ ಕಾರಣ ‘ಪಲಾಯನ’. ಕಾಲೇಜಿನ ವಾತಾವರಣಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳದ ಇಬ್ಬರೂ ಕಾಲೇಜಿನಿಂದ ಮನೆಗೆ ‘ಪಲಾಯನ’ದ ಕನಸಿಗೆ ಒಬ್ಬರಿಗೊಬ್ಬರು ಕಿವಿಯಾಗಿದ್ದೆವು.</description>
     </item>
-
+    
     <item>
       <title>Programming languages for teaching</title>
       <link>https://akash-akya.github.io/post/programming-for-teaching/</link>
       <pubDate>Mon, 11 Jun 2018 11:34:51 +0530</pubDate>
-
+      
       <guid>https://akash-akya.github.io/post/programming-for-teaching/</guid>
       <description>While reading Structure and Interpretation of Computer Programs book (sicp for short), I was amazed by how well the topics are explained. At first glance, the book looks like it&#39;s about programming, but it&#39;s actually more than that. Even though I&#39;m still at chapter 3, I&#39;m already in love with the book. Among other things it truly changes the way of thinking in general. All these things got me into thinking what made sicp so special?</description>
     </item>
-
+    
   </channel>
 </rss>
