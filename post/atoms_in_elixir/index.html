@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+		<title>
+				Atoms in Elixir &middot; Just another blog
+		</title>
+	
+		
+  		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Baskerville:400,400i,700">
+	
+	    <link rel="stylesheet" href="https://akash-akya.github.io/css/style.css">
+ 	   	<link rel="stylesheet" href="https://akash-akya.github.io/css/styles/github.css">
+    	<script src="https://akash-akya.github.io/js/highlight.pack.js"></script>
+    	<script>hljs.initHighlightingOnLoad();</script>
+
+
+		
+		<link rel="icon" type="image/png" sizes="32x32" href="https://akash-akya.github.io/images/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="https://akash-akya.github.io/images/favicon-16x16.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="https://akash-akya.github.io/images/apple-touch-icon.png">
+	
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="Just another blog" />
+	</head>
+	
+    <body>
+        		<nav class="nav">
+			<div class="nav-container">
+				<a href="/">
+					<h2 class="nav-title">Just another blog</h2>
+				</a>
+				<ul>
+    <li><a href="/about">About</a></li>
+    <li><a href="/">Posts</a></li>
+</ul>
+			</div>
+		</nav>
+
+        
+
+<main>
+	<div class="post">
+		<div class="post-info">
+    <span>Written by</span>
+        Akash
+        <br>
+        <span>on&nbsp;</span><time datetime="2019-01-01 22:08:03 &#43;0530 IST">January 1, 2019</time>
+</div>
+		<h1 class="post-title">Atoms in Elixir</h1>
+<div class="post-line"></div>
+
+		
+
+		<pre><code class="language-elixir">:foo
+#=&gt; :foo
+
+is_atom :foo
+#=&gt; true
+
+:&quot;foo&quot;
+#=&gt; warning: found quoted atom &quot;foo&quot; but the quotes are not
+#required. Quotes should only be used to introduce atoms with foreign
+#characters in them
+#
+# :foo
+
+# Looks like :foo. whats does foreign characters mean?
+
+is_atom :&quot;foo&quot;
+#=&gt; warning: found quoted atom &quot;foo&quot; but the quotes are not
+#required. Quotes should only be used to introduce atoms with foreign
+#characters in them
+#
+# true
+
+:foo == :&quot;foo&quot;
+#=&gt; warning: found quoted atom &quot;foo&quot; but the quotes are not
+#required. Quotes should only be used to introduce atoms with foreign
+#characters in them
+#
+# true
+
+:☺
+#=&gt; ** (SyntaxError) iex:16: unexpected token: &quot;:&quot; (column 1,
+#codepoint U+003A)
+
+:&quot;☺&quot;
+#=&gt; :&quot;☺&quot;
+# Hmmm. foreign characters mean non-ascii characters?
+
+:1
+#=&gt; ** (SyntaxError) iex:16: unexpected token: &quot;:&quot; (column 1,
+#codepoint U+003A)
+
+:&quot;1&quot;
+#=&gt; :&quot;1&quot;
+# 1 is 'foreign characters'?!
+
+
+:&quot;foo.bar&quot;
+#=&gt; :&quot;foo.bar&quot;
+
+:foo.bar
+#=&gt; ** (UndefinedFunctionError) function :foo.bar/0 is undefined
+#(module :foo is not available)
+
+
+:Foo
+#=&gt; :Foo
+
+is_atom :Foo
+#=&gt; true
+
+Foo
+#=&gt; Foo
+
+is_atom Foo
+#=&gt; true
+# no colon prefix needed!
+
+# Is this different from an atom with colon prefix?
+:Foo == Foo
+#=&gt; false
+# Both are atoms but not same
+
+to_string :Foo
+#=&gt; &quot;Foo&quot;
+
+to_string Foo
+#=&gt; &quot;Elixir.Foo&quot;
+# Aha, if the token starts with capital letter, compiler automatically
+# converts to this form?
+
+String.to_atom &quot;Foo&quot;
+#=&gt; :Foo
+
+String.to_atom &quot;Elixir.Foo&quot;
+#=&gt; Foo
+
+:&quot;Elixir.Foo&quot;
+#=&gt; Foo
+
+Foo == Elixir.Foo
+#=&gt; true
+
+Foo == :&quot;Elixir.Foo&quot;
+#=&gt; true
+
+# Whats with the Elixir prefix?
+
+is_atom Elixir
+#=&gt; true
+
+is_atom :Elixir
+#=&gt; true
+
+:Elixir == Elixir
+#=&gt; true
+# Wait, What?!
+# Looks like :Elixir is special atom
+
+
+i Elixir
+#=&gt; Term
+#   Elixir
+# Data type
+#   Atom
+# Reference modules
+#   Atom
+# Implemented protocols
+#   IEx.Info, Inspect, String.Chars, List.Chars
+#
+# 23:11:51.098 [error] beam/beam_load.c(1428): Error loading module
+#   'Elixir': module name in object code is elixir
+#
+# 23:11:51.100 [error] Loading of
+# /usr/local/Cellar/elixir/1.7.4/bin/../lib/elixir/ebin/Elixir.beam
+# failed: :badfile
+
+# iex&gt; i Elixir lead to an error!
+
+:&quot;Elixir.Map&quot; == Map
+#=&gt; true
+# but :__name__ is used to access erlang modules too. Module.__func__
+# is just syntatic sugar for :&quot;Elixir.Module&quot;?
+
+:&quot;Elixir.Map&quot;.new()
+#=&gt; %{}
+# indeed! So all Elixir modules are same as erlang modules. And all
+# elixir modules are defined under big :Elixir namespace. neat
+
+is_atom File.Stream
+#=&gt; true
+
+to_string File.Stat
+#=&gt; &quot;Elixir.File.Stat&quot;
+# True for nested modules too
+
+# ---------------------------------------------------------------
+# Let's try all these different atom notations with keyword list
+# ---------------------------------------------------------------
+
+a = [Foo: &quot;bar&quot;]
+a[:Foo]
+#=&gt; &quot;bar&quot;
+
+a = [&quot;Foo&quot;: &quot;bar&quot;]
+# a[:Foo]
+#=&gt; &quot;bar&quot;
+
+a = [{:Foo, &quot;bar&quot;}]
+a[:Foo]
+#=&gt; &quot;bar&quot;
+
+a = [{:&quot;Foo&quot;, &quot;bar&quot;}]
+a[:Foo]
+#=&gt; &quot;bar&quot;
+
+a = [{Foo, &quot;bar&quot;}]
+a[:Foo]
+#=&gt; nil
+
+a[Foo]
+#=&gt; &quot;bar&quot;
+
+a = [{Elixir.Foo, &quot;bar&quot;}]
+a[Foo]
+#=&gt; &quot;bar&quot;
+
+a = [{:&quot;Elixir.Foo&quot;, &quot;bar&quot;}]
+a[Foo]
+#=&gt; &quot;bar&quot;
+</code></pre>
+
+
+		
+<section class="section">
+  <div class="disqus">
+    <aside><div id="disqus_thread"></div></aside>
+    <script type="text/javascript">
+      var disqus_shortname = 'akash-hiremath';
+      (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+		
+		
+	</div>
+
+	<div class="pagination">
+		<a href="/post/elixir-gotcha-1/" class="left arrow">&#8592;</a>
+
+		<a href="#" class="top">Top</a>
+	</div>
+</main>
+
+
+        		<footer>
+			<span>
+			</span>
+		</footer>
+
+    </body>
+</html>
