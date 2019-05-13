@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+		<title>
+				Navigating to Elixir source in Emacs &middot; Just another blog
+		</title>
+	
+		
+  		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Baskerville:400,400i,700">
+	
+	    <link rel="stylesheet" href="https://akash-akya.github.io/css/style.css">
+ 	   	<link rel="stylesheet" href="https://akash-akya.github.io/css/styles/github.css">
+    	<script src="https://akash-akya.github.io/js/highlight.pack.js"></script>
+    	<script>hljs.initHighlightingOnLoad();</script>
+
+
+		
+		<link rel="icon" type="image/png" sizes="32x32" href="https://akash-akya.github.io/images/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="https://akash-akya.github.io/images/favicon-16x16.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="https://akash-akya.github.io/images/apple-touch-icon.png">
+	
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="Just another blog" />
+	</head>
+	
+    <body>
+        		<nav class="nav">
+			<div class="nav-container">
+				<a href="/">
+					<h2 class="nav-title">Just another blog</h2>
+				</a>
+				<ul>
+    <li><a href="/about">About</a></li>
+    <li><a href="/">Posts</a></li>
+</ul>
+			</div>
+		</nav>
+
+        
+
+<main>
+	<div class="post">
+		<div class="post-info">
+    <span>Written by</span>
+        Akash
+        <br>
+        <span>on&nbsp;</span><time datetime="2019-05-13 16:26:24 &#43;0530 IST">May 13, 2019</time>
+</div>
+		<h1 class="post-title">Navigating to Elixir source in Emacs</h1>
+<div class="post-line"></div>
+
+		
+
+		<p><strong>Short answer</strong> : Compile Elixir yourself</p>
+
+<p><strong>Long answer</strong> :</p>
+
+<p>Many times I find myself exploring Elixir source code in a separate
+frame. Either to learn how something is implemented or to know how
+something is used. What is a better reference to learn a language than
+the language source itself?</p>
+
+<p>I'm using <a href="https://github.com/JakeBecker/elixir-ls/" title="elixir-ls">elixir-ls</a> language server with <a href="https://github.com/joaotavora/eglot/" title="Eglot">Eglot</a> as LSP
+front-end. elixir-ls internally use <a href="https://github.com/msaraiva/elixir_sense" title="elixir-sense">elixir-sense</a> to get relevant
+information from source. A quick look at elixir-sense revealed that
+every module has <code>source</code> metadata attached to it. This metadata points
+to the source file from which beam file is generated. Since its done
+by Erlang, both Erlang and Elixir modules have this information as
+metadata. You can check this in <code>iex</code>.</p>
+
+<pre><code class="language-elixir">iex(3)&gt; Enum.module_info(:compile)
+[
+  version: '7.2.6',
+  options: [],
+  source: '/private/tmp/elixir-20181026-69137-ms45yr/elixir-1.7.4/lib/elixir/lib/enum.ex'
+]
+</code></pre>
+
+<p>Since brew by default installs pre-built binaries. The <code>source</code> path is
+invalid in my machine. So to have correct <code>source</code>, we just have to
+compile it locally.</p>
+
+<p>It's fairly easy to compile with <a href="https://github.com/asdf-vm/asdf" title="asdf">asdf</a></p>
+
+<h2 id="install-asdf">Install asdf</h2>
+
+<p>Follow the instructs at <a href="https://github.com/asdf-vm/asdf" title="asdf">asdf</a></p>
+
+<h2 id="install-correct-erlang-otp-plugin">Install correct erlang/OTP plugin</h2>
+
+<p>Note that each version of elixir supports a specific version of
+erlang/OTP version, make sure you install the correct version.
+I wanted to use elixir <code>1.7.4</code>, I installed Erlang/OTP <code>21.2</code>. Check <a href="https://github.com/asdf-vm/asdf-erlang" title="asdf-erlang">asdf-erlang</a>.</p>
+
+<h2 id="install-elixir-with-ref-tag">Install elixir with ref tag</h2>
+
+<p>asdf-elixir installs pre-built binaries if you just use version tags.
+you need to use <code>ref:&lt;commit_sha&gt;</code> for compiling from source. see
+<a href="https://github.com/elixir-lang/elixir/releases" title="releases">releases</a> to find the commit id for a particular release. Check
+<a href="https://github.com/asdf-vm/asdf-elixir" title="asdf-elixir">asdf-elixir</a>.</p>
+
+<p>In my case, it will be</p>
+
+<pre><code class="language-bash">asdf plugin-add elixir
+asdf plugin-add erlang
+
+asdf install erlang 21.2
+asdf global erlang 21.2
+
+asdf install elixir ref:eb5679b
+asdf global elixir ref:eb5679b
+</code></pre>
+
+<p>Now <code>source</code> should point to correct local path for both Elixir and Erlang modules</p>
+
+<pre><code class="language-elixir">iex(2)&gt; Enum.module_info(:compile)[:source]
+'/Users/akash/.asdf/installs/elixir/ref-eb5679b/lib/elixir/lib/enum.ex'
+
+iex(3)&gt; :ets.module_info(:compile)[:source]
+'/Users/akash/.asdf/plugins/erlang/kerl-home/builds/asdf_21.2/otp_src_21.2/lib/stdlib/src/ets.erl'
+</code></pre>
+
+<p>With this source code navigation works as expected in the Emacs</p>
+
+<h2 id="bonus-tip">Bonus Tip</h2>
+
+<p>Mostly likely that you don't want to modify any of the elixir/Erlang
+source files. You can use <code>M-x projectile-toggle-project-read-only</code> to
+always open these files with read-only mode.</p>
+
+
+		
+<section class="section">
+  <div class="disqus">
+    <aside><div id="disqus_thread"></div></aside>
+    <script type="text/javascript">
+      var disqus_shortname = 'akash-hiremath';
+      (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+		
+		
+	</div>
+
+	<div class="pagination">
+		<a href="/post/atoms_in_elixir/" class="left arrow">&#8592;</a>
+
+		<a href="#" class="top">Top</a>
+	</div>
+</main>
+
+
+        		<footer>
+			<span>
+			</span>
+		</footer>
+
+    </body>
+</html>

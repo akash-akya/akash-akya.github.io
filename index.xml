@@ -7,20 +7,32 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
-    <lastBuildDate>Tue, 01 Jan 2019 22:08:03 +0530</lastBuildDate>
-
+    <lastBuildDate>Mon, 13 May 2019 16:26:24 +0530</lastBuildDate>
+    
 	<atom:link href="https://akash-akya.github.io/index.xml" rel="self" type="application/rss+xml" />
-
-
+    
+    
+    <item>
+      <title>Navigating to Elixir source in Emacs</title>
+      <link>https://akash-akya.github.io/post/elixir_source_in_emacs/</link>
+      <pubDate>Mon, 13 May 2019 16:26:24 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/post/elixir_source_in_emacs/</guid>
+      <description>Short answer : Compile Elixir yourself
+Long answer :
+Many times I find myself exploring Elixir source code in a separate frame. Either to learn how something is implemented or to know how something is used. What is a better reference to learn a language than the language source itself?
+I&#39;m using elixir-ls language server with Eglot as LSP front-end. elixir-ls internally use elixir-sense to get relevant information from source. A quick look at elixir-sense revealed that every module has source metadata attached to it.</description>
+    </item>
+    
     <item>
       <title>Atoms in Elixir</title>
       <link>https://akash-akya.github.io/post/atoms_in_elixir/</link>
       <pubDate>Tue, 01 Jan 2019 22:08:03 +0530</pubDate>
-
-      <description>Exploring Atoms in Elixir with REPL</description>
+      
       <guid>https://akash-akya.github.io/post/atoms_in_elixir/</guid>
+      <description>:foo #=&amp;gt; :foo is_atom :foo #=&amp;gt; true :&amp;quot;foo&amp;quot; #=&amp;gt; warning: found quoted atom &amp;quot;foo&amp;quot; but the quotes are not #required. Quotes should only be used to introduce atoms with foreign #characters in them # # :foo # Looks like :foo. whats does foreign characters mean? is_atom :&amp;quot;foo&amp;quot; #=&amp;gt; warning: found quoted atom &amp;quot;foo&amp;quot; but the quotes are not #required. Quotes should only be used to introduce atoms with foreign #characters in them # # true :foo == :&amp;quot;foo&amp;quot; #=&amp;gt; warning: found quoted atom &amp;quot;foo&amp;quot; but the quotes are not #required.</description>
     </item>
-
+    
     <item>
       <title>Elixir Gotcha #1</title>
       <link>https://akash-akya.github.io/post/elixir-gotcha-1/</link>
