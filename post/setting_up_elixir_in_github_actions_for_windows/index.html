@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+		<title>
+				Setting up Elixir in github-actions for windows &middot; Just another blog
+		</title>
+	
+		
+  		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Baskerville:400,400i,700">
+	
+	    <link rel="stylesheet" href="https://akash-akya.github.io/css/style.css">
+ 	   	<link rel="stylesheet" href="https://akash-akya.github.io/css/styles/github.css">
+    	<script src="https://akash-akya.github.io/js/highlight.pack.js"></script>
+    	<script>hljs.initHighlightingOnLoad();</script>
+
+
+		
+		<link rel="icon" type="image/png" sizes="32x32" href="https://akash-akya.github.io/images/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="https://akash-akya.github.io/images/favicon-16x16.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="https://akash-akya.github.io/images/apple-touch-icon.png">
+	
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="Just another blog" />
+	</head>
+	
+    <body>
+        		<nav class="nav">
+			<div class="nav-container">
+				<a href="/">
+					<h2 class="nav-title">Just another blog</h2>
+				</a>
+				<ul>
+    <li><a href="/about">About</a></li>
+    <li><a href="/">Posts</a></li>
+</ul>
+			</div>
+		</nav>
+
+        
+
+<main>
+	<div class="post">
+		<div class="post-info">
+    <span>Written by</span>
+        Akash
+        <br>
+        <span>on&nbsp;</span><time datetime="2020-08-09 15:00:00 &#43;0530 IST">August 9, 2020</time>
+</div>
+		<h1 class="post-title">Setting up Elixir in github-actions for windows</h1>
+<div class="post-line"></div>
+
+		
+
+		
+
+<p>When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. <a href="https://github.com/features/actions">Github actions</a> makes this task easier than before but unfortunately <a href="https://github.com/actions/setup-elixir">elixir-setup</a> does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library</p>
+
+<h2 id="using-chocolatey-package-manager">Using Chocolatey package manager</h2>
+
+<p>We can use <a href="https://github.com/marketplace/actions/chocolatey-action">Chocolatey Action</a> install elixir. Chocolatey also installs Erlang as elixir dependency for us.</p>
+
+<pre><code class="language-shell">choco install elixir
+</code></pre>
+
+<p>But we can&rsquo;t access Elixir or mix yet. With github-actions, we have to explicitly update PATH environment variable using an <a href="https://github.community/t/append-path-on-windows/16205/5">undocumented</a> special syntax</p>
+
+<pre><code class="language-shell">echo &quot;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&quot;
+</code></pre>
+
+<p>Our workflow for tests might look like this:</p>
+
+<pre><code class="language-yaml">name: Elixir
+on: push
+jobs:
+  run_tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Elixir
+        uses: crazy-max/ghaction-chocolatey@v1.2.2
+        with:
+          args: install elixir
+      - name: Update PATH
+        run: echo &quot;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&quot;
+      - name: Install Dependencies
+        run: |
+          mix local.hex --force
+          mix.bat deps.get
+      - name: Compile
+        run: mix.bat compile --force --warnings-as-errors
+      - name: Check format
+        run: mix.bat format --check-formatted
+      - name: Run Tests
+        run: mix.bat test
+</code></pre>
+
+<p>This approach works, but it has few issues:</p>
+
+<h3 id="pipeline-is-slow">Pipeline is slow</h3>
+
+<p>When I tested this, the pipeline took 6m 41s. Installation alone took 6m 15s. We install Elixir and Erlang/OTP every time we run this pipeline. This includes downloading packages, extracting and installing.</p>
+
+<h3 id="changing-elixir-and-erlang-version-is-not-easy">Changing Elixir and Erlang version is not easy</h3>
+
+<p>We <em>can</em> change Elixir version with <code>--version</code> parameter with chocolatey, but now we sort of depend on chocolatey. Also, we can not combine different Erlang and Elixir with this. Moreover, we are already leaking installation by setting path environment variable explicitly.</p>
+
+<h2 id="manual-setup-with-cache">Manual setup with cache</h2>
+
+<p>Quick look at chocolatey revealed that installing Erlang and Elixir from command-line is not as complicated as I thought. New approach is to manually install Erlang and Elixir and setup action-cache to reuse installation across pipelines.</p>
+
+<ul>
+<li>check Erlang installation cache</li>
+<li>download and install Erlang if not in cache</li>
+<li>add Erlang to path</li>
+<li>check Elixir installation cache</li>
+<li>download and install Elixir if not in cache</li>
+<li>add Elixir to path</li>
+</ul>
+
+<p>This is slightly more complicated than our previous setup using chocolatey but it is faster and more flexible.</p>
+
+<pre><code class="language-yaml">name: Elixir
+on: push
+env:
+  OTP_VERSION: 22.2
+  ELIXIR_VERSION: 1.9.4
+jobs:
+  run_tests:
+    runs-on: windows-latest
+    name: Windows
+    steps:
+      - name: Cache erlang
+        uses: actions/cache@v2
+        id: erlang_cache
+        with:
+          path: C:\Program Files\erl10.6
+          key: erlang-${{ runner.os }}-${{ env.OTP_VERSION }}
+      - name: Download and install erlang
+        if: steps.erlang_cache.outputs.cache-hit != 'true'
+        run: |
+          Invoke-WebRequest &quot;http://erlang.org/download/otp_win64_$env:OTP_VERSION.exe&quot; -OutFile &quot;C:\otp_win64_$env:OTP_VERSION.exe&quot;
+          Start-Process -Wait &quot;C:\otp_win64_$env:OTP_VERSION.exe&quot; /S
+      - name: Add erlang to path
+        run: echo &quot;##[add-path]C:\Program Files\erl10.6\bin&quot;
+      - name: Cache Elixir
+        uses: actions/cache@v2
+        id: elixir_cache
+        with:
+          path: c:\elixir
+          key: elixir-${{ runner.os }}-${{ env.ELIXIR_VERSION }}
+      - name: Download and install Elixir
+        if: steps.elixir_cache.outputs.cache-hit != 'true'
+        run: |
+          Invoke-WebRequest &quot;https://github.com/elixir-lang/elixir/releases/download/v$env:ELIXIR_VERSION/Precompiled.zip&quot; -OutFile &quot;C:\elixir_$env:ELIXIR_VERSION.zip&quot;
+          Expand-Archive &quot;C:\elixir_$env:ELIXIR_VERSION.zip&quot; -DestinationPath c:\elixir
+      - name: Add elixir to path
+        run: echo &quot;##[add-path]C:\elixir\bin&quot;
+      - name: Install Dependencies
+        run: |
+          mix local.hex --force
+          mix.bat deps.get
+      - name: Compile
+        run: mix.bat compile --force --warnings-as-errors
+      - name: Check format
+        run: mix.bat format --check-formatted
+      - name: Run Tests
+        run: mix.bat test
+</code></pre>
+
+<p>This brings down pipeline execution time from 6m 41s to 2m.</p>
+
+<p><img src="/images/ci.png" alt="new workflow" title="New pipeline execution time" /></p>
+
+<p>You can check working setup <a href="https://github.com/akash-akya/ex_cmd/blob/master/.github/workflows/elixir.yml">here</a></p>
+
+<p>Our new setup is still far from ideal. We are leaking Erlang installation path <code>C:\Program Files\erl10.6</code> which changes with Erlang version. Hopefully we get windows support in setup-elixir soon</p>
+
+
+		
+<section class="section">
+  <div class="disqus">
+    <aside><div id="disqus_thread"></div></aside>
+    <script type="text/javascript">
+      var disqus_shortname = 'akash-hiremath';
+      (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+		
+		
+	</div>
+
+	<div class="pagination">
+		<a href="/post/elixir_source_in_emacs/" class="left arrow">&#8592;</a>
+
+		<a href="#" class="top">Top</a>
+	</div>
+</main>
+
+
+        		<footer>
+			<span>
+			</span>
+		</footer>
+
+    </body>
+</html>

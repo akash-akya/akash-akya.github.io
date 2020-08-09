@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Programming on Just another blog</title>
-    <link>https://akash-akya.github.io/tags/programming/</link>
-    <description>Recent content in Programming on Just another blog</description>
+    <title>Github on Just another blog</title>
+    <link>https://akash-akya.github.io/tags/github/</link>
+    <description>Recent content in Github on Just another blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
     <lastBuildDate>Sun, 09 Aug 2020 15:00:00 +0530</lastBuildDate>
     
-	<atom:link href="https://akash-akya.github.io/tags/programming/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://akash-akya.github.io/tags/github/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -20,17 +20,6 @@
       <guid>https://akash-akya.github.io/post/setting_up_elixir_in_github_actions_for_windows/</guid>
       <description>When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. Github actions makes this task easier than before but unfortunately elixir-setup does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library
 Using Chocolatey package manager We can use Chocolatey Action install elixir. Chocolatey also installs Erlang as elixir dependency for us.</description>
-    </item>
-    
-    <item>
-      <title>Elixir Gotcha #1</title>
-      <link>https://akash-akya.github.io/post/elixir-gotcha-1/</link>
-      <pubDate>Fri, 21 Sep 2018 19:50:57 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/post/elixir-gotcha-1/</guid>
-      <description>Can you guess the output of this code snippet?
-def baz(_a) do puts &amp;quot;baz/1&amp;quot; end def baz(_a, _b) do puts &amp;quot;baz/2&amp;quot; end baz(name: &amp;quot;foo&amp;quot;, age: 30)  Answer is baz/1.
-If you have worked with elixir for some time you will know about keyword lists. Hex docs define it as, Keyword is a list of two-element tuples where the first element of the tuple is an atom and the second element can be any value.</description>
     </item>
     
   </channel>

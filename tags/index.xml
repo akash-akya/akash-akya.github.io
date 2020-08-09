@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
-    <lastBuildDate>Fri, 21 Sep 2018 19:50:57 +0530</lastBuildDate>
+    <lastBuildDate>Sun, 09 Aug 2020 15:00:00 +0530</lastBuildDate>
     
 	<atom:link href="https://akash-akya.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,7 +15,7 @@
     <item>
       <title>Elixir</title>
       <link>https://akash-akya.github.io/tags/elixir/</link>
-      <pubDate>Fri, 21 Sep 2018 19:50:57 +0530</pubDate>
+      <pubDate>Sun, 09 Aug 2020 15:00:00 +0530</pubDate>
       
       <guid>https://akash-akya.github.io/tags/elixir/</guid>
       <description></description>
@@ -31,9 +31,18 @@
     </item>
     
     <item>
+      <title>Github</title>
+      <link>https://akash-akya.github.io/tags/github/</link>
+      <pubDate>Sun, 09 Aug 2020 15:00:00 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/tags/github/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Programming</title>
       <link>https://akash-akya.github.io/tags/programming/</link>
-      <pubDate>Fri, 21 Sep 2018 19:50:57 +0530</pubDate>
+      <pubDate>Sun, 09 Aug 2020 15:00:00 +0530</pubDate>
       
       <guid>https://akash-akya.github.io/tags/programming/</guid>
       <description></description>

@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
-    <lastBuildDate>Fri, 21 Sep 2018 19:50:57 +0530</lastBuildDate>
+    <lastBuildDate>Sun, 09 Aug 2020 15:00:00 +0530</lastBuildDate>
     
 	<atom:link href="https://akash-akya.github.io/tags/elixir/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Setting up Elixir in github-actions for windows</title>
+      <link>https://akash-akya.github.io/post/setting_up_elixir_in_github_actions_for_windows/</link>
+      <pubDate>Sun, 09 Aug 2020 15:00:00 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/post/setting_up_elixir_in_github_actions_for_windows/</guid>
+      <description>When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. Github actions makes this task easier than before but unfortunately elixir-setup does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library
+Using Chocolatey package manager We can use Chocolatey Action install elixir. Chocolatey also installs Erlang as elixir dependency for us.</description>
+    </item>
     
     <item>
       <title>Elixir Gotcha #1</title>
