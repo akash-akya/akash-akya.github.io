@@ -66,13 +66,13 @@
   </url>
   
   <url>
-    <loc>https://akash-akya.github.io/</loc>
+    <loc>https://akash-akya.github.io/post/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://akash-akya.github.io/post/</loc>
+    <loc>https://akash-akya.github.io/tags/programming/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
     <priority>0</priority>
   </url>
@@ -84,13 +84,13 @@
   </url>
   
   <url>
-    <loc>https://akash-akya.github.io/tags/programming/</loc>
+    <loc>https://akash-akya.github.io/tags/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://akash-akya.github.io/tags/</loc>
+    <loc>https://akash-akya.github.io/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
     <priority>0</priority>
   </url>
