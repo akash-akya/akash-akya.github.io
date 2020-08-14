@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
-    <lastBuildDate>Sun, 09 Aug 2020 15:00:00 +0530</lastBuildDate>
+    <lastBuildDate>Fri, 14 Aug 2020 22:40:57 +0530</lastBuildDate>
     
 	<atom:link href="https://akash-akya.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Better kubectl interaction</title>
+      <link>https://akash-akya.github.io/post/better-kubectl-interaction/</link>
+      <pubDate>Fri, 14 Aug 2020 22:40:57 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/post/better-kubectl-interaction/</guid>
+      <description>As many of you know, kubectl is official command-line client for interacting with the kubernetes cluster. Although kubectl allow us to do almost anything with the cluster, it has a convoluted interface. Especially for interacting with basic entities such pods. Pods are ephemeral entities, and each instance gets an unique name. If a deployment name is kafka-consumer then pods names might be kafka-consumer-654b7df6b-mfx46, kafka-consumer-654b7df6b-yy49i. This name changes every time pod is updated or restarted and all commands which needs to interact with pods needs this unique pod name as its parameter.</description>
+    </item>
     
     <item>
       <title>Setting up Elixir in github-actions for windows</title>

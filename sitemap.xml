@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://akash-akya.github.io/post/better-kubectl-interaction/</loc>
+    <lastmod>2020-08-14T22:40:57+05:30</lastmod>
+  </url>
+  
+  <url>
     <loc>https://akash-akya.github.io/post/setting_up_elixir_in_github_actions_for_windows/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
   </url>
@@ -66,8 +71,14 @@
   </url>
   
   <url>
+    <loc>https://akash-akya.github.io/tags/kubectl/</loc>
+    <lastmod>2020-08-14T22:40:57+05:30</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://akash-akya.github.io/post/</loc>
-    <lastmod>2020-08-09T15:00:00+05:30</lastmod>
+    <lastmod>2020-08-14T22:40:57+05:30</lastmod>
     <priority>0</priority>
   </url>
   
@@ -84,6 +95,12 @@
   </url>
   
   <url>
+    <loc>https://akash-akya.github.io/tags/shell/</loc>
+    <lastmod>2020-08-14T22:40:57+05:30</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://akash-akya.github.io/tags/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
     <priority>0</priority>
@@ -91,7 +108,7 @@
   
   <url>
     <loc>https://akash-akya.github.io/</loc>
-    <lastmod>2020-08-09T15:00:00+05:30</lastmod>
+    <lastmod>2020-08-14T22:40:57+05:30</lastmod>
     <priority>0</priority>
   </url>
   

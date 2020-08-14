@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<title>
+				Better kubectl interaction &middot; blogu geegu.
+		</title>
+
+		
+  		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:400,400i,700">
+
+	    <link rel="stylesheet" href="https://akash-akya.github.io/css/style.css">
+ 	   	<link rel="stylesheet" href="https://akash-akya.github.io/css/styles/github.css">
+    	<script src="https://akash-akya.github.io/js/highlight.pack.js"></script>
+    	<script>hljs.initHighlightingOnLoad();</script>
+
+
+		
+		<link rel="icon" type="image/png" sizes="32x32" href="https://akash-akya.github.io/images/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="https://akash-akya.github.io/images/favicon-16x16.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="https://akash-akya.github.io/images/apple-touch-icon.png">
+
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="blogu geegu." />
+	</head>
+
+    <body>
+        		<nav class="nav">
+			<div class="nav-container">
+				<a href="/">
+					<h2 class="nav-title">blogu geegu.</h2>
+				</a>
+				<ul>
+    <li><a href="/about">About</a></li>
+    <li><a href="/">Posts</a></li>
+</ul>
+			</div>
+		</nav>
+
+        
+
+<main>
+	<div class="post">
+		<div class="post-info">
+    <span>Written by</span>
+        Akash
+        <br>
+        <span>on&nbsp;</span><time datetime="2020-08-14 22:40:57 &#43;0530 IST">August 14, 2020</time>
+</div>
+		<h1 class="post-title">Better kubectl interaction</h1>
+<div class="post-line"></div>
+
+		
+
+		
+
+<p>As many of you know, <a href="https://kubernetes.io/docs/reference/kubectl/kubectl/">kubectl</a> is official command-line client for interacting with the kubernetes cluster. Although kubectl allow us to do almost anything with the cluster, it has a convoluted interface. Especially for interacting with basic entities such pods. Pods are ephemeral entities, and each instance gets an unique name. If a deployment name is <code>kafka-consumer</code> then pods names might be <code>kafka-consumer-654b7df6b-mfx46</code>, <code>kafka-consumer-654b7df6b-yy49i</code>. This name changes every time pod is updated or restarted and all commands which needs to interact with pods needs this unique pod name as its parameter.</p>
+
+<p>So the interaction might look like</p>
+
+<ul>
+<li>list pod names</li>
+<li>copy pod name</li>
+<li>run command with pod name as parameter</li>
+</ul>
+
+<pre><code class="language-bash">$ kubectl get pods
+NAME                                   READY   STATUS    RESTARTS   AGE
+consumer-654b7df6b-mfx46               1/1     Running   0          21d
+server-7df6b9903-oc9m6                 1/1     Running   0          22d
+
+$ kubectl delete pod consumer-654b7df6b-mfx46
+</code></pre>
+
+<p>Apart from irritating user by asking him/her to copy some string every time, this interaction breaks all conventional shell workflow. We can&rsquo;t use reverse shell history search (Ctrl+r), it is not composable, it is not repeatable, and it clutters clipboard.</p>
+
+<p>There are many tools which attempts to solve this, but most of them approach this by hiding kubectl. They provide a wrapper with their own set of options and syntax. Although this might work in most scenarios, there are few concerns: tool might not expose all options of kubectl, more documentation available online for kubectl, and we have to learn new tool. I wanted to solve this without hiding kubectl so that if I need to do something advanced I can always extend. One way to achieve this is by having &ldquo;template command&rdquo; which insert pod name each time we execute it.</p>
+
+<h3 id="subshell-fzf-https-github-com-junegunn-fzf-to-the-rescue">Subshell &amp; <a href="https://github.com/junegunn/fzf">fzf</a> to the rescue</h3>
+
+<p><code>$(...)</code> is way one of executing a command in separate shell. <code>$(...)</code> will be replaced with its output.</p>
+
+<p>Consider this</p>
+
+<pre><code class="language-bash">mkdir $(read name &amp;&amp; echo &quot;hello-$name&quot;)
+</code></pre>
+
+<p>Here we read user input from STDIN and return it with a &ldquo;hello-&rdquo; prefix. If input is &ldquo;world&rdquo;, command will be mkdir hello-world. Important thing to note here is that subshell command is executed before root command, and we can use this to insert a parameter to the command.</p>
+
+<p>fzf gives an interactive user interface for &ldquo;choosing something&rdquo; from a list. It reads lines from STDIN, ask user for choice and writes this entry to STDOUT.</p>
+
+<pre><code class="language-bash">ls -1 | fzf | wc -c
+</code></pre>
+
+<p>This returns count of characters in the filename depending on our choice.</p>
+
+<h3 id="combining-both">Combining both</h3>
+
+<p>We use subshell and fzf to dynamically select pod name and pass that to kubectl command template.</p>
+
+<pre><code class="language-bash">kubectl delete pod $(kubectl get pods | fzf)
+</code></pre>
+
+<p>We can use shell functions and alias to make this composable by add these to init file. such as <code>~/.profile</code> or <code>~/.oh-my-zsh/config.zsh</code></p>
+
+<pre><code class="language-bash">function kselect {
+    kubectl get &quot;$@&quot; --no-headers -o custom-columns=POD:.metadata.name | fzf --height 25% --border --exact
+}
+
+alias select_pod='kselect pods'
+</code></pre>
+
+<p>Now our command to:</p>
+
+<pre><code class="language-bash">kubectl delete pod $(select_pod)
+</code></pre>
+
+<p><em>Select pod in action:</em>
+<img src="/images/select_pod.gif" alt="demo" title="Select pod in action!" /></p>
+
+<p>We can use <code>kselect</code> for all kubernetes resource objects</p>
+
+<pre><code class="language-bash">alias select_deployment='kselect deployment'
+alias select_statefulset='kselect statefulset'
+alias select_configmap='kselect configmap'
+alias select_service='kselect service'
+alias select_secret='kselect secret'
+</code></pre>
+
+
+		
+<section class="section">
+  <div class="disqus">
+    <aside><div id="disqus_thread"></div></aside>
+    <script type="text/javascript">
+      var disqus_shortname = 'akash-hiremath';
+      (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+		
+		
+	</div>
+
+	<div class="pagination">
+		<a href="/post/setting_up_elixir_in_github_actions_for_windows/" class="left arrow">&#8592;</a>
+
+		<a href="#" class="top">Top</a>
+	</div>
+</main>
+
+
+        		<footer>
+			<span>
+			</span>
+		</footer>
+
+    </body>
+</html>
