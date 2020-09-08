@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
-    <lastBuildDate>Fri, 14 Aug 2020 22:40:57 +0530</lastBuildDate>
+    <lastBuildDate>Tue, 08 Sep 2020 23:49:19 +0530</lastBuildDate>
     
 	<atom:link href="https://akash-akya.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>ಕರ್ಣಾಟ ಭಾರತ ಕಥಾಮಂಜರಿಯ ಮನನ: ಕರ್ಣನ ಜನನ ಮತ್ತು ಬಾಲ್ಯ</title>
+      <link>https://akash-akya.github.io/post/kvb_karnana_janana/</link>
+      <pubDate>Tue, 08 Sep 2020 23:49:19 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/post/kvb_karnana_janana/</guid>
+      <description>ನನ್ನ ಬಹುದಿನದ ಆಸೆಯಾದ ಕುಮಾರವ್ಯಾಸ ಭಾರತದ ಓದನ್ನು ಕೊನೆಗೂ ನನ್ನೂರಲ್ಲಿ ಆರಂಭಿಸಿದ್ದೇನೆ. ಓದಿದ್ದನ್ನು ಬರೆದರೆ ಹೆಚ್ಚು ಅಂತರ್ಗತವಾಗಬಹುದೆಂಬ ಆಶಯ, ಕಾವ್ಯದ ಸ್ವಾರಸ್ಯವನ್ನು ಹಂಚಿಕೊಳ್ಳುವ ಆಸೆ ಮತ್ತು ಕನ್ನಡದಲ್ಲಿ ಬ್ಲಾಗಿಸುವ ಬಯಕೆ ಹೀಗೆ ಎಲ್ಲವೂ ಸೇರಿ ಈ ಸರಣಿಯನ್ನು ಆರಂಭಿಸಲು ನನ್ನನು ಮುಂದೂಡಿವೆ. ಅರ್ಥೈಸುವ ಅಥವಾ ವಿಶ್ಲೇಷಿಸುವ ಸಾಹಸಕ್ಕೆ ಕೈಹಾಕದೆ, ನನಗೆ ಹಿಡಿಸಿದ ಸ್ವಾರಸ್ಯಕರ ವಿಚಾರಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳುವುದಷ್ಟೇ ಇದರ ಉದ್ದೇಶ.
+೧.    ಅರಸ ಕೇಳ್ ಆಶ್ಚರ್ಯವನು ತಾ ವರೆಯ ಮಿತ್ರನ ಕರಗಿ ಕರುವಿನೊ ಳೆರೆದರೆಂದೆನೆ ಥಳಥಳಿಸಿ ತೊಳಗುವ ತನುಚ್ಛವಿಯ ಕುರುಳುದಲೆ ನಿಟ್ಟೆಸಳುಗಂಗಳ ಚರಣ ಕರಪಲ್ಲವದ ಕೆಂಪಿನ ವರಕುಮಾರನ ಕಂಡು ಬೆರಗಿನೊಳಿರ್ದಳಾ ಕುಂತಿ</description>
+    </item>
     
     <item>
       <title>Better kubectl interaction</title>
