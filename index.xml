@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
-    <lastBuildDate>Tue, 08 Sep 2020 23:49:19 +0530</lastBuildDate>
+    <lastBuildDate>Tue, 16 Feb 2021 22:40:57 +0530</lastBuildDate>
     
 	<atom:link href="https://akash-akya.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>ಗುಂಡನ ಫಿಲಾಸಫಿ</title>
+      <link>https://akash-akya.github.io/post/gundana_philosophy/</link>
+      <pubDate>Tue, 16 Feb 2021 22:40:57 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/post/gundana_philosophy/</guid>
+      <description>ಅಪ್ಪ, ಅಮ್ಮ, ಮನೆ, ಟೈಗರ್ ಎಲ್ಲವನ್ನೂ ಬಿಟ್ಟು ದೂರಹೋಗಿ ಒಂದು ದಶಕವೇ ಕಳೆದಿತ್ತು. ಈಗ Work From Home (ಮನೆಯಲ್ಲಿಯೇ ಕೆಲಸ) ಕೃಪೆಯಿಂದಾಗಿ ಕೆಲವು ತಿಂಗಳುಗಳಿಂದ ನಮ್ಮೂರಲ್ಲೆ ನೆಲೆಸಿದ್ದೇನೆ.
+ಹೀಗಿರಲು, ಇತ್ತೀಚೆಗೆ ನನ್ನ ಅಕ್ಕ ಮತ್ತು ಒಂದೂವರೆ ವರ್ಷದ ನನ್ನ ಆಳಿಯ ಗುಂಡ ಊರಿಗೆ ಬಂದರು. ಬಂದ ದಿನವೆಲ್ಲಾ ಸದಾ ತನ್ನ ಅಮ್ಮನ ಬಾಲದಂತೆ ಅವಳ ಹಿಂದೆಯೇ ಓಡುತ್ತಿದ್ದ ಗುಂಡ, ಆಗೊಮ್ಮೆ ಈಗೊಮ್ಮೆ ಹಿಂದಿನಿಂದಲೇ ತನ್ನ ತುಂಬಿದ ಗಲ್ಲದ, ಹುಬ್ಬು ಗಂಟಿಕ್ಕಿದ ಮೊಗವನ್ನು ಹೊರಹಾಕಿ &amp;ldquo;ಯಾರು ನೀನು ?&amp;rdquo; ಎಂಬ ನೋಟ ಬೀರುತ್ತಿದ್ದ. ಗುಂಡನ ಈ ಮುಗ್ಧ ಮೋರೆ ನೋಡಿ ನಮ್ಮಂತೆ ನೀವು ಮೋಸ ಹೊಗದಿರಿ! ಯಾಕೆಂದರೆ, ಬಂದ ಎರಡೇ ದಿನಕ್ಕೆ ತನ್ನ ತುಂಟಾಟ ಹಾಗೂ ತೊದಲು ನುಡಿಯ ಮಂತ್ರ ಪ್ರಯೋಗಸಿ ಮನೆಯವರನೆಲ್ಲ ವಶೀಕರಿಸಿದ್ದಾನೆ!</description>
+    </item>
     
     <item>
       <title>ಕರ್ಣಾಟ ಭಾರತ ಕಥಾಮಂಜರಿಯ ಮನನ: ಕರ್ಣನ ಜನನ ಮತ್ತು ಬಾಲ್ಯ</title>
@@ -63,17 +73,6 @@ I&#39;m using elixir-ls language server with Eglot as LSP front-end. elixir-ls i
     </item>
     
     <item>
-      <title>Elixir Gotcha #1</title>
-      <link>https://akash-akya.github.io/post/elixir-gotcha-1/</link>
-      <pubDate>Fri, 21 Sep 2018 19:50:57 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/post/elixir-gotcha-1/</guid>
-      <description>Can you guess the output of this code snippet?
-def baz(_a) do puts &amp;quot;baz/1&amp;quot; end def baz(_a, _b) do puts &amp;quot;baz/2&amp;quot; end baz(name: &amp;quot;foo&amp;quot;, age: 30)  Answer is baz/1.
-If you have worked with elixir for some time you will know about keyword lists. Hex docs define it as, Keyword is a list of two-element tuples where the first element of the tuple is an atom and the second element can be any value.</description>
-    </item>
-    
-    <item>
       <title>Akash Hiremath</title>
       <link>https://akash-akya.github.io/about/</link>
       <pubDate>Mon, 18 Jun 2018 14:43:22 +0530</pubDate>
@@ -81,15 +80,6 @@ If you have worked with elixir for some time you will know about keyword lists. 
       <guid>https://akash-akya.github.io/about/</guid>
       <description>I&amp;rsquo;m a programmer living in Bengaluru. I&amp;rsquo;m passionate about many things. This blog is collection of my reactions to these random interests.
 Github</description>
-    </item>
-    
-    <item>
-      <title>Import in Racket&#39;s sicp</title>
-      <link>https://akash-akya.github.io/post/racket-sicp-util/</link>
-      <pubDate>Thu, 14 Jun 2018 20:00:51 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/post/racket-sicp-util/</guid>
-      <description>I recently started reading Structure and Interpretation of Computer Programs or sicp for short. It&#39;s wonderfully well written. Can&#39;t recommend it enough. I&#39;m using racket scheme for doing the exercises. Along with support for sicp it also has awesome picture language1. You can run the code without any change. There is one caveat though. Some basic functions such as square are not defined in the language. So every time you need those functions you have to explicitly define it.</description>
     </item>
     
     <item>
