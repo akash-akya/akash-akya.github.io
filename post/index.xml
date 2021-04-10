@@ -126,10 +126,10 @@
 &lt;li&gt;copy pod name&lt;/li&gt;
 &lt;li&gt;run command with pod name as parameter&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ kubectl get pods
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ kubectl get pods
 NAME                                   READY   STATUS    RESTARTS   AGE
-consumer-654b7df6b-mfx46               1/1     Running   &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;          21d
-server-7df6b9903-oc9m6                 1/1     Running   &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;          22d
+consumer-654b7df6b-mfx46               1/1     Running   &lt;span style=&#34;color:#bd93f9&#34;&gt;0&lt;/span&gt;          21d
+server-7df6b9903-oc9m6                 1/1     Running   &lt;span style=&#34;color:#bd93f9&#34;&gt;0&lt;/span&gt;          22d
 
 $ kubectl delete pod consumer-654b7df6b-mfx46
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Apart from irritating user by asking him/her to copy some string every time, this interaction breaks all conventional shell workflow. We can&amp;rsquo;t use reverse shell history search (Ctrl+r), it is not composable, it is not repeatable, and it clutters clipboard.&lt;/p&gt;
@@ -137,30 +137,30 @@ $ kubectl delete pod consumer-654b7df6b-mfx46
 &lt;h3 id=&#34;subshell--fzfhttpsgithubcomjunegunnfzf-to-the-rescue&#34;&gt;Subshell &amp;amp; &lt;a href=&#34;https://github.com/junegunn/fzf&#34;&gt;fzf&lt;/a&gt; to the rescue&lt;/h3&gt;
 &lt;p&gt;&lt;code&gt;$(...)&lt;/code&gt; is way one of executing a command in separate shell. &lt;code&gt;$(...)&lt;/code&gt; will be replaced with its output.&lt;/p&gt;
 &lt;p&gt;Consider this&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mkdir &lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;read name &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;hello-&lt;/span&gt;$name&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mkdir &lt;span style=&#34;color:#ff79c6&#34;&gt;$(&lt;/span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;read&lt;/span&gt; name &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;hello-&lt;/span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;$name&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Here we read user input from STDIN and return it with a &amp;ldquo;hello-&amp;rdquo; prefix. If input is &amp;ldquo;world&amp;rdquo;, command will be mkdir hello-world. Important thing to note here is that subshell command is executed before root command, and we can use this to insert a parameter to the command.&lt;/p&gt;
 &lt;p&gt;fzf gives an interactive user interface for &amp;ldquo;choosing something&amp;rdquo; from a list. It reads lines from STDIN, ask user for choice and writes this entry to STDOUT.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;ls -1 | fzf | wc -c
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;ls -1 | fzf | wc -c
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This returns count of characters in the filename depending on our choice.&lt;/p&gt;
 &lt;h3 id=&#34;combining-both&#34;&gt;Combining both&lt;/h3&gt;
 &lt;p&gt;We use subshell and fzf to dynamically select pod name and pass that to kubectl command template.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;kubectl delete pod &lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;kubectl get pods | fzf&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;kubectl delete pod &lt;span style=&#34;color:#ff79c6&#34;&gt;$(&lt;/span&gt;kubectl get pods | fzf&lt;span style=&#34;color:#ff79c6&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We can use shell functions and alias to make this composable by add these to init file. such as &lt;code&gt;~/.profile&lt;/code&gt; or &lt;code&gt;~/.oh-my-zsh/config.zsh&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; kselect &lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;
-    kubectl get &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;$@&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt; --no-headers -o custom-columns&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;POD:.metadata.name | fzf --height 25% --border --exact
-&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;function&lt;/span&gt; kselect &lt;span style=&#34;color:#ff79c6&#34;&gt;{&lt;/span&gt;
+    kubectl get &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;$@&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&lt;/span&gt; --no-headers -o custom-columns&lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;POD:.metadata.name | fzf --height 25% --border --exact
+&lt;span style=&#34;color:#ff79c6&#34;&gt;}&lt;/span&gt;
 
-alias select_pod&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect pods&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;select_pod&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;kselect pods&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now our command to:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;kubectl delete pod &lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;select_pod&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;kubectl delete pod &lt;span style=&#34;color:#ff79c6&#34;&gt;$(&lt;/span&gt;select_pod&lt;span style=&#34;color:#ff79c6&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;em&gt;Select pod in action:&lt;/em&gt;
 &lt;img src=&#34;/images/select_pod.gif&#34; alt=&#34;demo&#34; title=&#34;Select pod in action!&#34;&gt;&lt;/p&gt;
 &lt;p&gt;We can use &lt;code&gt;kselect&lt;/code&gt; for all kubernetes resource objects&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;alias select_deployment&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect deployment&amp;#39;&lt;/span&gt;
-alias select_statefulset&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect statefulset&amp;#39;&lt;/span&gt;
-alias select_configmap&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect configmap&amp;#39;&lt;/span&gt;
-alias select_service&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect service&amp;#39;&lt;/span&gt;
-alias select_secret&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect secret&amp;#39;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;select_deployment&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;kselect deployment&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;select_statefulset&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;kselect statefulset&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;select_configmap&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;kselect configmap&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;select_service&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;kselect service&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;select_secret&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;kselect secret&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
@@ -173,33 +173,33 @@ alias select_secret&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;s
       <description>&lt;p&gt;When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. &lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github actions&lt;/a&gt; makes this task easier than before but unfortunately &lt;a href=&#34;https://github.com/actions/setup-elixir&#34;&gt;elixir-setup&lt;/a&gt; does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library&lt;/p&gt;
 &lt;h2 id=&#34;using-chocolatey-package-manager&#34;&gt;Using Chocolatey package manager&lt;/h2&gt;
 &lt;p&gt;We can use &lt;a href=&#34;https://github.com/marketplace/actions/chocolatey-action&#34;&gt;Chocolatey Action&lt;/a&gt; install elixir. Chocolatey also installs Erlang as elixir dependency for us.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;choco install elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;choco install elixir
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;But we can&amp;rsquo;t access Elixir or mix yet. With github-actions, we have to explicitly update PATH environment variable using an &lt;a href=&#34;https://github.community/t/append-path-on-windows/16205/5&#34;&gt;undocumented&lt;/a&gt; special syntax&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our workflow for tests might look like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Elixir&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;on&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;push&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;jobs&lt;/span&gt;:
-  &lt;span style=&#34;color:#f92672&#34;&gt;run_tests&lt;/span&gt;:
-    &lt;span style=&#34;color:#f92672&#34;&gt;runs-on&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;windows-latest&lt;/span&gt;
-    &lt;span style=&#34;color:#f92672&#34;&gt;steps&lt;/span&gt;:
-      - &lt;span style=&#34;color:#f92672&#34;&gt;uses&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;actions/checkout@v2&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Install Elixir&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;uses&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;crazy-max/ghaction-chocolatey@v1.2.2&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;with&lt;/span&gt;:
-          &lt;span style=&#34;color:#f92672&#34;&gt;args&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;install elixir&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Update PATH&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;echo &amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Install Dependencies&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#e6db74&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          mix local.hex --force
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          mix.bat deps.get&lt;/span&gt;          
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Compile&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat compile --force --warnings-as-errors&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Check format&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat format --check-formatted&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Run Tests&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat test&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
+&lt;span style=&#34;color:#ff79c6&#34;&gt;on&lt;/span&gt;: push
+&lt;span style=&#34;color:#ff79c6&#34;&gt;jobs&lt;/span&gt;:
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;run_tests&lt;/span&gt;:
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;runs-on&lt;/span&gt;: windows-latest
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;steps&lt;/span&gt;:
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;uses&lt;/span&gt;: actions/checkout@v2
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Install Elixir
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;uses&lt;/span&gt;: crazy-max/ghaction-chocolatey@v1.2.2
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;with&lt;/span&gt;:
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;args&lt;/span&gt;: install elixir
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Update PATH
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: echo &amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Install Dependencies
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#f1fa8c&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          mix local.hex --force
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          mix.bat deps.get&lt;/span&gt;          
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Compile
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat compile --force --warnings-as-errors
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Check format
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat format --check-formatted
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Run Tests
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat test
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This approach works, but it has few issues:&lt;/p&gt;
 &lt;h3 id=&#34;pipeline-is-slow&#34;&gt;Pipeline is slow&lt;/h3&gt;
 &lt;p&gt;When I tested this, the pipeline took 6m 41s. Installation alone took 6m 15s. We install Elixir and Erlang/OTP every time we run this pipeline. This includes downloading packages, extracting and installing.&lt;/p&gt;
@@ -216,52 +216,52 @@ alias select_secret&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;s
 &lt;li&gt;add Elixir to path&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;This is slightly more complicated than our previous setup using chocolatey but it is faster and more flexible.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Elixir&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;on&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;push&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;env&lt;/span&gt;:
-  &lt;span style=&#34;color:#f92672&#34;&gt;OTP_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;22.2&lt;/span&gt;
-  &lt;span style=&#34;color:#f92672&#34;&gt;ELIXIR_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;1.9.4&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;jobs&lt;/span&gt;:
-  &lt;span style=&#34;color:#f92672&#34;&gt;run_tests&lt;/span&gt;:
-    &lt;span style=&#34;color:#f92672&#34;&gt;runs-on&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;windows-latest&lt;/span&gt;
-    &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Windows&lt;/span&gt;
-    &lt;span style=&#34;color:#f92672&#34;&gt;steps&lt;/span&gt;:
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Cache erlang&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;uses&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;actions/cache@v2&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;id&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;erlang_cache&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;with&lt;/span&gt;:
-          &lt;span style=&#34;color:#f92672&#34;&gt;path&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;C:\Program Files\erl10.6&lt;/span&gt;
-          &lt;span style=&#34;color:#f92672&#34;&gt;key&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;erlang-${{ runner.os }}-${{ env.OTP_VERSION }}&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Download and install erlang&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;if&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;steps.erlang_cache.outputs.cache-hit != &amp;#39;true&amp;#39;&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#e6db74&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          Invoke-WebRequest &amp;#34;http://erlang.org/download/otp_win64_$env:OTP_VERSION.exe&amp;#34; -OutFile &amp;#34;C:\otp_win64_$env:OTP_VERSION.exe&amp;#34;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          Start-Process -Wait &amp;#34;C:\otp_win64_$env:OTP_VERSION.exe&amp;#34; /S&lt;/span&gt;          
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Add erlang to path&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;echo &amp;#34;##[add-path]C:\Program Files\erl10.6\bin&amp;#34;&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Cache Elixir&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;uses&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;actions/cache@v2&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;id&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;elixir_cache&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;with&lt;/span&gt;:
-          &lt;span style=&#34;color:#f92672&#34;&gt;path&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;c:\elixir&lt;/span&gt;
-          &lt;span style=&#34;color:#f92672&#34;&gt;key&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;elixir-${{ runner.os }}-${{ env.ELIXIR_VERSION }}&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Download and install Elixir&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;if&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;steps.elixir_cache.outputs.cache-hit != &amp;#39;true&amp;#39;&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#e6db74&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          Invoke-WebRequest &amp;#34;https://github.com/elixir-lang/elixir/releases/download/v$env:ELIXIR_VERSION/Precompiled.zip&amp;#34; -OutFile &amp;#34;C:\elixir_$env:ELIXIR_VERSION.zip&amp;#34;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          Expand-Archive &amp;#34;C:\elixir_$env:ELIXIR_VERSION.zip&amp;#34; -DestinationPath c:\elixir&lt;/span&gt;          
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Add elixir to path&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;echo &amp;#34;##[add-path]C:\elixir\bin&amp;#34;&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Install Dependencies&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#e6db74&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          mix local.hex --force
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          mix.bat deps.get&lt;/span&gt;          
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Compile&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat compile --force --warnings-as-errors&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Check format&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat format --check-formatted&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Run Tests&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat test&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
+&lt;span style=&#34;color:#ff79c6&#34;&gt;on&lt;/span&gt;: push
+&lt;span style=&#34;color:#ff79c6&#34;&gt;env&lt;/span&gt;:
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;OTP_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#bd93f9&#34;&gt;22.2&lt;/span&gt;
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;ELIXIR_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#bd93f9&#34;&gt;1.9.4&lt;/span&gt;
+&lt;span style=&#34;color:#ff79c6&#34;&gt;jobs&lt;/span&gt;:
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;run_tests&lt;/span&gt;:
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;runs-on&lt;/span&gt;: windows-latest
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Windows
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;steps&lt;/span&gt;:
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Cache erlang
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;uses&lt;/span&gt;: actions/cache@v2
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;id&lt;/span&gt;: erlang_cache
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;with&lt;/span&gt;:
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;path&lt;/span&gt;: C:\Program Files\erl10.6
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;key&lt;/span&gt;: erlang-${{ runner.os }}-${{ env.OTP_VERSION }}
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Download and install erlang
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt;: steps.erlang_cache.outputs.cache-hit != &amp;#39;true&amp;#39;
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#f1fa8c&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          Invoke-WebRequest &amp;#34;http://erlang.org/download/otp_win64_$env:OTP_VERSION.exe&amp;#34; -OutFile &amp;#34;C:\otp_win64_$env:OTP_VERSION.exe&amp;#34;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          Start-Process -Wait &amp;#34;C:\otp_win64_$env:OTP_VERSION.exe&amp;#34; /S&lt;/span&gt;          
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Add erlang to path
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: echo &amp;#34;##[add-path]C:\Program Files\erl10.6\bin&amp;#34;
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Cache Elixir
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;uses&lt;/span&gt;: actions/cache@v2
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;id&lt;/span&gt;: elixir_cache
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;with&lt;/span&gt;:
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;path&lt;/span&gt;: c:\elixir
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;key&lt;/span&gt;: elixir-${{ runner.os }}-${{ env.ELIXIR_VERSION }}
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Download and install Elixir
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt;: steps.elixir_cache.outputs.cache-hit != &amp;#39;true&amp;#39;
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#f1fa8c&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          Invoke-WebRequest &amp;#34;https://github.com/elixir-lang/elixir/releases/download/v$env:ELIXIR_VERSION/Precompiled.zip&amp;#34; -OutFile &amp;#34;C:\elixir_$env:ELIXIR_VERSION.zip&amp;#34;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          Expand-Archive &amp;#34;C:\elixir_$env:ELIXIR_VERSION.zip&amp;#34; -DestinationPath c:\elixir&lt;/span&gt;          
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Add elixir to path
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: echo &amp;#34;##[add-path]C:\elixir\bin&amp;#34;
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Install Dependencies
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#f1fa8c&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          mix local.hex --force
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          mix.bat deps.get&lt;/span&gt;          
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Compile
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat compile --force --warnings-as-errors
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Check format
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat format --check-formatted
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Run Tests
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat test
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This brings down pipeline execution time from 6m 41s to 2m.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/images/ci.png&#34; alt=&#34;new workflow&#34; title=&#34;New pipeline execution time&#34;&gt;&lt;/p&gt;
 &lt;p&gt;You can check working setup &lt;a href=&#34;https://github.com/akash-akya/ex_cmd/blob/master/.github/workflows/elixir.yml&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
@@ -294,11 +294,11 @@ to the source file from which beam file is generated. Since its done
 by Erlang, both Erlang and Elixir modules have this information as
 metadata. You can check this in &lt;code class=&#34;verbatim&#34;&gt;iex&lt;/code&gt;.&lt;/p&gt;
 &lt;div class=&#34;src src-elixir&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#e6db74&#34;&gt;:compile&lt;/span&gt;)
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)
 [
-  &lt;span style=&#34;color:#e6db74&#34;&gt;version&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;7.2.6&amp;#39;&lt;/span&gt;,
-  &lt;span style=&#34;color:#e6db74&#34;&gt;options&lt;/span&gt;: [],
-  &lt;span style=&#34;color:#e6db74&#34;&gt;source&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/private/tmp/elixir-20181026-69137-ms45yr/elixir-1.7.4/lib/elixir/lib/enum.ex&amp;#39;&lt;/span&gt;
+  &lt;span style=&#34;color:#f1fa8c&#34;&gt;version&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;7.2.6&amp;#39;&lt;/span&gt;,
+  &lt;span style=&#34;color:#f1fa8c&#34;&gt;options&lt;/span&gt;: [],
+  &lt;span style=&#34;color:#f1fa8c&#34;&gt;source&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;/private/tmp/elixir-20181026-69137-ms45yr/elixir-1.7.4/lib/elixir/lib/enum.ex&amp;#39;&lt;/span&gt;
 ]&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;p&gt;
@@ -337,7 +337,7 @@ you need to use &lt;code class=&#34;verbatim&#34;&gt;ref:&amp;lt;commit_sha&amp;
 &lt;p&gt;
 In my case, it will be&lt;/p&gt;
 &lt;div class=&#34;src src-bash&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;asdf plugin-add elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;asdf plugin-add elixir
 asdf plugin-add erlang
 
 asdf install erlang 21.2
@@ -349,11 +349,11 @@ asdf global elixir ref:eb5679b&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;
 Now &lt;code class=&#34;verbatim&#34;&gt;source&lt;/code&gt; should point to correct local path for both Elixir and Erlang modules&lt;/p&gt;
 &lt;div class=&#34;src src-elixir&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;)&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#e6db74&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#e6db74&#34;&gt;:source&lt;/span&gt;]
-&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/Users/akash/.asdf/installs/elixir/ref-eb5679b/lib/elixir/lib/enum.ex&amp;#39;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;2&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:source&lt;/span&gt;]
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;/Users/akash/.asdf/installs/elixir/ref-eb5679b/lib/elixir/lib/enum.ex&amp;#39;&lt;/span&gt;
 
-iex(&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;:ets&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#e6db74&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#e6db74&#34;&gt;:source&lt;/span&gt;]
-&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/Users/akash/.asdf/plugins/erlang/kerl-home/builds/asdf_21.2/otp_src_21.2/lib/stdlib/src/ets.erl&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;:ets&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:source&lt;/span&gt;]
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;/Users/akash/.asdf/plugins/erlang/kerl-home/builds/asdf_21.2/otp_src_21.2/lib/stdlib/src/ets.erl&amp;#39;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;p&gt;
 With this source code navigation works as expected in the Emacs&lt;/p&gt;
@@ -379,185 +379,185 @@ always open these files with read-only mode.&lt;/p&gt;
       
       <guid>/post/atoms_in_elixir/</guid>
       <description>&lt;div class=&#34;src src-elixir&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;:foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; :foo&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;:foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; :foo&lt;/span&gt;
 
-is_atom &lt;span style=&#34;color:#e6db74&#34;&gt;:foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
+is_atom &lt;span style=&#34;color:#f1fa8c&#34;&gt;:foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
 
-&lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;foo&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; warning: found quoted atom &amp;#34;foo&amp;#34; but the quotes are not&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#required. Quotes should only be used to introduce atoms with foreign&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#characters in them&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# :foo&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;foo&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; warning: found quoted atom &amp;#34;foo&amp;#34; but the quotes are not&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#required. Quotes should only be used to introduce atoms with foreign&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#characters in them&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# :foo&lt;/span&gt;
 
-&lt;span style=&#34;color:#75715e&#34;&gt;# Looks like :foo. whats does foreign characters mean?&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Looks like :foo. whats does foreign characters mean?&lt;/span&gt;
 
-is_atom &lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;foo&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; warning: found quoted atom &amp;#34;foo&amp;#34; but the quotes are not&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#required. Quotes should only be used to introduce atoms with foreign&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#characters in them&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# true&lt;/span&gt;
+is_atom &lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;foo&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; warning: found quoted atom &amp;#34;foo&amp;#34; but the quotes are not&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#required. Quotes should only be used to introduce atoms with foreign&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#characters in them&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# true&lt;/span&gt;
 
-&lt;span style=&#34;color:#e6db74&#34;&gt;:foo&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;foo&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; warning: found quoted atom &amp;#34;foo&amp;#34; but the quotes are not&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#required. Quotes should only be used to introduce atoms with foreign&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#characters in them&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# true&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:foo&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;foo&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; warning: found quoted atom &amp;#34;foo&amp;#34; but the quotes are not&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#required. Quotes should only be used to introduce atoms with foreign&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#characters in them&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# true&lt;/span&gt;
 
-:&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;☺&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; ** (SyntaxError) iex:16: unexpected token: &amp;#34;:&amp;#34; (column 1,&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#codepoint U+003A)&lt;/span&gt;
+:☺
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; ** (SyntaxError) iex:16: unexpected token: &amp;#34;:&amp;#34; (column 1,&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#codepoint U+003A)&lt;/span&gt;
 
-&lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;☺&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; :&amp;#34;☺&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# Hmmm. foreign characters mean non-ascii characters?&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;☺&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; :&amp;#34;☺&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Hmmm. foreign characters mean non-ascii characters?&lt;/span&gt;
 
-:&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; ** (SyntaxError) iex:16: unexpected token: &amp;#34;:&amp;#34; (column 1,&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#codepoint U+003A)&lt;/span&gt;
+:&lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; ** (SyntaxError) iex:16: unexpected token: &amp;#34;:&amp;#34; (column 1,&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#codepoint U+003A)&lt;/span&gt;
 
-&lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;1&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; :&amp;#34;1&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# 1 is &amp;#39;foreign characters&amp;#39;?!&lt;/span&gt;
-
-
-&lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;foo.bar&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; :&amp;#34;foo.bar&amp;#34;&lt;/span&gt;
-
-&lt;span style=&#34;color:#e6db74&#34;&gt;:foo&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;bar
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; ** (UndefinedFunctionError) function :foo.bar/0 is undefined&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#(module :foo is not available)&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;1&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; :&amp;#34;1&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# 1 is &amp;#39;foreign characters&amp;#39;?!&lt;/span&gt;
 
 
-&lt;span style=&#34;color:#e6db74&#34;&gt;:Foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; :Foo&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;foo.bar&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; :&amp;#34;foo.bar&amp;#34;&lt;/span&gt;
 
-is_atom &lt;span style=&#34;color:#e6db74&#34;&gt;:Foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
-
-&lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; Foo&lt;/span&gt;
-
-is_atom &lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# no colon prefix needed!&lt;/span&gt;
-
-&lt;span style=&#34;color:#75715e&#34;&gt;# Is this different from an atom with colon prefix?&lt;/span&gt;
-&lt;span style=&#34;color:#e6db74&#34;&gt;:Foo&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; false&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# Both are atoms but not same&lt;/span&gt;
-
-to_string &lt;span style=&#34;color:#e6db74&#34;&gt;:Foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;Foo&amp;#34;&lt;/span&gt;
-
-to_string &lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# Aha, if the token starts with capital letter, compiler automatically&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# converts to this form?&lt;/span&gt;
-
-&lt;span style=&#34;color:#a6e22e&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;to_atom &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Foo&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; :Foo&lt;/span&gt;
-
-&lt;span style=&#34;color:#a6e22e&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;to_atom &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; Foo&lt;/span&gt;
-
-&lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; Foo&lt;/span&gt;
-
-&lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Elixir.Foo&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
-
-&lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
-
-&lt;span style=&#34;color:#75715e&#34;&gt;# Whats with the Elixir prefix?&lt;/span&gt;
-
-is_atom &lt;span style=&#34;color:#a6e22e&#34;&gt;Elixir&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
-
-is_atom &lt;span style=&#34;color:#e6db74&#34;&gt;:Elixir&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
-
-&lt;span style=&#34;color:#e6db74&#34;&gt;:Elixir&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Elixir&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# Wait, What?!&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# Looks like :Elixir is special atom&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:foo&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;bar
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; ** (UndefinedFunctionError) function :foo.bar/0 is undefined&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#(module :foo is not available)&lt;/span&gt;
 
 
-i &lt;span style=&#34;color:#a6e22e&#34;&gt;Elixir&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; Term&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#   Elixir&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# Data type&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#   Atom&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# Reference modules&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#   Atom&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# Implemented protocols&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#   IEx.Info, Inspect, String.Chars, List.Chars&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# 23:11:51.098 [error] beam/beam_load.c(1428): Error loading module&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#   &amp;#39;Elixir&amp;#39;: module name in object code is elixir&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# 23:11:51.100 [error] Loading of&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# /usr/local/Cellar/elixir/1.7.4/bin/../lib/elixir/ebin/Elixir.beam&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# failed: :badfile&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:Foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; :Foo&lt;/span&gt;
 
-&lt;span style=&#34;color:#75715e&#34;&gt;# iex&amp;gt; i Elixir lead to an error!&lt;/span&gt;
+is_atom &lt;span style=&#34;color:#f1fa8c&#34;&gt;:Foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
 
-&lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;Elixir.Map&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Map&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# but :__name__ is used to access erlang modules too. Module.__func__&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# is just syntatic sugar for :&amp;#34;Elixir.Module&amp;#34;?&lt;/span&gt;
+&lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; Foo&lt;/span&gt;
 
-&lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;Elixir.Map&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;new()
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; %{}&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# indeed! So all Elixir modules are same as erlang modules. And all&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# elixir modules are defined under big :Elixir namespace. neat&lt;/span&gt;
+is_atom &lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# no colon prefix needed!&lt;/span&gt;
 
-is_atom &lt;span style=&#34;color:#a6e22e&#34;&gt;File.Stream&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; true&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Is this different from an atom with colon prefix?&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:Foo&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; false&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Both are atoms but not same&lt;/span&gt;
 
-to_string &lt;span style=&#34;color:#a6e22e&#34;&gt;File.Stat&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;Elixir.File.Stat&amp;#34;&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# True for nested modules too&lt;/span&gt;
+to_string &lt;span style=&#34;color:#f1fa8c&#34;&gt;:Foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;Foo&amp;#34;&lt;/span&gt;
 
-&lt;span style=&#34;color:#75715e&#34;&gt;# ---------------------------------------------------------------&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# Let&amp;#39;s try all these different atom notations with keyword list&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;# ---------------------------------------------------------------&lt;/span&gt;
+to_string &lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Aha, if the token starts with capital letter, compiler automatically&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# converts to this form?&lt;/span&gt;
 
-a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#e6db74&#34;&gt;Foo&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;]
-a[&lt;span style=&#34;color:#e6db74&#34;&gt;:Foo&lt;/span&gt;]
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#50fa7b&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;to_atom &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Foo&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; :Foo&lt;/span&gt;
 
-a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Foo&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;]
-&lt;span style=&#34;color:#75715e&#34;&gt;# a[:Foo]&lt;/span&gt;
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#50fa7b&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;to_atom &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; Foo&lt;/span&gt;
 
-a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#e6db74&#34;&gt;:Foo&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
-a[&lt;span style=&#34;color:#e6db74&#34;&gt;:Foo&lt;/span&gt;]
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; Foo&lt;/span&gt;
 
-a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;Foo&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
-a[&lt;span style=&#34;color:#e6db74&#34;&gt;:Foo&lt;/span&gt;]
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Elixir.Foo&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
 
-a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
-a[&lt;span style=&#34;color:#e6db74&#34;&gt;:Foo&lt;/span&gt;]
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; nil&lt;/span&gt;
+&lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
 
-a[&lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt;]
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Whats with the Elixir prefix?&lt;/span&gt;
 
-a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#a6e22e&#34;&gt;Elixir.Foo&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
-a[&lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt;]
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+is_atom &lt;span style=&#34;color:#50fa7b&#34;&gt;Elixir&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
 
-a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#e6db74&#34;&gt;:&amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
-a[&lt;span style=&#34;color:#a6e22e&#34;&gt;Foo&lt;/span&gt;]
-&lt;span style=&#34;color:#75715e&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+is_atom &lt;span style=&#34;color:#f1fa8c&#34;&gt;:Elixir&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
+
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:Elixir&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Elixir&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Wait, What?!&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Looks like :Elixir is special atom&lt;/span&gt;
+
+
+i &lt;span style=&#34;color:#50fa7b&#34;&gt;Elixir&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; Term&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#   Elixir&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Data type&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#   Atom&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Reference modules&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#   Atom&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Implemented protocols&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#   IEx.Info, Inspect, String.Chars, List.Chars&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# 23:11:51.098 [error] beam/beam_load.c(1428): Error loading module&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#   &amp;#39;Elixir&amp;#39;: module name in object code is elixir&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# 23:11:51.100 [error] Loading of&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# /usr/local/Cellar/elixir/1.7.4/bin/../lib/elixir/ebin/Elixir.beam&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# failed: :badfile&lt;/span&gt;
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# iex&amp;gt; i Elixir lead to an error!&lt;/span&gt;
+
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;Elixir.Map&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Map&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# but :__name__ is used to access erlang modules too. Module.__func__&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# is just syntatic sugar for :&amp;#34;Elixir.Module&amp;#34;?&lt;/span&gt;
+
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;Elixir.Map&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;new()
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; %{}&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# indeed! So all Elixir modules are same as erlang modules. And all&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# elixir modules are defined under big :Elixir namespace. neat&lt;/span&gt;
+
+is_atom &lt;span style=&#34;color:#50fa7b&#34;&gt;File.Stream&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; true&lt;/span&gt;
+
+to_string &lt;span style=&#34;color:#50fa7b&#34;&gt;File.Stat&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;Elixir.File.Stat&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# True for nested modules too&lt;/span&gt;
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# ---------------------------------------------------------------&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# Let&amp;#39;s try all these different atom notations with keyword list&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;# ---------------------------------------------------------------&lt;/span&gt;
+
+a &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#f1fa8c&#34;&gt;Foo&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;]
+a[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:Foo&lt;/span&gt;]
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+
+a &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Foo&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;]
+&lt;span style=&#34;color:#6272a4&#34;&gt;# a[:Foo]&lt;/span&gt;
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+
+a &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#f1fa8c&#34;&gt;:Foo&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
+a[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:Foo&lt;/span&gt;]
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+
+a &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;Foo&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
+a[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:Foo&lt;/span&gt;]
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+
+a &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
+a[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:Foo&lt;/span&gt;]
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; nil&lt;/span&gt;
+
+a[&lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt;]
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+
+a &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#50fa7b&#34;&gt;Elixir.Foo&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
+a[&lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt;]
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;
+
+a &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;color:#f1fa8c&#34;&gt;:&amp;#34;Elixir.Foo&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;}]
+a[&lt;span style=&#34;color:#50fa7b&#34;&gt;Foo&lt;/span&gt;]
+&lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; &amp;#34;bar&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;
 </description>
     </item>

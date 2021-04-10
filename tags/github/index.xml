@@ -20,33 +20,33 @@
       <description>&lt;p&gt;When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. &lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github actions&lt;/a&gt; makes this task easier than before but unfortunately &lt;a href=&#34;https://github.com/actions/setup-elixir&#34;&gt;elixir-setup&lt;/a&gt; does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library&lt;/p&gt;
 &lt;h2 id=&#34;using-chocolatey-package-manager&#34;&gt;Using Chocolatey package manager&lt;/h2&gt;
 &lt;p&gt;We can use &lt;a href=&#34;https://github.com/marketplace/actions/chocolatey-action&#34;&gt;Chocolatey Action&lt;/a&gt; install elixir. Chocolatey also installs Erlang as elixir dependency for us.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;choco install elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;choco install elixir
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;But we can&amp;rsquo;t access Elixir or mix yet. With github-actions, we have to explicitly update PATH environment variable using an &lt;a href=&#34;https://github.community/t/append-path-on-windows/16205/5&#34;&gt;undocumented&lt;/a&gt; special syntax&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our workflow for tests might look like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Elixir&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;on&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;push&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;jobs&lt;/span&gt;:
-  &lt;span style=&#34;color:#f92672&#34;&gt;run_tests&lt;/span&gt;:
-    &lt;span style=&#34;color:#f92672&#34;&gt;runs-on&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;windows-latest&lt;/span&gt;
-    &lt;span style=&#34;color:#f92672&#34;&gt;steps&lt;/span&gt;:
-      - &lt;span style=&#34;color:#f92672&#34;&gt;uses&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;actions/checkout@v2&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Install Elixir&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;uses&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;crazy-max/ghaction-chocolatey@v1.2.2&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;with&lt;/span&gt;:
-          &lt;span style=&#34;color:#f92672&#34;&gt;args&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;install elixir&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Update PATH&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;echo &amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Install Dependencies&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#e6db74&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          mix local.hex --force
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          mix.bat deps.get&lt;/span&gt;          
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Compile&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat compile --force --warnings-as-errors&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Check format&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat format --check-formatted&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Run Tests&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat test&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
+&lt;span style=&#34;color:#ff79c6&#34;&gt;on&lt;/span&gt;: push
+&lt;span style=&#34;color:#ff79c6&#34;&gt;jobs&lt;/span&gt;:
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;run_tests&lt;/span&gt;:
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;runs-on&lt;/span&gt;: windows-latest
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;steps&lt;/span&gt;:
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;uses&lt;/span&gt;: actions/checkout@v2
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Install Elixir
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;uses&lt;/span&gt;: crazy-max/ghaction-chocolatey@v1.2.2
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;with&lt;/span&gt;:
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;args&lt;/span&gt;: install elixir
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Update PATH
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: echo &amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Install Dependencies
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#f1fa8c&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          mix local.hex --force
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          mix.bat deps.get&lt;/span&gt;          
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Compile
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat compile --force --warnings-as-errors
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Check format
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat format --check-formatted
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Run Tests
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat test
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This approach works, but it has few issues:&lt;/p&gt;
 &lt;h3 id=&#34;pipeline-is-slow&#34;&gt;Pipeline is slow&lt;/h3&gt;
 &lt;p&gt;When I tested this, the pipeline took 6m 41s. Installation alone took 6m 15s. We install Elixir and Erlang/OTP every time we run this pipeline. This includes downloading packages, extracting and installing.&lt;/p&gt;
@@ -63,52 +63,52 @@
 &lt;li&gt;add Elixir to path&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;This is slightly more complicated than our previous setup using chocolatey but it is faster and more flexible.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Elixir&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;on&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;push&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;env&lt;/span&gt;:
-  &lt;span style=&#34;color:#f92672&#34;&gt;OTP_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;22.2&lt;/span&gt;
-  &lt;span style=&#34;color:#f92672&#34;&gt;ELIXIR_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;1.9.4&lt;/span&gt;
-&lt;span style=&#34;color:#f92672&#34;&gt;jobs&lt;/span&gt;:
-  &lt;span style=&#34;color:#f92672&#34;&gt;run_tests&lt;/span&gt;:
-    &lt;span style=&#34;color:#f92672&#34;&gt;runs-on&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;windows-latest&lt;/span&gt;
-    &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Windows&lt;/span&gt;
-    &lt;span style=&#34;color:#f92672&#34;&gt;steps&lt;/span&gt;:
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Cache erlang&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;uses&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;actions/cache@v2&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;id&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;erlang_cache&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;with&lt;/span&gt;:
-          &lt;span style=&#34;color:#f92672&#34;&gt;path&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;C:\Program Files\erl10.6&lt;/span&gt;
-          &lt;span style=&#34;color:#f92672&#34;&gt;key&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;erlang-${{ runner.os }}-${{ env.OTP_VERSION }}&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Download and install erlang&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;if&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;steps.erlang_cache.outputs.cache-hit != &amp;#39;true&amp;#39;&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#e6db74&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          Invoke-WebRequest &amp;#34;http://erlang.org/download/otp_win64_$env:OTP_VERSION.exe&amp;#34; -OutFile &amp;#34;C:\otp_win64_$env:OTP_VERSION.exe&amp;#34;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          Start-Process -Wait &amp;#34;C:\otp_win64_$env:OTP_VERSION.exe&amp;#34; /S&lt;/span&gt;          
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Add erlang to path&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;echo &amp;#34;##[add-path]C:\Program Files\erl10.6\bin&amp;#34;&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Cache Elixir&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;uses&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;actions/cache@v2&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;id&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;elixir_cache&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;with&lt;/span&gt;:
-          &lt;span style=&#34;color:#f92672&#34;&gt;path&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;c:\elixir&lt;/span&gt;
-          &lt;span style=&#34;color:#f92672&#34;&gt;key&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;elixir-${{ runner.os }}-${{ env.ELIXIR_VERSION }}&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Download and install Elixir&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;if&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;steps.elixir_cache.outputs.cache-hit != &amp;#39;true&amp;#39;&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#e6db74&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          Invoke-WebRequest &amp;#34;https://github.com/elixir-lang/elixir/releases/download/v$env:ELIXIR_VERSION/Precompiled.zip&amp;#34; -OutFile &amp;#34;C:\elixir_$env:ELIXIR_VERSION.zip&amp;#34;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          Expand-Archive &amp;#34;C:\elixir_$env:ELIXIR_VERSION.zip&amp;#34; -DestinationPath c:\elixir&lt;/span&gt;          
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Add elixir to path&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;echo &amp;#34;##[add-path]C:\elixir\bin&amp;#34;&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Install Dependencies&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#e6db74&#34;&gt;
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          mix local.hex --force
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;          mix.bat deps.get&lt;/span&gt;          
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Compile&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat compile --force --warnings-as-errors&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Check format&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat format --check-formatted&lt;/span&gt;
-      - &lt;span style=&#34;color:#f92672&#34;&gt;name&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;Run Tests&lt;/span&gt;
-        &lt;span style=&#34;color:#f92672&#34;&gt;run&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;mix.bat test&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
+&lt;span style=&#34;color:#ff79c6&#34;&gt;on&lt;/span&gt;: push
+&lt;span style=&#34;color:#ff79c6&#34;&gt;env&lt;/span&gt;:
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;OTP_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#bd93f9&#34;&gt;22.2&lt;/span&gt;
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;ELIXIR_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#bd93f9&#34;&gt;1.9.4&lt;/span&gt;
+&lt;span style=&#34;color:#ff79c6&#34;&gt;jobs&lt;/span&gt;:
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;run_tests&lt;/span&gt;:
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;runs-on&lt;/span&gt;: windows-latest
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Windows
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;steps&lt;/span&gt;:
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Cache erlang
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;uses&lt;/span&gt;: actions/cache@v2
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;id&lt;/span&gt;: erlang_cache
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;with&lt;/span&gt;:
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;path&lt;/span&gt;: C:\Program Files\erl10.6
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;key&lt;/span&gt;: erlang-${{ runner.os }}-${{ env.OTP_VERSION }}
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Download and install erlang
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt;: steps.erlang_cache.outputs.cache-hit != &amp;#39;true&amp;#39;
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#f1fa8c&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          Invoke-WebRequest &amp;#34;http://erlang.org/download/otp_win64_$env:OTP_VERSION.exe&amp;#34; -OutFile &amp;#34;C:\otp_win64_$env:OTP_VERSION.exe&amp;#34;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          Start-Process -Wait &amp;#34;C:\otp_win64_$env:OTP_VERSION.exe&amp;#34; /S&lt;/span&gt;          
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Add erlang to path
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: echo &amp;#34;##[add-path]C:\Program Files\erl10.6\bin&amp;#34;
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Cache Elixir
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;uses&lt;/span&gt;: actions/cache@v2
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;id&lt;/span&gt;: elixir_cache
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;with&lt;/span&gt;:
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;path&lt;/span&gt;: c:\elixir
+          &lt;span style=&#34;color:#ff79c6&#34;&gt;key&lt;/span&gt;: elixir-${{ runner.os }}-${{ env.ELIXIR_VERSION }}
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Download and install Elixir
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt;: steps.elixir_cache.outputs.cache-hit != &amp;#39;true&amp;#39;
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#f1fa8c&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          Invoke-WebRequest &amp;#34;https://github.com/elixir-lang/elixir/releases/download/v$env:ELIXIR_VERSION/Precompiled.zip&amp;#34; -OutFile &amp;#34;C:\elixir_$env:ELIXIR_VERSION.zip&amp;#34;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          Expand-Archive &amp;#34;C:\elixir_$env:ELIXIR_VERSION.zip&amp;#34; -DestinationPath c:\elixir&lt;/span&gt;          
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Add elixir to path
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: echo &amp;#34;##[add-path]C:\elixir\bin&amp;#34;
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Install Dependencies
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: |&lt;span style=&#34;color:#f1fa8c&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          mix local.hex --force
+&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;          mix.bat deps.get&lt;/span&gt;          
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Compile
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat compile --force --warnings-as-errors
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Check format
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat format --check-formatted
+      - &lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Run Tests
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;run&lt;/span&gt;: mix.bat test
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This brings down pipeline execution time from 6m 41s to 2m.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/images/ci.png&#34; alt=&#34;new workflow&#34; title=&#34;New pipeline execution time&#34;&gt;&lt;/p&gt;
 &lt;p&gt;You can check working setup &lt;a href=&#34;https://github.com/akash-akya/ex_cmd/blob/master/.github/workflows/elixir.yml&#34;&gt;here&lt;/a&gt;&lt;/p&gt;

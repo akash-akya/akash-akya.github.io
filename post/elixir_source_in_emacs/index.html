@@ -29,7 +29,7 @@
     
 
     
-        <link rel="stylesheet" href="/css/style.e9ff90468b59f05c9e530ea57ff66a74d2ad4e0f27af7e3a2f08d4c7b0c3ac10.css" integrity="sha256-6f&#43;QRotZ8FyeUw6lf/ZqdNKtTg8nr346LwjUx7DDrBA=">
+        <link rel="stylesheet" href="/css/style.84c1bc3a39c079af1327d737f4b888ce6f99b58a6a7716e82fdcc05bc2b913ba.css" integrity="sha256-hMG8OjnAea8TJ9c39LiIzm&#43;ZtYpqdxboL9zAW8K5E7o=">
     
 
 
@@ -114,11 +114,11 @@ to the source file from which beam file is generated. Since its done
 by Erlang, both Erlang and Elixir modules have this information as
 metadata. You can check this in <code class="verbatim">iex</code>.</p>
 <div class="src src-elixir">
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">iex(<span style="color:#ae81ff">3</span>)<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Enum</span><span style="color:#f92672">.</span>module_info(<span style="color:#e6db74">:compile</span>)
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">iex(<span style="color:#bd93f9">3</span>)<span style="color:#ff79c6">&gt;</span> <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>module_info(<span style="color:#f1fa8c">:compile</span>)
 [
-  <span style="color:#e6db74">version</span>: <span style="color:#e6db74">&#39;7.2.6&#39;</span>,
-  <span style="color:#e6db74">options</span>: [],
-  <span style="color:#e6db74">source</span>: <span style="color:#e6db74">&#39;/private/tmp/elixir-20181026-69137-ms45yr/elixir-1.7.4/lib/elixir/lib/enum.ex&#39;</span>
+  <span style="color:#f1fa8c">version</span>: <span style="color:#f1fa8c">&#39;7.2.6&#39;</span>,
+  <span style="color:#f1fa8c">options</span>: [],
+  <span style="color:#f1fa8c">source</span>: <span style="color:#f1fa8c">&#39;/private/tmp/elixir-20181026-69137-ms45yr/elixir-1.7.4/lib/elixir/lib/enum.ex&#39;</span>
 ]</code></pre></div>
 </div>
 <p>
@@ -157,7 +157,7 @@ you need to use <code class="verbatim">ref:&lt;commit_sha&gt;</code> for compili
 <p>
 In my case, it will be</p>
 <div class="src src-bash">
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">asdf plugin-add elixir
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">asdf plugin-add elixir
 asdf plugin-add erlang
 
 asdf install erlang 21.2
@@ -169,11 +169,11 @@ asdf global elixir ref:eb5679b</code></pre></div>
 <p>
 Now <code class="verbatim">source</code> should point to correct local path for both Elixir and Erlang modules</p>
 <div class="src src-elixir">
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">iex(<span style="color:#ae81ff">2</span>)<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Enum</span><span style="color:#f92672">.</span>module_info(<span style="color:#e6db74">:compile</span>)[<span style="color:#e6db74">:source</span>]
-<span style="color:#e6db74">&#39;/Users/akash/.asdf/installs/elixir/ref-eb5679b/lib/elixir/lib/enum.ex&#39;</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">iex(<span style="color:#bd93f9">2</span>)<span style="color:#ff79c6">&gt;</span> <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>module_info(<span style="color:#f1fa8c">:compile</span>)[<span style="color:#f1fa8c">:source</span>]
+<span style="color:#f1fa8c">&#39;/Users/akash/.asdf/installs/elixir/ref-eb5679b/lib/elixir/lib/enum.ex&#39;</span>
 
-iex(<span style="color:#ae81ff">3</span>)<span style="color:#f92672">&gt;</span> <span style="color:#e6db74">:ets</span><span style="color:#f92672">.</span>module_info(<span style="color:#e6db74">:compile</span>)[<span style="color:#e6db74">:source</span>]
-<span style="color:#e6db74">&#39;/Users/akash/.asdf/plugins/erlang/kerl-home/builds/asdf_21.2/otp_src_21.2/lib/stdlib/src/ets.erl&#39;</span></code></pre></div>
+iex(<span style="color:#bd93f9">3</span>)<span style="color:#ff79c6">&gt;</span> <span style="color:#f1fa8c">:ets</span><span style="color:#ff79c6">.</span>module_info(<span style="color:#f1fa8c">:compile</span>)[<span style="color:#f1fa8c">:source</span>]
+<span style="color:#f1fa8c">&#39;/Users/akash/.asdf/plugins/erlang/kerl-home/builds/asdf_21.2/otp_src_21.2/lib/stdlib/src/ets.erl&#39;</span></code></pre></div>
 </div>
 <p>
 With this source code navigation works as expected in the Emacs</p>
