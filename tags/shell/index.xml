@@ -1,24 +1,65 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Shell on blogu geegu.</title>
-    <link>https://akash-akya.github.io/tags/shell/</link>
-    <description>Recent content in Shell on blogu geegu.</description>
+    <title>shell on *scratch*</title>
+    <link>/tags/shell/</link>
+    <description>*scratch* (shell)</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <copyright>&amp;copy; &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Akash Hiremath&lt;/a&gt; 2018</copyright>
+    <language>en-us</language>
     <lastBuildDate>Fri, 14 Aug 2020 22:40:57 +0530</lastBuildDate>
     
-	<atom:link href="https://akash-akya.github.io/tags/shell/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/tags/shell/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Better kubectl interaction</title>
-      <link>https://akash-akya.github.io/post/better-kubectl-interaction/</link>
+      <link>/post/better-kubectl-interaction/</link>
       <pubDate>Fri, 14 Aug 2020 22:40:57 +0530</pubDate>
       
-      <guid>https://akash-akya.github.io/post/better-kubectl-interaction/</guid>
-      <description>As many of you know, kubectl is official command-line client for interacting with the kubernetes cluster. Although kubectl allow us to do almost anything with the cluster, it has a convoluted interface. Especially for interacting with basic entities such pods. Pods are ephemeral entities, and each instance gets an unique name. If a deployment name is kafka-consumer then pods names might be kafka-consumer-654b7df6b-mfx46, kafka-consumer-654b7df6b-yy49i. This name changes every time pod is updated or restarted and all commands which needs to interact with pods needs this unique pod name as its parameter.</description>
+      <guid>/post/better-kubectl-interaction/</guid>
+      <description>&lt;p&gt;As many of you know, &lt;a href=&#34;https://kubernetes.io/docs/reference/kubectl/kubectl/&#34;&gt;kubectl&lt;/a&gt; is official command-line client for interacting with the kubernetes cluster. Although kubectl allow us to do almost anything with the cluster, it has a convoluted interface. Especially for interacting with basic entities such pods. Pods are ephemeral entities, and each instance gets an unique name. If a deployment name is &lt;code&gt;kafka-consumer&lt;/code&gt; then pods names might be &lt;code&gt;kafka-consumer-654b7df6b-mfx46&lt;/code&gt;, &lt;code&gt;kafka-consumer-654b7df6b-yy49i&lt;/code&gt;. This name changes every time pod is updated or restarted and all commands which needs to interact with pods needs this unique pod name as its parameter.&lt;/p&gt;
+&lt;p&gt;So the interaction might look like&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;list pod names&lt;/li&gt;
+&lt;li&gt;copy pod name&lt;/li&gt;
+&lt;li&gt;run command with pod name as parameter&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ kubectl get pods
+NAME                                   READY   STATUS    RESTARTS   AGE
+consumer-654b7df6b-mfx46               1/1     Running   &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;          21d
+server-7df6b9903-oc9m6                 1/1     Running   &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;          22d
+
+$ kubectl delete pod consumer-654b7df6b-mfx46
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Apart from irritating user by asking him/her to copy some string every time, this interaction breaks all conventional shell workflow. We can&amp;rsquo;t use reverse shell history search (Ctrl+r), it is not composable, it is not repeatable, and it clutters clipboard.&lt;/p&gt;
+&lt;p&gt;There are many tools which attempts to solve this, but most of them approach this by hiding kubectl. They provide a wrapper with their own set of options and syntax. Although this might work in most scenarios, there are few concerns: tool might not expose all options of kubectl, more documentation available online for kubectl, and we have to learn new tool. I wanted to solve this without hiding kubectl so that if I need to do something advanced I can always extend. One way to achieve this is by having &amp;ldquo;template command&amp;rdquo; which insert pod name each time we execute it.&lt;/p&gt;
+&lt;h3 id=&#34;subshell--fzfhttpsgithubcomjunegunnfzf-to-the-rescue&#34;&gt;Subshell &amp;amp; &lt;a href=&#34;https://github.com/junegunn/fzf&#34;&gt;fzf&lt;/a&gt; to the rescue&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;$(...)&lt;/code&gt; is way one of executing a command in separate shell. &lt;code&gt;$(...)&lt;/code&gt; will be replaced with its output.&lt;/p&gt;
+&lt;p&gt;Consider this&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;mkdir &lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;read name &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;hello-&lt;/span&gt;$name&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Here we read user input from STDIN and return it with a &amp;ldquo;hello-&amp;rdquo; prefix. If input is &amp;ldquo;world&amp;rdquo;, command will be mkdir hello-world. Important thing to note here is that subshell command is executed before root command, and we can use this to insert a parameter to the command.&lt;/p&gt;
+&lt;p&gt;fzf gives an interactive user interface for &amp;ldquo;choosing something&amp;rdquo; from a list. It reads lines from STDIN, ask user for choice and writes this entry to STDOUT.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;ls -1 | fzf | wc -c
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This returns count of characters in the filename depending on our choice.&lt;/p&gt;
+&lt;h3 id=&#34;combining-both&#34;&gt;Combining both&lt;/h3&gt;
+&lt;p&gt;We use subshell and fzf to dynamically select pod name and pass that to kubectl command template.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;kubectl delete pod &lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;kubectl get pods | fzf&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We can use shell functions and alias to make this composable by add these to init file. such as &lt;code&gt;~/.profile&lt;/code&gt; or &lt;code&gt;~/.oh-my-zsh/config.zsh&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; kselect &lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;
+    kubectl get &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;$@&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt; --no-headers -o custom-columns&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;POD:.metadata.name | fzf --height 25% --border --exact
+&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;
+
+alias select_pod&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect pods&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now our command to:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;kubectl delete pod &lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;select_pod&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;em&gt;Select pod in action:&lt;/em&gt;
+&lt;img src=&#34;/images/select_pod.gif&#34; alt=&#34;demo&#34; title=&#34;Select pod in action!&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We can use &lt;code&gt;kselect&lt;/code&gt; for all kubernetes resource objects&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;alias select_deployment&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect deployment&amp;#39;&lt;/span&gt;
+alias select_statefulset&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect statefulset&amp;#39;&lt;/span&gt;
+alias select_configmap&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect configmap&amp;#39;&lt;/span&gt;
+alias select_service&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect service&amp;#39;&lt;/span&gt;
+alias select_secret&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;kselect secret&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
   </channel>
