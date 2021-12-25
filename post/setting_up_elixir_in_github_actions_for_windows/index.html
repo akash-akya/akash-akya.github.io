@@ -40,8 +40,8 @@
 <meta property="og:description" content="Setting up Elixir in github actions for windows" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/post/setting_up_elixir_in_github_actions_for_windows/" /><meta property="article:section" content="post" />
-<meta property="article:published_time" content="2020-08-09T15:00:00&#43;05:30" />
-<meta property="article:modified_time" content="2020-08-09T15:00:00&#43;05:30" />
+<meta property="article:published_time" content="2020-08-09T15:00:00+05:30" />
+<meta property="article:modified_time" content="2020-08-09T15:00:00+05:30" />
 
 
 <meta name="twitter:card" content="summary"/>
@@ -98,11 +98,11 @@
             <p>When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. <a href="https://github.com/features/actions">Github actions</a> makes this task easier than before but unfortunately <a href="https://github.com/actions/setup-elixir">elixir-setup</a> does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library</p>
 <h2 id="using-chocolatey-package-manager">Using Chocolatey package manager</h2>
 <p>We can use <a href="https://github.com/marketplace/actions/chocolatey-action">Chocolatey Action</a> install elixir. Chocolatey also installs Erlang as elixir dependency for us.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">choco install elixir
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">choco install elixir
 </code></pre></div><p>But we can&rsquo;t access Elixir or mix yet. With github-actions, we have to explicitly update PATH environment variable using an <a href="https://github.community/t/append-path-on-windows/16205/5">undocumented</a> special syntax</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#f1fa8c">&#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#f1fa8c">&#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&#34;</span>
 </code></pre></div><p>Our workflow for tests might look like this:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ff79c6">name</span>: Elixir
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ff79c6">name</span>: Elixir
 <span style="color:#ff79c6">on</span>: push
 <span style="color:#ff79c6">jobs</span>:
   <span style="color:#ff79c6">run_tests</span>:
@@ -141,7 +141,7 @@
 <li>add Elixir to path</li>
 </ul>
 <p>This is slightly more complicated than our previous setup using chocolatey but it is faster and more flexible.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ff79c6">name</span>: Elixir
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ff79c6">name</span>: Elixir
 <span style="color:#ff79c6">on</span>: push
 <span style="color:#ff79c6">env</span>:
   <span style="color:#ff79c6">OTP_VERSION</span>: <span style="color:#bd93f9">22.2</span>

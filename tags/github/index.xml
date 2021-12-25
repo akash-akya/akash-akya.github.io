@@ -20,11 +20,11 @@
       <description>&lt;p&gt;When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. &lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github actions&lt;/a&gt; makes this task easier than before but unfortunately &lt;a href=&#34;https://github.com/actions/setup-elixir&#34;&gt;elixir-setup&lt;/a&gt; does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library&lt;/p&gt;
 &lt;h2 id=&#34;using-chocolatey-package-manager&#34;&gt;Using Chocolatey package manager&lt;/h2&gt;
 &lt;p&gt;We can use &lt;a href=&#34;https://github.com/marketplace/actions/chocolatey-action&#34;&gt;Chocolatey Action&lt;/a&gt; install elixir. Chocolatey also installs Erlang as elixir dependency for us.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;choco install elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;choco install elixir
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;But we can&amp;rsquo;t access Elixir or mix yet. With github-actions, we have to explicitly update PATH environment variable using an &lt;a href=&#34;https://github.community/t/append-path-on-windows/16205/5&#34;&gt;undocumented&lt;/a&gt; special syntax&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our workflow for tests might look like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
 &lt;span style=&#34;color:#ff79c6&#34;&gt;on&lt;/span&gt;: push
 &lt;span style=&#34;color:#ff79c6&#34;&gt;jobs&lt;/span&gt;:
   &lt;span style=&#34;color:#ff79c6&#34;&gt;run_tests&lt;/span&gt;:
@@ -63,7 +63,7 @@
 &lt;li&gt;add Elixir to path&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;This is slightly more complicated than our previous setup using chocolatey but it is faster and more flexible.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
 &lt;span style=&#34;color:#ff79c6&#34;&gt;on&lt;/span&gt;: push
 &lt;span style=&#34;color:#ff79c6&#34;&gt;env&lt;/span&gt;:
   &lt;span style=&#34;color:#ff79c6&#34;&gt;OTP_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#bd93f9&#34;&gt;22.2&lt;/span&gt;

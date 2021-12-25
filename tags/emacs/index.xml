@@ -36,7 +36,7 @@ to the source file from which beam file is generated. Since its done
 by Erlang, both Erlang and Elixir modules have this information as
 metadata. You can check this in &lt;code class=&#34;verbatim&#34;&gt;iex&lt;/code&gt;.&lt;/p&gt;
 &lt;div class=&#34;src src-elixir&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)
 [
   &lt;span style=&#34;color:#f1fa8c&#34;&gt;version&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;7.2.6&amp;#39;&lt;/span&gt;,
   &lt;span style=&#34;color:#f1fa8c&#34;&gt;options&lt;/span&gt;: [],
@@ -79,7 +79,7 @@ you need to use &lt;code class=&#34;verbatim&#34;&gt;ref:&amp;lt;commit_sha&amp;
 &lt;p&gt;
 In my case, it will be&lt;/p&gt;
 &lt;div class=&#34;src src-bash&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;asdf plugin-add elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;asdf plugin-add elixir
 asdf plugin-add erlang
 
 asdf install erlang 21.2
@@ -91,7 +91,7 @@ asdf global elixir ref:eb5679b&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;
 Now &lt;code class=&#34;verbatim&#34;&gt;source&lt;/code&gt; should point to correct local path for both Elixir and Erlang modules&lt;/p&gt;
 &lt;div class=&#34;src src-elixir&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;2&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:source&lt;/span&gt;]
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;2&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:source&lt;/span&gt;]
 &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;/Users/akash/.asdf/installs/elixir/ref-eb5679b/lib/elixir/lib/enum.ex&amp;#39;&lt;/span&gt;
 
 iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;:ets&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:source&lt;/span&gt;]

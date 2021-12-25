@@ -40,8 +40,8 @@
 <meta property="og:description" content="Getting goto-definition work for Elixir core functions in Emacs" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/post/elixir_source_in_emacs/" /><meta property="article:section" content="post" />
-<meta property="article:published_time" content="2019-05-13T16:26:24&#43;05:30" />
-<meta property="article:modified_time" content="2019-05-13T16:26:24&#43;05:30" />
+<meta property="article:published_time" content="2019-05-13T16:26:24+05:30" />
+<meta property="article:modified_time" content="2019-05-13T16:26:24+05:30" />
 
 
 <meta name="twitter:card" content="summary"/>
@@ -114,7 +114,7 @@ to the source file from which beam file is generated. Since its done
 by Erlang, both Erlang and Elixir modules have this information as
 metadata. You can check this in <code class="verbatim">iex</code>.</p>
 <div class="src src-elixir">
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">iex(<span style="color:#bd93f9">3</span>)<span style="color:#ff79c6">&gt;</span> <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>module_info(<span style="color:#f1fa8c">:compile</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">iex(<span style="color:#bd93f9">3</span>)<span style="color:#ff79c6">&gt;</span> <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>module_info(<span style="color:#f1fa8c">:compile</span>)
 [
   <span style="color:#f1fa8c">version</span>: <span style="color:#f1fa8c">&#39;7.2.6&#39;</span>,
   <span style="color:#f1fa8c">options</span>: [],
@@ -157,7 +157,7 @@ you need to use <code class="verbatim">ref:&lt;commit_sha&gt;</code> for compili
 <p>
 In my case, it will be</p>
 <div class="src src-bash">
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">asdf plugin-add elixir
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">asdf plugin-add elixir
 asdf plugin-add erlang
 
 asdf install erlang 21.2
@@ -169,7 +169,7 @@ asdf global elixir ref:eb5679b</code></pre></div>
 <p>
 Now <code class="verbatim">source</code> should point to correct local path for both Elixir and Erlang modules</p>
 <div class="src src-elixir">
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">iex(<span style="color:#bd93f9">2</span>)<span style="color:#ff79c6">&gt;</span> <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>module_info(<span style="color:#f1fa8c">:compile</span>)[<span style="color:#f1fa8c">:source</span>]
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">iex(<span style="color:#bd93f9">2</span>)<span style="color:#ff79c6">&gt;</span> <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>module_info(<span style="color:#f1fa8c">:compile</span>)[<span style="color:#f1fa8c">:source</span>]
 <span style="color:#f1fa8c">&#39;/Users/akash/.asdf/installs/elixir/ref-eb5679b/lib/elixir/lib/enum.ex&#39;</span>
 
 iex(<span style="color:#bd93f9">3</span>)<span style="color:#ff79c6">&gt;</span> <span style="color:#f1fa8c">:ets</span><span style="color:#ff79c6">.</span>module_info(<span style="color:#f1fa8c">:compile</span>)[<span style="color:#f1fa8c">:source</span>]

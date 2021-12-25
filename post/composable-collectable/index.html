@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+
+
+<html lang="en-us" data-theme="">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>Composable Collectable - *scratch*</title>
+<meta name="description" content="Personal blog">
+
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="favicon.png">
+
+
+
+    
+
+
+
+
+
+    
+    
+    
+
+    
+        <link rel="stylesheet" href="/css/style.84c1bc3a39c079af1327d737f4b888ce6f99b58a6a7716e82fdcc05bc2b913ba.css" integrity="sha256-hMG8OjnAea8TJ9c39LiIzm&#43;ZtYpqdxboL9zAW8K5E7o=">
+    
+
+
+
+
+
+<meta property="og:title" content="Composable Collectable" />
+<meta property="og:description" content="Building composable collectable for fun and profit" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/post/composable-collectable/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2021-11-14T08:47:00+05:30" />
+<meta property="article:modified_time" content="2021-11-14T08:47:00+05:30" />
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Composable Collectable"/>
+<meta name="twitter:description" content="Building composable collectable for fun and profit"/>
+
+
+
+
+
+
+
+
+
+
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <h1 class="site-title">
+    <a href="/"><b><code>*scratch*</code></b></a>
+</h1>
+
+    <nav>
+        
+        
+        <a class="" href="/about" title="About">About</a>
+        
+        <a class="" href="/tags/" title="Tags">Tags</a>
+        
+        <a class="" href="/" title="Archive">Archive</a>
+        
+    </nav>
+
+
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+    
+    <article class="post h-entry">
+        <header class="post-header">
+            <h1 class="p-name post-title">Composable Collectable</h1>
+        </header>
+        <div class="content e-content">
+            
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Enumerable and Collectable
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>
+Often we have to work with a collection of multiple values. Maybe we
+need multiple values as input to the logic we are going to implement
+and/or our logic might produce multiple values as output.  The
+collection of multiple values can be a list of numbers, a map of
+key-value pairs, or a mapset of strings. Here list, map, mapset act as
+a <em>container</em> which group or hold each element together. Each element
+can be a number, string, or another container. Most of the time when
+we face such scenarios where we need to work with multiple values, the
+exact <em>type of the container</em> is less relevant. If we are going to
+implement a function to sum a collection of values, we would prefer if
+we work any container right? because whether the container is a list
+or set is not relevant to &#34;adding elements&#34; logic. We want to separate
+something which represents <strong><strong>container</strong></strong> aspect from <strong><strong>an instance
+of container</strong></strong>. Example for an instance of container is list, set,
+map, etc. Want to define our operations as generic operations which
+work with any instance of the container. Sum operation should work
+with a list or set.</p>
+<p>
+If we think of a generic function that needs to work with
+containers. there are two places where we need this container
+glue.</p>
+<ul>
+<li>
+<p>function might need N number values as input and need a container
+abstraction from where it can <strong><strong>pull</strong></strong> values</p>
+</li>
+<li>
+<p>function might produce N number values as output and need a
+container abstraction to where it can <strong><strong>push</strong></strong> values</p>
+</li>
+</ul>
+<p>For the first type of glue we have Enumerable in Elixir. If we define
+a function that accepts enumerable as an argument then the caller can
+pass list, mapset, stream or anything which implements Enumerable
+protocol. Our function does not care about the type of container. All
+we need to know is how to get elements out of the container which is
+what the enumerable protocol is about.</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#6272a4"># passing List as an argument</span>
+list <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>filter(<span style="color:#bd93f9">1</span><span style="color:#ff79c6">..</span><span style="color:#bd93f9">10</span>, <span style="color:#ff79c6">fn</span> n <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">Integer</span><span style="color:#ff79c6">.</span>is_even(n) <span style="color:#ff79c6">end</span>)
+
+<span style="color:#6272a4"># passing MapSet as an argument</span>
+list <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>filter(<span style="color:#50fa7b">MapSet</span><span style="color:#ff79c6">.</span>new([<span style="color:#bd93f9">1</span><span style="color:#ff79c6">..</span><span style="color:#bd93f9">10</span>]), <span style="color:#ff79c6">fn</span> n <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">Integer</span><span style="color:#ff79c6">.</span>is_even(n) <span style="color:#ff79c6">end</span>)</code></pre></div>
+</div>
+<p>
+Another major advantage of enumerable is <code>Enum</code> and <code>Stream</code>
+modules. These modules cover almost all basic operations we might
+need. Among other things these act as shared vocabulary between reader
+and writer. And If someone is starting to learn Elixir, they don&#39;t
+even need to know about Enumerable protocol or even about Protocol
+concept itself! they can just use Enum or Stream functions and assume
+that these modules take list, map as an argument, and does something.</p>
+<p>
+If we look at the Enum and Stream functions, most of them follow a
+similar spec.</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#50fa7b">@spec</span> map(<span style="color:#50fa7b">Enumerable</span><span style="color:#ff79c6">.</span>t(), (element() <span style="color:#ff79c6">-&gt;</span> any())) <span style="color:#ff79c6">::</span> list()
+<span style="color:#50fa7b">@spec</span> filter(<span style="color:#50fa7b">Enumerable</span><span style="color:#ff79c6">.</span>t(), (element() <span style="color:#ff79c6">-&gt;</span> as_boolean(term()))) <span style="color:#ff79c6">::</span> list()
+<span style="color:#50fa7b">@spec</span> reduce(<span style="color:#50fa7b">Enumerable</span><span style="color:#ff79c6">.</span>t(), acc(), (element(), acc() <span style="color:#ff79c6">-&gt;</span> acc())) <span style="color:#ff79c6">::</span> acc()
+<span style="color:#50fa7b">@spec</span> split_with(<span style="color:#50fa7b">Enumerable</span><span style="color:#ff79c6">.</span>t(), (element() <span style="color:#ff79c6">-&gt;</span> as_boolean(term()))) <span style="color:#ff79c6">::</span> {list(), list()}</code></pre></div>
+</div>
+<p>
+They take &#34;anything&#34; which implements enumerable and do certain
+operation and returns predefined type, which is generally a new list for Enum
+and opaque Stream data type for Stream functions.</p>
+<p>
+What about the second type of glue? which is about collecting values
+in a specific container. We want to be able to define our logic which
+produces multiple values in a generic way such that the caller should decide the type of container they want. For example, I should be
+able to define a function that generates strings, and I want to return it
+as a list, or set, or, as a stream. The caller of the function should
+be able to decide the return type of the function.</p>
+<p>
+We have <code>Collectable</code> for this</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#6272a4"># returns a string</span>
+<span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>into([<span style="color:#bd93f9">1</span><span style="color:#ff79c6">..</span><span style="color:#bd93f9">10</span>], <span style="color:#f1fa8c">&#34;&#34;</span>)
+
+<span style="color:#6272a4"># returns a mapset</span>
+<span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>into([<span style="color:#bd93f9">1</span><span style="color:#ff79c6">..</span><span style="color:#bd93f9">10</span>], <span style="color:#50fa7b">MapSet</span><span style="color:#ff79c6">.</span>new())</code></pre></div>
+</div>
+<p>
+But the catch is we don&#39;t have standard library functions to compose,
+build, manipulate collectables in Elixir. Similar to Enum and Stream for Enumerable.</p>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
+Why do we need composability?
+</h2>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>
+Let&#39;s take an example, We have a stream of logs from multiple apps and
+we are tasked to write these logs to a different destination depending
+on the scenario. We might want to just write it to console, or a file,
+or s3 file system. Since the destination need to be configurable we
+opt to use collectable protocol so that we can plug different type of
+destination</p>
+<p>
+It can look like this</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#50fa7b">@spec</span> write_logs(<span style="color:#50fa7b">Enumerable</span><span style="color:#ff79c6">.</span>t(), <span style="color:#50fa7b">Collectable</span><span style="color:#ff79c6">.</span>t()) <span style="color:#ff79c6">::</span> <span style="color:#f1fa8c">:ok</span>
+<span style="color:#8be9fd;font-style:italic">def</span> write_logs(stream, destination) <span style="color:#ff79c6">do</span>
+  stream
+  <span style="color:#ff79c6">|&gt;</span> <span style="color:#50fa7b">Stream</span><span style="color:#ff79c6">.</span>map(<span style="color:#ff79c6">fn</span> line <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">DateTime</span><span style="color:#ff79c6">.</span>utc_now() <span style="color:#ff79c6">&lt;&gt;</span> <span style="color:#f1fa8c">&#34; : &#34;</span> <span style="color:#ff79c6">&lt;&gt;</span> line <span style="color:#ff79c6">end</span>)
+  <span style="color:#ff79c6">|&gt;</span> <span style="color:#50fa7b">Stream</span><span style="color:#ff79c6">.</span>into(destination)
+  <span style="color:#ff79c6">|&gt;</span> <span style="color:#50fa7b">Stream</span><span style="color:#ff79c6">.</span>run()
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+Then we can use it like this</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#6272a4"># to write it to console</span>
+<span style="color:#f1fa8c">:ok</span> <span style="color:#ff79c6">=</span> write_logs(stream, <span style="color:#50fa7b">IO</span><span style="color:#ff79c6">.</span>stream())
+
+<span style="color:#6272a4"># to write it to file</span>
+<span style="color:#f1fa8c">:ok</span> <span style="color:#ff79c6">=</span> write_logs(stream, <span style="color:#50fa7b">File</span><span style="color:#ff79c6">.</span>stream!(<span style="color:#f1fa8c">&#34;app.log&#34;</span>))
+
+<span style="color:#6272a4"># or anything which implements Collectable protocol</span>
+<span style="color:#f1fa8c">:ok</span> <span style="color:#ff79c6">=</span> write_logs(stream, whatever())</code></pre></div>
+</div>
+<p>
+As you can see caller decides where to write. As long as the
+destination implements collectable protocol.</p>
+<p>
+This works fine. But what if we want to buffer lines before writing to
+file or s3 for performance reasons?</p>
+<p>
+This is where we miss the lack of composability. For Enumerable we
+have <code>Stream.chunk_every</code> and we don&#39;t have functions like that or the
+basic building block (like reduce) for Collectable. We <em>can</em> get into
+the details of collectable protocol to achieve this, but this will be
+hard to work with in the long run as we will be having more and more things to
+compose, like say we need to filter logs of a specific app and only
+write those etc.</p>
+<p>
+So let&#39;s just implement all basic operations like <code>chunk_every</code> directly
+using <code>Collectable.t()</code>?</p>
+<p>
+We can do that, that&#39;s one way of doing it. But let&#39;s try to address
+this from the other end. Let&#39;s build a small primitive we can pass
+around and then come to collectable protocol. Because I think there
+are interesting parallels between enumerable and collectable which is
+more apparent if we build it from the bottom-up.</p>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-2">
+<h2 id="headline-3">
+Push Container
+</h2>
+<div id="outline-text-headline-3" class="outline-text-2">
+<p>
+So let&#39;s assume there is no collectable protocol and we need to build a
+new abstraction. What we need is a container abstraction where we can
+<strong>push</strong> values.</p>
+<p>
+Let&#39;s start with a simpler example, we want to create a function which
+generates strings and we need the caller to have control over the
+underlaying container type.</p>
+<p>
+It can look something like this</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">def</span> generate_strings(container) <span style="color:#ff79c6">do</span>
+  container <span style="color:#ff79c6">=</span> push(container, <span style="color:#f1fa8c">&#34;foo &#34;</span>)
+  container <span style="color:#ff79c6">=</span> push(container, <span style="color:#f1fa8c">&#34;bar&#34;</span>)
+
+  finish(container)
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+And we want to use it like this</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">container <span style="color:#ff79c6">=</span> build_string_container()
+string <span style="color:#ff79c6">=</span> generate_strings(container)
+<span style="color:#6272a4"># &#34;foo bar&#34;</span>
+
+container <span style="color:#ff79c6">=</span> build_list_container()
+list <span style="color:#ff79c6">=</span> generate_strings(container)
+<span style="color:#6272a4"># [&#34;foo &#34;, &#34;bar&#34;]</span></code></pre></div>
+</div>
+<p>
+To recap, <code>generate_strings</code> is not tied to the implementation of the
+container. And it only needs to know how to push elements to the
+container and how to get the final value when it is done.</p>
+<p>
+Implementation of <code>push</code> and <code>finish</code> can be</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">def</span> push({acc, finisher}, elem) <span style="color:#ff79c6">do</span>
+  {acc <span style="color:#ff79c6">++</span> [elem], finisher}
+<span style="color:#ff79c6">end</span>
+
+<span style="color:#8be9fd;font-style:italic">def</span> finish({acc, finisher}) <span style="color:#ff79c6">do</span>
+  finisher<span style="color:#ff79c6">.</span>(acc)
+<span style="color:#ff79c6">end</span>
+
+<span style="color:#8be9fd;font-style:italic">def</span> build(finisher) <span style="color:#ff79c6">do</span>
+  {[], finisher}
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+An interesting thing to observe here is that when we build a push container we won&#39;t
+be knowing from <em>where it is going to get values pushed</em>. We can pass it around
+as something where someone can push values. But that decision is not
+made when we build a push container. This is exactly the opposite of
+Enumerable. With the enumerable, we don&#39;t know <em>where values are going
+to get pulled out</em>. It is something we can pass around from where
+someone can pull values out.</p>
+<p>
+Implementation of different builders</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#6272a4"># builder for string</span>
+<span style="color:#8be9fd;font-style:italic">def</span> build_string_container() <span style="color:#ff79c6">do</span>
+  finisher <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">fn</span> acc <span style="color:#ff79c6">-&gt;</span>
+    <span style="color:#50fa7b">String</span><span style="color:#ff79c6">.</span>join(acc)
+  <span style="color:#ff79c6">end</span>
+
+  build(finisher)
+<span style="color:#ff79c6">end</span>
+
+<span style="color:#6272a4"># builder for list</span>
+<span style="color:#8be9fd;font-style:italic">def</span> build_list_container() <span style="color:#ff79c6">do</span>
+  finisher <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">fn</span> acc <span style="color:#ff79c6">-&gt;</span> acc <span style="color:#ff79c6">end</span>
+
+  build(finisher)
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+We are using List to accumulate values. While this works for smaller
+collections but if we are working with large collections this will
+cause memory issues similar to how Enum can cause memory issues to
+Enumerable. And the list is not always the correct type to collect
+values. For Enumerable we have Stream which solves this issue by being
+lazy. That is it generates values on-demand instead of producing
+values in advance and storing intermediate values. In this case, we
+can do a similar thing. No need to store the intermediate values. We
+can just push that responsibility to type as soon as we get a
+<code>push</code>. Which is sort of the exact opposite of Stream in a way. Stream
+is memory efficient by being lazy and here push-container is
+memory-efficient by being eager!</p>
+<p>
+Let&#39;s create an interface for the eager push. While at it, let&#39;s also give it a
+cleaner interface by creating a module</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">defmodule</span> <span style="color:#50fa7b">Collect</span> <span style="color:#ff79c6">do</span>
+  <span style="color:#8be9fd;font-style:italic">defstruct</span> [<span style="color:#f1fa8c">:acc</span>, <span style="color:#f1fa8c">:func</span>, <span style="color:#f1fa8c">:after_func</span>]
+
+  <span style="color:#ff79c6">alias</span> __MODULE__
+
+  <span style="color:#8be9fd;font-style:italic">def</span> build(acc, func, after_func) <span style="color:#ff79c6">do</span>
+    %<span style="color:#50fa7b">Collect</span>{<span style="color:#f1fa8c">acc</span>: acc, <span style="color:#f1fa8c">func</span>: func, <span style="color:#f1fa8c">after_func</span>: after_func}
+  <span style="color:#ff79c6">end</span>
+
+  <span style="color:#8be9fd;font-style:italic">def</span> call(%<span style="color:#50fa7b">Collect</span>{<span style="color:#f1fa8c">acc</span>: acc, <span style="color:#f1fa8c">func</span>: func} <span style="color:#ff79c6">=</span> collect, elem) <span style="color:#ff79c6">do</span>
+    acc <span style="color:#ff79c6">=</span> func<span style="color:#ff79c6">.</span>(acc, elem)
+    %<span style="color:#50fa7b">Collect</span>{collect <span style="color:#ff79c6">|</span> <span style="color:#f1fa8c">acc</span>: acc}
+  <span style="color:#ff79c6">end</span>
+
+  <span style="color:#8be9fd;font-style:italic">def</span> finish(%<span style="color:#50fa7b">Collect</span>{<span style="color:#f1fa8c">acc</span>: acc, <span style="color:#f1fa8c">after_func</span>: after_func} <span style="color:#ff79c6">=</span> collect) <span style="color:#ff79c6">do</span>
+    after_func<span style="color:#ff79c6">.</span>(acc)
+  <span style="color:#ff79c6">end</span>
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+We can use our new interface like this</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">def</span> generate_strings(%<span style="color:#50fa7b">Collect</span>{} <span style="color:#ff79c6">=</span> collect) <span style="color:#ff79c6">do</span>
+  collect <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>call(collect, <span style="color:#f1fa8c">&#34;foo&#34;</span>)
+  collect <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>call(collect, <span style="color:#f1fa8c">&#34;bar&#34;</span>)
+
+  <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>finish(collect)
+<span style="color:#ff79c6">end</span>
+
+string <span style="color:#ff79c6">=</span> generate_strings(string_collect())
+list <span style="color:#ff79c6">=</span> generate_strings(list_collect())</code></pre></div>
+</div>
+<p>
+We are no longer using list anywhere and we push elements to the container
+as they arrive</p>
+<p>
+Let&#39;s update the string implement</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">def</span> string_collect() <span style="color:#ff79c6">do</span>
+  <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>build(
+    <span style="color:#f1fa8c">&#34;&#34;</span>,
+    <span style="color:#ff79c6">fn</span> acc, string <span style="color:#ff79c6">-&gt;</span>
+      acc <span style="color:#ff79c6">&lt;&gt;</span> string
+    <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> acc <span style="color:#ff79c6">-&gt;</span>
+      acc
+    <span style="color:#ff79c6">end</span>
+  )
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+We can do even better by using iolist which is much more efficient</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">def</span> string_collect() <span style="color:#ff79c6">do</span>
+  <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>build(
+    [],
+    <span style="color:#ff79c6">fn</span> acc, string <span style="color:#ff79c6">-&gt;</span>
+      [acc <span style="color:#ff79c6">|</span> string]
+    <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> acc <span style="color:#ff79c6">-&gt;</span>
+      <span style="color:#50fa7b">IO</span><span style="color:#ff79c6">.</span>iodata_to_binary(acc)
+    <span style="color:#ff79c6">end</span>
+  )
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+In the above examples, we are using <code>Collect</code> to return a value. But
+that&#39;s not always necessary. Collect is something where we can <strong>push</strong>
+values.  What we do with that value is left to the type. A file can be
+a push container! This file push container can write to a file
+whenever it gets a value.  And we can pass it around as value to
+different functions as something where different functions can write.</p>
+<p>
+For resource type containers like file, we also need a callback to init
+the resource, like opening file for file resource before we start
+pushing values.</p>
+<p>
+Let&#39;s update our interface and build a file container</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">defmodule</span> <span style="color:#50fa7b">Collect</span> <span style="color:#ff79c6">do</span>
+  <span style="color:#8be9fd;font-style:italic">defstruct</span> [<span style="color:#f1fa8c">:state</span>, <span style="color:#f1fa8c">:acc</span>, <span style="color:#f1fa8c">:init_func</span>, <span style="color:#f1fa8c">:func</span>, <span style="color:#f1fa8c">:finish_func</span>]
+
+  <span style="color:#ff79c6">alias</span> __MODULE__
+
+  <span style="color:#8be9fd;font-style:italic">def</span> build(init_func, call_func, finish_func) <span style="color:#ff79c6">do</span>
+    %<span style="color:#50fa7b">Collect</span>{<span style="color:#f1fa8c">state</span>: <span style="color:#f1fa8c">:init</span>, <span style="color:#f1fa8c">init_func</span>: init_func, <span style="color:#f1fa8c">func</span>: call_func, <span style="color:#f1fa8c">finish_func</span>: finish_func}
+  <span style="color:#ff79c6">end</span>
+
+  <span style="color:#8be9fd;font-style:italic">def</span> init(%<span style="color:#50fa7b">Collect</span>{<span style="color:#f1fa8c">state</span>: <span style="color:#f1fa8c">:init</span>, <span style="color:#f1fa8c">init_func</span>: init_func}) <span style="color:#ff79c6">do</span>
+    init_acc <span style="color:#ff79c6">=</span> init_func<span style="color:#ff79c6">.</span>()
+    %<span style="color:#50fa7b">Collect</span>{collect <span style="color:#ff79c6">|</span> <span style="color:#f1fa8c">state</span>: <span style="color:#f1fa8c">:started</span>, <span style="color:#f1fa8c">acc</span>: init_acc}
+  <span style="color:#ff79c6">end</span>
+
+  <span style="color:#8be9fd;font-style:italic">def</span> call(%<span style="color:#50fa7b">Collect</span>{<span style="color:#f1fa8c">state</span>: <span style="color:#f1fa8c">:started</span>, <span style="color:#f1fa8c">acc</span>: acc, <span style="color:#f1fa8c">func</span>: func} <span style="color:#ff79c6">=</span> collect, elem) <span style="color:#ff79c6">do</span>
+    acc <span style="color:#ff79c6">=</span> func<span style="color:#ff79c6">.</span>(acc, elem)
+    %<span style="color:#50fa7b">Collect</span>{collect <span style="color:#ff79c6">|</span> <span style="color:#f1fa8c">acc</span>: acc}
+  <span style="color:#ff79c6">end</span>
+
+  <span style="color:#8be9fd;font-style:italic">def</span> finish(%<span style="color:#50fa7b">Collect</span>{<span style="color:#f1fa8c">state</span>: <span style="color:#f1fa8c">:started</span>, <span style="color:#f1fa8c">acc</span>: acc, <span style="color:#f1fa8c">finish_func</span>: finish_func} <span style="color:#ff79c6">=</span> collect, status) <span style="color:#ff79c6">do</span>
+    after_func<span style="color:#ff79c6">.</span>(acc, status)
+  <span style="color:#ff79c6">end</span>
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+With this now we have callbacks to manage init, call, and finish
+life-cycles of resources self-contained.</p>
+<p>
+Let&#39;s implement different containers with this new interface</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">def</span> string_collect <span style="color:#ff79c6">do</span>
+  <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>build(
+    <span style="color:#ff79c6">fn</span> <span style="color:#ff79c6">-&gt;</span> <span style="color:#f1fa8c">&#34;&#34;</span> <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> acc, string <span style="color:#ff79c6">-&gt;</span> [acc <span style="color:#ff79c6">|</span> string] <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> acc, _status <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">IO</span><span style="color:#ff79c6">.</span>iodata_to_binary(acc) <span style="color:#ff79c6">end</span>
+  )
+<span style="color:#ff79c6">end</span>
+
+<span style="color:#8be9fd;font-style:italic">def</span> mapset_collect <span style="color:#ff79c6">do</span>
+  <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>build(
+    <span style="color:#ff79c6">fn</span> <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">MapSet</span><span style="color:#ff79c6">.</span>new() <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> set, string <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">MapSet</span><span style="color:#ff79c6">.</span>put(set, string) <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> set, _status <span style="color:#ff79c6">-&gt;</span> set <span style="color:#ff79c6">end</span>
+  )
+<span style="color:#ff79c6">end</span>
+
+<span style="color:#8be9fd;font-style:italic">def</span> list_collect <span style="color:#ff79c6">do</span>
+  <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>build(
+    <span style="color:#ff79c6">fn</span> <span style="color:#ff79c6">-&gt;</span> [] <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> list, string <span style="color:#ff79c6">-&gt;</span> [list <span style="color:#ff79c6">|</span> string] <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> list, _status <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>reverse(list) <span style="color:#ff79c6">end</span>
+  )
+<span style="color:#ff79c6">end</span>
+
+<span style="color:#8be9fd;font-style:italic">def</span> file_collect(path) <span style="color:#ff79c6">do</span>
+  <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>new(
+    <span style="color:#ff79c6">fn</span> <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">File</span><span style="color:#ff79c6">.</span>open!(path, [<span style="color:#f1fa8c">:write</span>, <span style="color:#f1fa8c">:binary</span>]) <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> elem, file <span style="color:#ff79c6">-&gt;</span>  <span style="color:#50fa7b">IO</span><span style="color:#ff79c6">.</span>binwrite!(file, elem) <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> file, _status <span style="color:#ff79c6">-&gt;</span>  <span style="color:#f1fa8c">:ok</span> <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">File</span><span style="color:#ff79c6">.</span>close(file) <span style="color:#ff79c6">end</span>
+  )
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+Now that we have different push containers. Let&#39;s head back to
+composability aspect.</p>
+</div>
+</div>
+<div id="outline-container-headline-4" class="outline-2">
+<h2 id="headline-4">
+How to compose different push containers?
+</h2>
+<div id="outline-text-headline-4" class="outline-text-2">
+<p>
+Say we want to upcase all the strings before we write to a file. We
+don&#39;t know where or who is going to push (write) to this file since
+the push-container is something we can pass around different
+functions, but we must upcase before we write. Of course, we can build
+a new push container for this specific case using <code>Collect.new</code> but it
+would be brittle. We want to be able to separate this upcase logic
+with the specific type details. So that if tomorrow we want to reuse
+this upcase with list container then we should be straightforward.</p>
+<p>
+For the upcase example mentioned above, we need a <code>map</code> function
+similar to <code>Enum.map</code> which map each push to a function before passing
+to underlying container type.</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">defmodule</span> <span style="color:#50fa7b">Coll</span> <span style="color:#ff79c6">do</span>
+  <span style="color:#50fa7b">@spec</span> map((any <span style="color:#ff79c6">-&gt;</span> any), <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>t()) <span style="color:#ff79c6">::</span> <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>t()
+  <span style="color:#8be9fd;font-style:italic">def</span> map(func, collect) <span style="color:#ff79c6">do</span>
+    <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>build(
+      <span style="color:#ff79c6">fn</span> <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>init(collect) <span style="color:#ff79c6">end</span>,
+      <span style="color:#ff79c6">fn</span> acc, elem <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>call(collect, func<span style="color:#ff79c6">.</span>(elem)) <span style="color:#ff79c6">end</span>,
+      <span style="color:#ff79c6">fn</span> acc, status <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>finish(collect, status) <span style="color:#ff79c6">end</span>,
+    )
+  <span style="color:#ff79c6">end</span>
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+Note that map returns <code>Collect.t()</code> as return type so
+<code>generate_strings</code> happy to accept this new container.</p>
+<p>
+Now we can support multiply without changing <code>generate_numbers</code></p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">list <span style="color:#ff79c6">=</span> generate_strings(
+  <span style="color:#50fa7b">Coll</span><span style="color:#ff79c6">.</span>map(
+    <span style="color:#ff79c6">fn</span> str <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">String</span><span style="color:#ff79c6">.</span>upcase(str) <span style="color:#ff79c6">end</span>,
+    list_collect()
+  )
+)
+
+<span style="color:#6272a4"># =&gt; [&#34;FOO &#34;, &#34;BAR&#34;]</span></code></pre></div>
+</div>
+<p>
+Not that we are passing the container as the last argument might look
+awkward but this is important from a readability point of view which
+will be obvious when we see more complex example.</p>
+<p>
+Let&#39;s implement few more basic operations</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">def</span> <span style="color:#50fa7b">Coll</span> <span style="color:#ff79c6">do</span>
+  <span style="color:#8be9fd;font-style:italic">def</span> reduce(func, %<span style="color:#50fa7b">Collect</span>{} <span style="color:#ff79c6">=</span> collect) <span style="color:#ff79c6">do</span>
+    <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>new(
+      <span style="color:#ff79c6">fn</span> <span style="color:#ff79c6">-&gt;</span>
+        <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>init(collect)
+      <span style="color:#ff79c6">end</span>,
+      <span style="color:#ff79c6">fn</span> elem, collect <span style="color:#ff79c6">-&gt;</span>
+        func<span style="color:#ff79c6">.</span>(elem, collect)
+      <span style="color:#ff79c6">end</span>,
+      <span style="color:#ff79c6">fn</span> collect, status <span style="color:#ff79c6">-&gt;</span>
+        <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>finish(collect, status)
+      <span style="color:#ff79c6">end</span>
+    )
+  <span style="color:#ff79c6">end</span>
+
+  <span style="color:#8be9fd;font-style:italic">def</span> map(func, %<span style="color:#50fa7b">Collect</span>{} <span style="color:#ff79c6">=</span> collect) <span style="color:#ff79c6">do</span>
+    reduce(
+      <span style="color:#ff79c6">fn</span> elem, collect <span style="color:#ff79c6">-&gt;</span>
+        <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>call(collect, func<span style="color:#ff79c6">.</span>(elem))
+      <span style="color:#ff79c6">end</span>,
+      collect
+    )
+  <span style="color:#ff79c6">end</span>
+
+  <span style="color:#8be9fd;font-style:italic">def</span> filter(func, %<span style="color:#50fa7b">Collect</span>{} <span style="color:#ff79c6">=</span> collect) <span style="color:#ff79c6">do</span>
+    reduce(
+      <span style="color:#ff79c6">fn</span> elem, collect <span style="color:#ff79c6">-&gt;</span>
+        <span style="color:#ff79c6">if</span> func<span style="color:#ff79c6">.</span>(elem) <span style="color:#ff79c6">do</span>
+          <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>call(collect, elem)
+        <span style="color:#ff79c6">else</span>
+          collect
+        <span style="color:#ff79c6">end</span>
+      <span style="color:#ff79c6">end</span>,
+      collect
+    )
+  <span style="color:#ff79c6">end</span>
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+Equipped with these functions we can compose them however we want</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">def</span> format_string(label, collect) <span style="color:#ff79c6">do</span>
+  <span style="color:#50fa7b">Coll</span><span style="color:#ff79c6">.</span>map(
+    <span style="color:#ff79c6">fn</span> str <span style="color:#ff79c6">-&gt;</span> <span style="color:#f1fa8c">&#34;</span><span style="color:#f1fa8c">#{</span><span style="color:#50fa7b">DateTime</span><span style="color:#ff79c6">.</span>utc_now()<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c"> : </span><span style="color:#f1fa8c">#{</span>str<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">&#34;</span> <span style="color:#ff79c6">end</span>,
+    collect
+  )
+<span style="color:#ff79c6">end</span>
+
+list <span style="color:#ff79c6">=</span>
+  generate_strings(
+    format_string(list_collect())
+  )
+
+<span style="color:#6272a4"># filter strings with length &gt; 3 and write upcase of those strings</span>
+string <span style="color:#ff79c6">=</span>
+  generate_strings(
+    <span style="color:#50fa7b">Coll</span><span style="color:#ff79c6">.</span>filter(
+      <span style="color:#ff79c6">fn</span> str <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">String</span><span style="color:#ff79c6">.</span>length(str) <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">3</span> <span style="color:#ff79c6">end</span>,
+      <span style="color:#50fa7b">Coll</span><span style="color:#ff79c6">.</span>map(
+        <span style="color:#ff79c6">fn</span> str <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">String</span><span style="color:#ff79c6">.</span>upcase(str) <span style="color:#ff79c6">end</span>,
+        string_collect()
+      )
+    )
+  )
+<span style="color:#6272a4"># =&gt; &#34;FOO BAR&#34;</span></code></pre></div>
+</div>
+<p>
+All our functiosn works with <code>Collect</code> type but since elixir already
+provides <code>Collectable</code> protocol and many types and different libraries
+already implement it. All we need now is just to bridge the <code>Collect</code>
+and <code>Collectable</code> protocol for interoperability.</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#8be9fd;font-style:italic">def</span> from_collectable(collectable) <span style="color:#ff79c6">do</span>
+  <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>new(
+    <span style="color:#ff79c6">fn</span> <span style="color:#ff79c6">-&gt;</span>
+      <span style="color:#50fa7b">Collectable</span><span style="color:#ff79c6">.</span>into(collectable)
+    <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> {acc, collector_func}, elem <span style="color:#ff79c6">-&gt;</span>
+      collector_func<span style="color:#ff79c6">.</span>(acc, {<span style="color:#f1fa8c">:cont</span>, elem})
+    <span style="color:#ff79c6">end</span>,
+    <span style="color:#ff79c6">fn</span> {acc, collector_func}, status <span style="color:#ff79c6">-&gt;</span>
+      collector_func<span style="color:#ff79c6">.</span>(acc, status)
+    <span style="color:#ff79c6">end</span>
+  )
+<span style="color:#ff79c6">end</span>
+
+<span style="color:#8be9fd;font-style:italic">defimpl</span> <span style="color:#50fa7b">Collectable</span>, <span style="color:#f1fa8c">for</span>: <span style="color:#50fa7b">Coll</span> <span style="color:#ff79c6">do</span>
+  <span style="color:#8be9fd;font-style:italic">def</span> into(%<span style="color:#50fa7b">Collect</span>{} <span style="color:#ff79c6">=</span> collect) <span style="color:#ff79c6">do</span>
+    collector_func <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">fn</span>
+      acc, {<span style="color:#f1fa8c">:cont</span>, elem} <span style="color:#ff79c6">-&gt;</span>
+        <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>call(acc, elem)
+
+      acc, <span style="color:#f1fa8c">:halt</span> <span style="color:#ff79c6">-&gt;</span>
+        <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>finish(acc, <span style="color:#f1fa8c">:halt</span>)
+
+      acc, <span style="color:#f1fa8c">:done</span> <span style="color:#ff79c6">-&gt;</span>
+        <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>finish(acc, <span style="color:#f1fa8c">:done</span>)
+    <span style="color:#ff79c6">end</span>
+
+    acc <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">Collect</span><span style="color:#ff79c6">.</span>init(collect)
+    {acc, collector_func}
+  <span style="color:#ff79c6">end</span>
+<span style="color:#ff79c6">end</span></code></pre></div>
+</div>
+<p>
+Example</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">mapset <span style="color:#ff79c6">=</span>
+  <span style="color:#50fa7b">Enum</span><span style="color:#ff79c6">.</span>into(
+    [<span style="color:#bd93f9">1</span><span style="color:#ff79c6">..</span><span style="color:#bd93f9">100</span>],
+    <span style="color:#50fa7b">Coll</span><span style="color:#ff79c6">.</span>map(
+      <span style="color:#ff79c6">fn</span> num <span style="color:#ff79c6">-&gt;</span> num <span style="color:#ff79c6">*</span> <span style="color:#bd93f9">2</span> <span style="color:#ff79c6">end</span>,
+      <span style="color:#50fa7b">Coll</span><span style="color:#ff79c6">.</span>from_collectable(<span style="color:#50fa7b">MapSet</span><span style="color:#ff79c6">.</span>new())
+    )
+  )
+
+
+<span style="color:#6272a4"># =&gt; [2, 4, 6, 8 ...]</span></code></pre></div>
+</div>
+<p>
+And for the original example problem, we set out to solve. Which is how
+to split stream of logs</p>
+<div class="src src-elixir">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir"><span style="color:#f1fa8c">:ok</span> <span style="color:#ff79c6">=</span>
+  write_logs(
+    stream,
+    <span style="color:#50fa7b">Coll</span><span style="color:#ff79c6">.</span>filter(
+      <span style="color:#ff79c6">fn</span> str <span style="color:#ff79c6">-&gt;</span> <span style="color:#50fa7b">String</span><span style="color:#ff79c6">.</span>start_with?(<span style="color:#f1fa8c">&#34;foo:&#34;</span>) <span style="color:#ff79c6">end</span>,
+      <span style="color:#50fa7b">Coll</span><span style="color:#ff79c6">.</span>from_collectable(<span style="color:#50fa7b">File</span><span style="color:#ff79c6">.</span>stream!(<span style="color:#f1fa8c">&#34;foo.log&#34;</span>))
+    )
+  )</code></pre></div>
+</div>
+<div id="outline-container-headline-5" class="outline-3">
+<h3 id="headline-5">
+Further Reading
+</h3>
+<div id="outline-text-headline-5" class="outline-text-3">
+<ul>
+<li>
+<p>More about streams <a href="https://ananthakumaran.in/2017/11/28/stream.html">https://ananthakumaran.in/2017/11/28/stream.html</a></p>
+</li>
+<li>
+<p>Collectable doc <a href="https://hexdocs.pm/elixir/Collectable.html">https://hexdocs.pm/elixir/Collectable.html</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+        </div>
+        
+
+    
+
+
+<div class="post-info">
+    
+        <div class="post-date dt-published">2021-11-14</div>
+    
+    
+    <a class="post-hidden-url u-url" href="/post/composable-collectable/">/post/composable-collectable/</a>
+    <a href= class="p-name p-author post-hidden-author h-card" rel="me">Akash</a>
+
+
+    <div class="post-taxonomies">
+        
+            
+                <ul class="post-tags">
+                    
+                        <li><a href="tags/elixir">#elixir</a></li>
+                    
+                        <li><a href="tags/programming">#programming</a></li>
+                    
+                        <li><a href="tags/stream">#stream</a></li>
+                    
+                </ul>
+        
+    </div>
+</div>
+
+    </article>
+
+    
+        
+    <div class="pagination post-pagination">
+        <div class="left pagination-item disabled">
+            
+        </div>
+        <div class="right pagination-item ">
+            
+                <a href="/post/old_textbook_art/">Art in old textbook</a>
+            
+        </div>
+    </div>
+
+
+
+
+    
+
+    
+
+    
+
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© Akash, 2021<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
+            
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+    <button class="theme-switcher">
+        Dark theme
+    </button>
+
+    <script>
+    const STORAGE_KEY = 'user-color-scheme'
+    const defaultTheme = "auto"
+
+    let currentTheme
+    let switchButton
+    let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+    const autoChangeScheme = e => {
+        currentTheme = e.matches ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', currentTheme)
+        changeButtonText()
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        switchButton = document.querySelector('.theme-switcher')
+        currentTheme = detectCurrentScheme()
+        if (currentTheme == 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark')
+        }
+        if (currentTheme == 'auto') {
+            autoChangeScheme(autoDefinedScheme);
+            autoDefinedScheme.addListener(autoChangeScheme);
+        }
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    })
+
+    function detectCurrentScheme() {
+        if (localStorage.getItem(STORAGE_KEY)) {
+            return localStorage.getItem(STORAGE_KEY)
+        } 
+        if (defaultTheme) {
+            return defaultTheme
+        } 
+        if (!window.matchMedia) {
+            return 'light'
+        } 
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark'
+        }
+        return 'light'
+    }
+
+    function changeButtonText()
+    {   
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+
+    function switchTheme(e) {
+        if (currentTheme == 'dark') {
+            localStorage.setItem(STORAGE_KEY, 'light')
+            document.documentElement.setAttribute('data-theme', 'light')
+            currentTheme = 'light'
+        } else {
+            localStorage.setItem(STORAGE_KEY, 'dark')
+            document.documentElement.setAttribute('data-theme', 'dark')
+            currentTheme = 'dark'
+        }
+        changeButtonText()
+    }
+    </script>
+   
+    </div>
+
+    <p class="h-card vcard">
+
+    <a href= class="p-name u-url url fn" rel="me">Akash</a> 
+
+    
+
+    
+</p> 
+</footer>
+
+        
+    </div>
+</body>
+</html>

@@ -6,10 +6,616 @@
     <description>*scratch* (programming)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Aug 2020 15:00:00 +0530</lastBuildDate>
+    <lastBuildDate>Sun, 14 Nov 2021 08:47:00 +0530</lastBuildDate>
     
     <atom:link href="/tags/programming/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Composable Collectable</title>
+      <link>/post/composable-collectable/</link>
+      <pubDate>Sun, 14 Nov 2021 08:47:00 +0530</pubDate>
+      
+      <guid>/post/composable-collectable/</guid>
+      <description>
+&lt;div id=&#34;outline-container-headline-1&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-1&#34;&gt;
+Enumerable and Collectable
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-1&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Often we have to work with a collection of multiple values. Maybe we
+need multiple values as input to the logic we are going to implement
+and/or our logic might produce multiple values as output.  The
+collection of multiple values can be a list of numbers, a map of
+key-value pairs, or a mapset of strings. Here list, map, mapset act as
+a &lt;em&gt;container&lt;/em&gt; which group or hold each element together. Each element
+can be a number, string, or another container. Most of the time when
+we face such scenarios where we need to work with multiple values, the
+exact &lt;em&gt;type of the container&lt;/em&gt; is less relevant. If we are going to
+implement a function to sum a collection of values, we would prefer if
+we work any container right? because whether the container is a list
+or set is not relevant to &amp;#34;adding elements&amp;#34; logic. We want to separate
+something which represents &lt;strong&gt;&lt;strong&gt;container&lt;/strong&gt;&lt;/strong&gt; aspect from &lt;strong&gt;&lt;strong&gt;an instance
+of container&lt;/strong&gt;&lt;/strong&gt;. Example for an instance of container is list, set,
+map, etc. Want to define our operations as generic operations which
+work with any instance of the container. Sum operation should work
+with a list or set.&lt;/p&gt;
+&lt;p&gt;
+If we think of a generic function that needs to work with
+containers. there are two places where we need this container
+glue.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;function might need N number values as input and need a container
+abstraction from where it can &lt;strong&gt;&lt;strong&gt;pull&lt;/strong&gt;&lt;/strong&gt; values&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;function might produce N number values as output and need a
+container abstraction to where it can &lt;strong&gt;&lt;strong&gt;push&lt;/strong&gt;&lt;/strong&gt; values&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For the first type of glue we have Enumerable in Elixir. If we define
+a function that accepts enumerable as an argument then the caller can
+pass list, mapset, stream or anything which implements Enumerable
+protocol. Our function does not care about the type of container. All
+we need to know is how to get elements out of the container which is
+what the enumerable protocol is about.&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;# passing List as an argument&lt;/span&gt;
+list &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;filter(&lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;..&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;10&lt;/span&gt;, &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; n &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Integer&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;is_even(n) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;)
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# passing MapSet as an argument&lt;/span&gt;
+list &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;filter(&lt;span style=&#34;color:#50fa7b&#34;&gt;MapSet&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;new([&lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;..&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;10&lt;/span&gt;]), &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; n &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Integer&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;is_even(n) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Another major advantage of enumerable is &lt;code&gt;Enum&lt;/code&gt; and &lt;code&gt;Stream&lt;/code&gt;
+modules. These modules cover almost all basic operations we might
+need. Among other things these act as shared vocabulary between reader
+and writer. And If someone is starting to learn Elixir, they don&amp;#39;t
+even need to know about Enumerable protocol or even about Protocol
+concept itself! they can just use Enum or Stream functions and assume
+that these modules take list, map as an argument, and does something.&lt;/p&gt;
+&lt;p&gt;
+If we look at the Enum and Stream functions, most of them follow a
+similar spec.&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#50fa7b&#34;&gt;@spec&lt;/span&gt; map(&lt;span style=&#34;color:#50fa7b&#34;&gt;Enumerable&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;t(), (element() &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; any())) &lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt; list()
+&lt;span style=&#34;color:#50fa7b&#34;&gt;@spec&lt;/span&gt; filter(&lt;span style=&#34;color:#50fa7b&#34;&gt;Enumerable&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;t(), (element() &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; as_boolean(term()))) &lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt; list()
+&lt;span style=&#34;color:#50fa7b&#34;&gt;@spec&lt;/span&gt; reduce(&lt;span style=&#34;color:#50fa7b&#34;&gt;Enumerable&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;t(), acc(), (element(), acc() &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; acc())) &lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt; acc()
+&lt;span style=&#34;color:#50fa7b&#34;&gt;@spec&lt;/span&gt; split_with(&lt;span style=&#34;color:#50fa7b&#34;&gt;Enumerable&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;t(), (element() &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; as_boolean(term()))) &lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt; {list(), list()}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+They take &amp;#34;anything&amp;#34; which implements enumerable and do certain
+operation and returns predefined type, which is generally a new list for Enum
+and opaque Stream data type for Stream functions.&lt;/p&gt;
+&lt;p&gt;
+What about the second type of glue? which is about collecting values
+in a specific container. We want to be able to define our logic which
+produces multiple values in a generic way such that the caller should decide the type of container they want. For example, I should be
+able to define a function that generates strings, and I want to return it
+as a list, or set, or, as a stream. The caller of the function should
+be able to decide the return type of the function.&lt;/p&gt;
+&lt;p&gt;
+We have &lt;code&gt;Collectable&lt;/code&gt; for this&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;# returns a string&lt;/span&gt;
+&lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;into([&lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;..&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;10&lt;/span&gt;], &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# returns a mapset&lt;/span&gt;
+&lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;into([&lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;..&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;10&lt;/span&gt;], &lt;span style=&#34;color:#50fa7b&#34;&gt;MapSet&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;new())&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+But the catch is we don&amp;#39;t have standard library functions to compose,
+build, manipulate collectables in Elixir. Similar to Enum and Stream for Enumerable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-2&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-2&#34;&gt;
+Why do we need composability?
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-2&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Let&amp;#39;s take an example, We have a stream of logs from multiple apps and
+we are tasked to write these logs to a different destination depending
+on the scenario. We might want to just write it to console, or a file,
+or s3 file system. Since the destination need to be configurable we
+opt to use collectable protocol so that we can plug different type of
+destination&lt;/p&gt;
+&lt;p&gt;
+It can look like this&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#50fa7b&#34;&gt;@spec&lt;/span&gt; write_logs(&lt;span style=&#34;color:#50fa7b&#34;&gt;Enumerable&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;t(), &lt;span style=&#34;color:#50fa7b&#34;&gt;Collectable&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;t()) &lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;:ok&lt;/span&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; write_logs(stream, destination) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  stream
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;|&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Stream&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;map(&lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; line &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;DateTime&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;utc_now() &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34; : &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;gt;&lt;/span&gt; line &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;)
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;|&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Stream&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;into(destination)
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;|&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Stream&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;run()
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Then we can use it like this&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;# to write it to console&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:ok&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; write_logs(stream, &lt;span style=&#34;color:#50fa7b&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;stream())
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# to write it to file&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:ok&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; write_logs(stream, &lt;span style=&#34;color:#50fa7b&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;stream!(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;app.log&amp;#34;&lt;/span&gt;))
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# or anything which implements Collectable protocol&lt;/span&gt;
+&lt;span style=&#34;color:#f1fa8c&#34;&gt;:ok&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; write_logs(stream, whatever())&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+As you can see caller decides where to write. As long as the
+destination implements collectable protocol.&lt;/p&gt;
+&lt;p&gt;
+This works fine. But what if we want to buffer lines before writing to
+file or s3 for performance reasons?&lt;/p&gt;
+&lt;p&gt;
+This is where we miss the lack of composability. For Enumerable we
+have &lt;code&gt;Stream.chunk_every&lt;/code&gt; and we don&amp;#39;t have functions like that or the
+basic building block (like reduce) for Collectable. We &lt;em&gt;can&lt;/em&gt; get into
+the details of collectable protocol to achieve this, but this will be
+hard to work with in the long run as we will be having more and more things to
+compose, like say we need to filter logs of a specific app and only
+write those etc.&lt;/p&gt;
+&lt;p&gt;
+So let&amp;#39;s just implement all basic operations like &lt;code&gt;chunk_every&lt;/code&gt; directly
+using &lt;code&gt;Collectable.t()&lt;/code&gt;?&lt;/p&gt;
+&lt;p&gt;
+We can do that, that&amp;#39;s one way of doing it. But let&amp;#39;s try to address
+this from the other end. Let&amp;#39;s build a small primitive we can pass
+around and then come to collectable protocol. Because I think there
+are interesting parallels between enumerable and collectable which is
+more apparent if we build it from the bottom-up.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-3&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-3&#34;&gt;
+Push Container
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-3&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+So let&amp;#39;s assume there is no collectable protocol and we need to build a
+new abstraction. What we need is a container abstraction where we can
+&lt;strong&gt;push&lt;/strong&gt; values.&lt;/p&gt;
+&lt;p&gt;
+Let&amp;#39;s start with a simpler example, we want to create a function which
+generates strings and we need the caller to have control over the
+underlaying container type.&lt;/p&gt;
+&lt;p&gt;
+It can look something like this&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; generate_strings(container) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  container &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; push(container, &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;foo &amp;#34;&lt;/span&gt;)
+  container &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; push(container, &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;)
+
+  finish(container)
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+And we want to use it like this&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;container &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; build_string_container()
+string &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; generate_strings(container)
+&lt;span style=&#34;color:#6272a4&#34;&gt;# &amp;#34;foo bar&amp;#34;&lt;/span&gt;
+
+container &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; build_list_container()
+list &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; generate_strings(container)
+&lt;span style=&#34;color:#6272a4&#34;&gt;# [&amp;#34;foo &amp;#34;, &amp;#34;bar&amp;#34;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+To recap, &lt;code&gt;generate_strings&lt;/code&gt; is not tied to the implementation of the
+container. And it only needs to know how to push elements to the
+container and how to get the final value when it is done.&lt;/p&gt;
+&lt;p&gt;
+Implementation of &lt;code&gt;push&lt;/code&gt; and &lt;code&gt;finish&lt;/code&gt; can be&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; push({acc, finisher}, elem) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  {acc &lt;span style=&#34;color:#ff79c6&#34;&gt;++&lt;/span&gt; [elem], finisher}
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; finish({acc, finisher}) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  finisher&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(acc)
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; build(finisher) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  {[], finisher}
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+An interesting thing to observe here is that when we build a push container we won&amp;#39;t
+be knowing from &lt;em&gt;where it is going to get values pushed&lt;/em&gt;. We can pass it around
+as something where someone can push values. But that decision is not
+made when we build a push container. This is exactly the opposite of
+Enumerable. With the enumerable, we don&amp;#39;t know &lt;em&gt;where values are going
+to get pulled out&lt;/em&gt;. It is something we can pass around from where
+someone can pull values out.&lt;/p&gt;
+&lt;p&gt;
+Implementation of different builders&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;# builder for string&lt;/span&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; build_string_container() &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  finisher &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+    &lt;span style=&#34;color:#50fa7b&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;join(acc)
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+  build(finisher)
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# builder for list&lt;/span&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; build_list_container() &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  finisher &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; acc &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+  build(finisher)
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+We are using List to accumulate values. While this works for smaller
+collections but if we are working with large collections this will
+cause memory issues similar to how Enum can cause memory issues to
+Enumerable. And the list is not always the correct type to collect
+values. For Enumerable we have Stream which solves this issue by being
+lazy. That is it generates values on-demand instead of producing
+values in advance and storing intermediate values. In this case, we
+can do a similar thing. No need to store the intermediate values. We
+can just push that responsibility to type as soon as we get a
+&lt;code&gt;push&lt;/code&gt;. Which is sort of the exact opposite of Stream in a way. Stream
+is memory efficient by being lazy and here push-container is
+memory-efficient by being eager!&lt;/p&gt;
+&lt;p&gt;
+Let&amp;#39;s create an interface for the eager push. While at it, let&amp;#39;s also give it a
+cleaner interface by creating a module&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;defmodule&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;defstruct&lt;/span&gt; [&lt;span style=&#34;color:#f1fa8c&#34;&gt;:acc&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:func&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:after_func&lt;/span&gt;]
+
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;alias&lt;/span&gt; __MODULE__
+
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; build(acc, func, after_func) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    %&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{&lt;span style=&#34;color:#f1fa8c&#34;&gt;acc&lt;/span&gt;: acc, &lt;span style=&#34;color:#f1fa8c&#34;&gt;func&lt;/span&gt;: func, &lt;span style=&#34;color:#f1fa8c&#34;&gt;after_func&lt;/span&gt;: after_func}
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; call(%&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{&lt;span style=&#34;color:#f1fa8c&#34;&gt;acc&lt;/span&gt;: acc, &lt;span style=&#34;color:#f1fa8c&#34;&gt;func&lt;/span&gt;: func} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect, elem) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    acc &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(acc, elem)
+    %&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{collect &lt;span style=&#34;color:#ff79c6&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;acc&lt;/span&gt;: acc}
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; finish(%&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{&lt;span style=&#34;color:#f1fa8c&#34;&gt;acc&lt;/span&gt;: acc, &lt;span style=&#34;color:#f1fa8c&#34;&gt;after_func&lt;/span&gt;: after_func} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    after_func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(acc)
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+We can use our new interface like this&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; generate_strings(%&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  collect &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;call(collect, &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;foo&amp;#34;&lt;/span&gt;)
+  collect &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;call(collect, &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;bar&amp;#34;&lt;/span&gt;)
+
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;finish(collect)
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+string &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; generate_strings(string_collect())
+list &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; generate_strings(list_collect())&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+We are no longer using list anywhere and we push elements to the container
+as they arrive&lt;/p&gt;
+&lt;p&gt;
+Let&amp;#39;s update the string implement&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; string_collect() &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;build(
+    &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc, string &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+      acc &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;gt;&lt;/span&gt; string
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+      acc
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+  )
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+We can do even better by using iolist which is much more efficient&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; string_collect() &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;build(
+    [],
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc, string &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+      [acc &lt;span style=&#34;color:#ff79c6&#34;&gt;|&lt;/span&gt; string]
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+      &lt;span style=&#34;color:#50fa7b&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;iodata_to_binary(acc)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+  )
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+In the above examples, we are using &lt;code&gt;Collect&lt;/code&gt; to return a value. But
+that&amp;#39;s not always necessary. Collect is something where we can &lt;strong&gt;push&lt;/strong&gt;
+values.  What we do with that value is left to the type. A file can be
+a push container! This file push container can write to a file
+whenever it gets a value.  And we can pass it around as value to
+different functions as something where different functions can write.&lt;/p&gt;
+&lt;p&gt;
+For resource type containers like file, we also need a callback to init
+the resource, like opening file for file resource before we start
+pushing values.&lt;/p&gt;
+&lt;p&gt;
+Let&amp;#39;s update our interface and build a file container&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;defmodule&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;defstruct&lt;/span&gt; [&lt;span style=&#34;color:#f1fa8c&#34;&gt;:state&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:acc&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:init_func&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:func&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:finish_func&lt;/span&gt;]
+
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;alias&lt;/span&gt; __MODULE__
+
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; build(init_func, call_func, finish_func) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    %&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{&lt;span style=&#34;color:#f1fa8c&#34;&gt;state&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;:init&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;init_func&lt;/span&gt;: init_func, &lt;span style=&#34;color:#f1fa8c&#34;&gt;func&lt;/span&gt;: call_func, &lt;span style=&#34;color:#f1fa8c&#34;&gt;finish_func&lt;/span&gt;: finish_func}
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; init(%&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{&lt;span style=&#34;color:#f1fa8c&#34;&gt;state&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;:init&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;init_func&lt;/span&gt;: init_func}) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    init_acc &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; init_func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;()
+    %&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{collect &lt;span style=&#34;color:#ff79c6&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;state&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;:started&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;acc&lt;/span&gt;: init_acc}
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; call(%&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{&lt;span style=&#34;color:#f1fa8c&#34;&gt;state&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;:started&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;acc&lt;/span&gt;: acc, &lt;span style=&#34;color:#f1fa8c&#34;&gt;func&lt;/span&gt;: func} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect, elem) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    acc &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(acc, elem)
+    %&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{collect &lt;span style=&#34;color:#ff79c6&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;acc&lt;/span&gt;: acc}
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; finish(%&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{&lt;span style=&#34;color:#f1fa8c&#34;&gt;state&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;:started&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;acc&lt;/span&gt;: acc, &lt;span style=&#34;color:#f1fa8c&#34;&gt;finish_func&lt;/span&gt;: finish_func} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect, status) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    after_func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(acc, status)
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+With this now we have callbacks to manage init, call, and finish
+life-cycles of resources self-contained.&lt;/p&gt;
+&lt;p&gt;
+Let&amp;#39;s implement different containers with this new interface&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; string_collect &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;build(
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc, string &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; [acc &lt;span style=&#34;color:#ff79c6&#34;&gt;|&lt;/span&gt; string] &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc, _status &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;iodata_to_binary(acc) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+  )
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; mapset_collect &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;build(
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;MapSet&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;new() &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; set, string &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;MapSet&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;put(set, string) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; set, _status &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; set &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+  )
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; list_collect &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;build(
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; [] &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; list, string &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; [list &lt;span style=&#34;color:#ff79c6&#34;&gt;|&lt;/span&gt; string] &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; list, _status &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;reverse(list) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+  )
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; file_collect(path) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;new(
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;open!(path, [&lt;span style=&#34;color:#f1fa8c&#34;&gt;:write&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:binary&lt;/span&gt;]) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; elem, file &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;  &lt;span style=&#34;color:#50fa7b&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;binwrite!(file, elem) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; file, _status &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;  &lt;span style=&#34;color:#f1fa8c&#34;&gt;:ok&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;close(file) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+  )
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Now that we have different push containers. Let&amp;#39;s head back to
+composability aspect.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-4&#34; class=&#34;outline-2&#34;&gt;
+&lt;h2 id=&#34;headline-4&#34;&gt;
+How to compose different push containers?
+&lt;/h2&gt;
+&lt;div id=&#34;outline-text-headline-4&#34; class=&#34;outline-text-2&#34;&gt;
+&lt;p&gt;
+Say we want to upcase all the strings before we write to a file. We
+don&amp;#39;t know where or who is going to push (write) to this file since
+the push-container is something we can pass around different
+functions, but we must upcase before we write. Of course, we can build
+a new push container for this specific case using &lt;code&gt;Collect.new&lt;/code&gt; but it
+would be brittle. We want to be able to separate this upcase logic
+with the specific type details. So that if tomorrow we want to reuse
+this upcase with list container then we should be straightforward.&lt;/p&gt;
+&lt;p&gt;
+For the upcase example mentioned above, we need a &lt;code&gt;map&lt;/code&gt; function
+similar to &lt;code&gt;Enum.map&lt;/code&gt; which map each push to a function before passing
+to underlying container type.&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;defmodule&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;@spec&lt;/span&gt; map((any &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; any), &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;t()) &lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;t()
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; map(func, collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;build(
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;init(collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc, elem &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;call(collect, func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(elem)) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; acc, status &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;finish(collect, status) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    )
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Note that map returns &lt;code&gt;Collect.t()&lt;/code&gt; as return type so
+&lt;code&gt;generate_strings&lt;/code&gt; happy to accept this new container.&lt;/p&gt;
+&lt;p&gt;
+Now we can support multiply without changing &lt;code&gt;generate_numbers&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;list &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; generate_strings(
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;map(
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; str &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;upcase(str) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    list_collect()
+  )
+)
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# =&amp;gt; [&amp;#34;FOO &amp;#34;, &amp;#34;BAR&amp;#34;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Not that we are passing the container as the last argument might look
+awkward but this is important from a readability point of view which
+will be obvious when we see more complex example.&lt;/p&gt;
+&lt;p&gt;
+Let&amp;#39;s implement few more basic operations&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; reduce(func, %&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;new(
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;init(collect)
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; elem, collect &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+        func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(elem, collect)
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; collect, status &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;finish(collect, status)
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+    )
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; map(func, %&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    reduce(
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; elem, collect &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;call(collect, func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(elem))
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+      collect
+    )
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; filter(func, %&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    reduce(
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; elem, collect &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(elem) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+          &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;call(collect, elem)
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;else&lt;/span&gt;
+          collect
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+      collect
+    )
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Equipped with these functions we can compose them however we want&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; format_string(label, collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;map(
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; str &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;#{&lt;/span&gt;&lt;span style=&#34;color:#50fa7b&#34;&gt;DateTime&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;utc_now()&lt;span style=&#34;color:#f1fa8c&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt; : &lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;#{&lt;/span&gt;str&lt;span style=&#34;color:#f1fa8c&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    collect
+  )
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+list &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;
+  generate_strings(
+    format_string(list_collect())
+  )
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# filter strings with length &amp;gt; 3 and write upcase of those strings&lt;/span&gt;
+string &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;
+  generate_strings(
+    &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;filter(
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; str &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;length(str) &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#bd93f9&#34;&gt;3&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+      &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;map(
+        &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; str &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;upcase(str) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+        string_collect()
+      )
+    )
+  )
+&lt;span style=&#34;color:#6272a4&#34;&gt;# =&amp;gt; &amp;#34;FOO BAR&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+All our functiosn works with &lt;code&gt;Collect&lt;/code&gt; type but since elixir already
+provides &lt;code&gt;Collectable&lt;/code&gt; protocol and many types and different libraries
+already implement it. All we need now is just to bridge the &lt;code&gt;Collect&lt;/code&gt;
+and &lt;code&gt;Collectable&lt;/code&gt; protocol for interoperability.&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; from_collectable(collectable) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;new(
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+      &lt;span style=&#34;color:#50fa7b&#34;&gt;Collectable&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;into(collectable)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; {acc, collector_func}, elem &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+      collector_func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(acc, {&lt;span style=&#34;color:#f1fa8c&#34;&gt;:cont&lt;/span&gt;, elem})
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; {acc, collector_func}, status &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+      collector_func&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;(acc, status)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+  )
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;defimpl&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collectable&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;for&lt;/span&gt;: &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; into(%&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+    collector_func &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt;
+      acc, {&lt;span style=&#34;color:#f1fa8c&#34;&gt;:cont&lt;/span&gt;, elem} &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;call(acc, elem)
+
+      acc, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:halt&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;finish(acc, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:halt&lt;/span&gt;)
+
+      acc, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:done&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;finish(acc, &lt;span style=&#34;color:#f1fa8c&#34;&gt;:done&lt;/span&gt;)
+    &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+
+    acc &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;init(collect)
+    {acc, collector_func}
+  &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
+&lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Example&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;mapset &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;
+  &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;into(
+    [&lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;..&lt;/span&gt;&lt;span style=&#34;color:#bd93f9&#34;&gt;100&lt;/span&gt;],
+    &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;map(
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; num &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; num &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#bd93f9&#34;&gt;2&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+      &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;from_collectable(&lt;span style=&#34;color:#50fa7b&#34;&gt;MapSet&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;new())
+    )
+  )
+
+
+&lt;span style=&#34;color:#6272a4&#34;&gt;# =&amp;gt; [2, 4, 6, 8 ...]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;
+And for the original example problem, we set out to solve. Which is how
+to split stream of logs&lt;/p&gt;
+&lt;div class=&#34;src src-elixir&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;:ok&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;
+  write_logs(
+    stream,
+    &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;filter(
+      &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt; str &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;start_with?(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;foo:&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;,
+      &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;from_collectable(&lt;span style=&#34;color:#50fa7b&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;stream!(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;foo.log&amp;#34;&lt;/span&gt;))
+    )
+  )&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;outline-container-headline-5&#34; class=&#34;outline-3&#34;&gt;
+&lt;h3 id=&#34;headline-5&#34;&gt;
+Further Reading
+&lt;/h3&gt;
+&lt;div id=&#34;outline-text-headline-5&#34; class=&#34;outline-text-3&#34;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;More about streams &lt;a href=&#34;https://ananthakumaran.in/2017/11/28/stream.html&#34;&gt;https://ananthakumaran.in/2017/11/28/stream.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Collectable doc &lt;a href=&#34;https://hexdocs.pm/elixir/Collectable.html&#34;&gt;https://hexdocs.pm/elixir/Collectable.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>Setting up Elixir in github-actions for windows</title>
@@ -20,11 +626,11 @@
       <description>&lt;p&gt;When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. &lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github actions&lt;/a&gt; makes this task easier than before but unfortunately &lt;a href=&#34;https://github.com/actions/setup-elixir&#34;&gt;elixir-setup&lt;/a&gt; does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library&lt;/p&gt;
 &lt;h2 id=&#34;using-chocolatey-package-manager&#34;&gt;Using Chocolatey package manager&lt;/h2&gt;
 &lt;p&gt;We can use &lt;a href=&#34;https://github.com/marketplace/actions/chocolatey-action&#34;&gt;Chocolatey Action&lt;/a&gt; install elixir. Chocolatey also installs Erlang as elixir dependency for us.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;choco install elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;choco install elixir
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;But we can&amp;rsquo;t access Elixir or mix yet. With github-actions, we have to explicitly update PATH environment variable using an &lt;a href=&#34;https://github.community/t/append-path-on-windows/16205/5&#34;&gt;undocumented&lt;/a&gt; special syntax&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&amp;#34;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our workflow for tests might look like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
 &lt;span style=&#34;color:#ff79c6&#34;&gt;on&lt;/span&gt;: push
 &lt;span style=&#34;color:#ff79c6&#34;&gt;jobs&lt;/span&gt;:
   &lt;span style=&#34;color:#ff79c6&#34;&gt;run_tests&lt;/span&gt;:
@@ -63,7 +669,7 @@
 &lt;li&gt;add Elixir to path&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;This is slightly more complicated than our previous setup using chocolatey but it is faster and more flexible.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;name&lt;/span&gt;: Elixir
 &lt;span style=&#34;color:#ff79c6&#34;&gt;on&lt;/span&gt;: push
 &lt;span style=&#34;color:#ff79c6&#34;&gt;env&lt;/span&gt;:
   &lt;span style=&#34;color:#ff79c6&#34;&gt;OTP_VERSION&lt;/span&gt;: &lt;span style=&#34;color:#bd93f9&#34;&gt;22.2&lt;/span&gt;
@@ -141,7 +747,7 @@ to the source file from which beam file is generated. Since its done
 by Erlang, both Erlang and Elixir modules have this information as
 metadata. You can check this in &lt;code class=&#34;verbatim&#34;&gt;iex&lt;/code&gt;.&lt;/p&gt;
 &lt;div class=&#34;src src-elixir&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)
 [
   &lt;span style=&#34;color:#f1fa8c&#34;&gt;version&lt;/span&gt;: &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;7.2.6&amp;#39;&lt;/span&gt;,
   &lt;span style=&#34;color:#f1fa8c&#34;&gt;options&lt;/span&gt;: [],
@@ -184,7 +790,7 @@ you need to use &lt;code class=&#34;verbatim&#34;&gt;ref:&amp;lt;commit_sha&amp;
 &lt;p&gt;
 In my case, it will be&lt;/p&gt;
 &lt;div class=&#34;src src-bash&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;asdf plugin-add elixir
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;asdf plugin-add elixir
 asdf plugin-add erlang
 
 asdf install erlang 21.2
@@ -196,7 +802,7 @@ asdf global elixir ref:eb5679b&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;
 Now &lt;code class=&#34;verbatim&#34;&gt;source&lt;/code&gt; should point to correct local path for both Elixir and Erlang modules&lt;/p&gt;
 &lt;div class=&#34;src src-elixir&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;2&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:source&lt;/span&gt;]
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;2&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Enum&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:source&lt;/span&gt;]
 &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#39;/Users/akash/.asdf/installs/elixir/ref-eb5679b/lib/elixir/lib/enum.ex&amp;#39;&lt;/span&gt;
 
 iex(&lt;span style=&#34;color:#bd93f9&#34;&gt;3&lt;/span&gt;)&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;:ets&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;.&lt;/span&gt;module_info(&lt;span style=&#34;color:#f1fa8c&#34;&gt;:compile&lt;/span&gt;)[&lt;span style=&#34;color:#f1fa8c&#34;&gt;:source&lt;/span&gt;]
@@ -226,7 +832,7 @@ always open these files with read-only mode.&lt;/p&gt;
       
       <guid>/post/atoms_in_elixir/</guid>
       <description>&lt;div class=&#34;src src-elixir&#34;&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;:foo&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;:foo&lt;/span&gt;
 &lt;span style=&#34;color:#6272a4&#34;&gt;#=&amp;gt; :foo&lt;/span&gt;
 
 is_atom &lt;span style=&#34;color:#f1fa8c&#34;&gt;:foo&lt;/span&gt;

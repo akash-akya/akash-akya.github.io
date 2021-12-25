@@ -40,8 +40,8 @@
 <meta property="og:description" content="It&rsquo;s just about using fzf with kubectl" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/post/better-kubectl-interaction/" /><meta property="article:section" content="post" />
-<meta property="article:published_time" content="2020-08-14T22:40:57&#43;05:30" />
-<meta property="article:modified_time" content="2020-08-14T22:40:57&#43;05:30" />
+<meta property="article:published_time" content="2020-08-14T22:40:57+05:30" />
+<meta property="article:modified_time" content="2020-08-14T22:40:57+05:30" />
 
 
 <meta name="twitter:card" content="summary"/>
@@ -102,7 +102,7 @@
 <li>copy pod name</li>
 <li>run command with pod name as parameter</li>
 </ul>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ kubectl get pods
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ kubectl get pods
 NAME                                   READY   STATUS    RESTARTS   AGE
 consumer-654b7df6b-mfx46               1/1     Running   <span style="color:#bd93f9">0</span>          21d
 server-7df6b9903-oc9m6                 1/1     Running   <span style="color:#bd93f9">0</span>          22d
@@ -113,26 +113,26 @@ $ kubectl delete pod consumer-654b7df6b-mfx46
 <h3 id="subshell--fzfhttpsgithubcomjunegunnfzf-to-the-rescue">Subshell &amp; <a href="https://github.com/junegunn/fzf">fzf</a> to the rescue</h3>
 <p><code>$(...)</code> is way one of executing a command in separate shell. <code>$(...)</code> will be replaced with its output.</p>
 <p>Consider this</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkdir <span style="color:#ff79c6">$(</span><span style="color:#8be9fd;font-style:italic">read</span> name <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#f1fa8c">&#34;hello-</span><span style="color:#8be9fd;font-style:italic">$name</span><span style="color:#f1fa8c">&#34;</span><span style="color:#ff79c6">)</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkdir <span style="color:#ff79c6">$(</span><span style="color:#8be9fd;font-style:italic">read</span> name <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#f1fa8c">&#34;hello-</span><span style="color:#8be9fd;font-style:italic">$name</span><span style="color:#f1fa8c">&#34;</span><span style="color:#ff79c6">)</span>
 </code></pre></div><p>Here we read user input from STDIN and return it with a &ldquo;hello-&rdquo; prefix. If input is &ldquo;world&rdquo;, command will be mkdir hello-world. Important thing to note here is that subshell command is executed before root command, and we can use this to insert a parameter to the command.</p>
 <p>fzf gives an interactive user interface for &ldquo;choosing something&rdquo; from a list. It reads lines from STDIN, ask user for choice and writes this entry to STDOUT.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ls -1 | fzf | wc -c
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ls -1 | fzf | wc -c
 </code></pre></div><p>This returns count of characters in the filename depending on our choice.</p>
 <h3 id="combining-both">Combining both</h3>
 <p>We use subshell and fzf to dynamically select pod name and pass that to kubectl command template.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl delete pod <span style="color:#ff79c6">$(</span>kubectl get pods | fzf<span style="color:#ff79c6">)</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl delete pod <span style="color:#ff79c6">$(</span>kubectl get pods | fzf<span style="color:#ff79c6">)</span>
 </code></pre></div><p>We can use shell functions and alias to make this composable by add these to init file. such as <code>~/.profile</code> or <code>~/.oh-my-zsh/config.zsh</code></p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#ff79c6">function</span> kselect <span style="color:#ff79c6">{</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#ff79c6">function</span> kselect <span style="color:#ff79c6">{</span>
     kubectl get <span style="color:#f1fa8c">&#34;</span><span style="color:#8be9fd;font-style:italic">$@</span><span style="color:#f1fa8c">&#34;</span> --no-headers -o custom-columns<span style="color:#ff79c6">=</span>POD:.metadata.name | fzf --height 25% --border --exact
 <span style="color:#ff79c6">}</span>
 
 <span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_pod</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect pods&#39;</span>
 </code></pre></div><p>Now our command to:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl delete pod <span style="color:#ff79c6">$(</span>select_pod<span style="color:#ff79c6">)</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl delete pod <span style="color:#ff79c6">$(</span>select_pod<span style="color:#ff79c6">)</span>
 </code></pre></div><p><em>Select pod in action:</em>
 <img src="/images/select_pod.gif" alt="demo" title="Select pod in action!"></p>
 <p>We can use <code>kselect</code> for all kubernetes resource objects</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_deployment</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect deployment&#39;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_deployment</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect deployment&#39;</span>
 <span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_statefulset</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect statefulset&#39;</span>
 <span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_configmap</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect configmap&#39;</span>
 <span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_service</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect service&#39;</span>
