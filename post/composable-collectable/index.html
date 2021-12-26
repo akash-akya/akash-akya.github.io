@@ -629,7 +629,7 @@ and <code>Collectable</code> protocol for interoperability.</p>
   )
 <span style="color:#ff79c6">end</span>
 
-<span style="color:#8be9fd;font-style:italic">defimpl</span> <span style="color:#50fa7b">Collectable</span>, <span style="color:#f1fa8c">for</span>: <span style="color:#50fa7b">Coll</span> <span style="color:#ff79c6">do</span>
+<span style="color:#8be9fd;font-style:italic">defimpl</span> <span style="color:#50fa7b">Collectable</span>, <span style="color:#f1fa8c">for</span>: <span style="color:#50fa7b">Collect</span> <span style="color:#ff79c6">do</span>
   <span style="color:#8be9fd;font-style:italic">def</span> into(%<span style="color:#50fa7b">Collect</span>{} <span style="color:#ff79c6">=</span> collect) <span style="color:#ff79c6">do</span>
     collector_func <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">fn</span>
       acc, {<span style="color:#f1fa8c">:cont</span>, elem} <span style="color:#ff79c6">-&gt;</span>

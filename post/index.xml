@@ -551,7 +551,7 @@ and &lt;code&gt;Collectable&lt;/code&gt; protocol for interoperability.&lt;/p&gt
   )
 &lt;span style=&#34;color:#ff79c6&#34;&gt;end&lt;/span&gt;
 
-&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;defimpl&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collectable&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;for&lt;/span&gt;: &lt;span style=&#34;color:#50fa7b&#34;&gt;Coll&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
+&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;defimpl&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Collectable&lt;/span&gt;, &lt;span style=&#34;color:#f1fa8c&#34;&gt;for&lt;/span&gt;: &lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
   &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;def&lt;/span&gt; into(%&lt;span style=&#34;color:#50fa7b&#34;&gt;Collect&lt;/span&gt;{} &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; collect) &lt;span style=&#34;color:#ff79c6&#34;&gt;do&lt;/span&gt;
     collector_func &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;fn&lt;/span&gt;
       acc, {&lt;span style=&#34;color:#f1fa8c&#34;&gt;:cont&lt;/span&gt;, elem} &lt;span style=&#34;color:#ff79c6&#34;&gt;-&amp;gt;&lt;/span&gt;
