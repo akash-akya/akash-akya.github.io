@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>shell on *scratch*</title>
-    <link>/tags/shell/</link>
+    <link>https://akash-akya.github.io/tags/shell/</link>
     <description>Recent content in shell on *scratch*</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 14 Aug 2020 22:40:57 +0530</lastBuildDate><atom:link href="/tags/shell/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 14 Aug 2020 22:40:57 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/shell/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Better kubectl interaction</title>
-      <link>/post/better-kubectl-interaction/</link>
+      <link>https://akash-akya.github.io/post/better-kubectl-interaction/</link>
       <pubDate>Fri, 14 Aug 2020 22:40:57 +0530</pubDate>
       
-      <guid>/post/better-kubectl-interaction/</guid>
+      <guid>https://akash-akya.github.io/post/better-kubectl-interaction/</guid>
       <description>It&amp;rsquo;s just about using &lt;code&gt;fzf&lt;/code&gt; with &lt;code&gt;kubectl&lt;/code&gt;</description>
     </item>
     

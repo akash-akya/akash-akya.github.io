@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>vintage on *scratch*</title>
-    <link>/tags/vintage/</link>
+    <link>https://akash-akya.github.io/tags/vintage/</link>
     <description>Recent content in vintage on *scratch*</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 06 May 2021 21:19:30 +0530</lastBuildDate><atom:link href="/tags/vintage/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 06 May 2021 21:19:30 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/vintage/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Art in old textbook</title>
-      <link>/post/old_textbook_art/</link>
+      <link>https://akash-akya.github.io/post/old_textbook_art/</link>
       <pubDate>Thu, 06 May 2021 21:19:30 +0530</pubDate>
       
-      <guid>/post/old_textbook_art/</guid>
+      <guid>https://akash-akya.github.io/post/old_textbook_art/</guid>
       <description>Photo-realistic art form old textbook</description>
     </item>
     

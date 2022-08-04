@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>teaching on *scratch*</title>
-    <link>/tags/teaching/</link>
+    <link>https://akash-akya.github.io/tags/teaching/</link>
     <description>Recent content in teaching on *scratch*</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 11 Jun 2018 11:34:51 +0530</lastBuildDate><atom:link href="/tags/teaching/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 11 Jun 2018 11:34:51 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/teaching/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Programming languages for teaching</title>
-      <link>/post/programming-for-teaching/</link>
+      <link>https://akash-akya.github.io/post/programming-for-teaching/</link>
       <pubDate>Mon, 11 Jun 2018 11:34:51 +0530</pubDate>
       
-      <guid>/post/programming-for-teaching/</guid>
+      <guid>https://akash-akya.github.io/post/programming-for-teaching/</guid>
       <description>Dated rant about programming and limited understanding of teaching</description>
     </item>
     

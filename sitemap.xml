@@ -2,77 +2,77 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/</loc>
+    <loc>https://akash-akya.github.io/</loc>
     <lastmod>2021-05-06T21:19:30+05:30</lastmod>
   </url><url>
-    <loc>/post/old_textbook_art/</loc>
+    <loc>https://akash-akya.github.io/post/old_textbook_art/</loc>
     <lastmod>2021-05-06T21:19:30+05:30</lastmod>
   </url><url>
-    <loc>/post/</loc>
+    <loc>https://akash-akya.github.io/post/</loc>
     <lastmod>2021-05-06T21:19:30+05:30</lastmod>
   </url><url>
-    <loc>/tags/</loc>
+    <loc>https://akash-akya.github.io/tags/</loc>
     <lastmod>2021-05-06T21:19:30+05:30</lastmod>
   </url><url>
-    <loc>/tags/vintage/</loc>
+    <loc>https://akash-akya.github.io/tags/vintage/</loc>
     <lastmod>2021-05-06T21:19:30+05:30</lastmod>
   </url><url>
-    <loc>/tags/kannada/</loc>
+    <loc>https://akash-akya.github.io/tags/kannada/</loc>
     <lastmod>2021-02-16T22:40:57+05:30</lastmod>
   </url><url>
-    <loc>/tags/short-story/</loc>
+    <loc>https://akash-akya.github.io/tags/short-story/</loc>
     <lastmod>2021-02-16T22:40:57+05:30</lastmod>
   </url><url>
-    <loc>/post/gundana_philosophy/</loc>
+    <loc>https://akash-akya.github.io/post/gundana_philosophy/</loc>
     <lastmod>2021-02-16T22:40:57+05:30</lastmod>
   </url><url>
-    <loc>/tags/kumara-vyasa-bharatha/</loc>
+    <loc>https://akash-akya.github.io/tags/kumara-vyasa-bharatha/</loc>
     <lastmod>2020-09-08T23:49:19+05:30</lastmod>
   </url><url>
-    <loc>/post/kvb_karnana_janana/</loc>
+    <loc>https://akash-akya.github.io/post/kvb_karnana_janana/</loc>
     <lastmod>2020-09-08T23:49:19+05:30</lastmod>
   </url><url>
-    <loc>/post/better-kubectl-interaction/</loc>
+    <loc>https://akash-akya.github.io/post/better-kubectl-interaction/</loc>
     <lastmod>2020-08-14T22:40:57+05:30</lastmod>
   </url><url>
-    <loc>/tags/kubectl/</loc>
+    <loc>https://akash-akya.github.io/tags/kubectl/</loc>
     <lastmod>2020-08-14T22:40:57+05:30</lastmod>
   </url><url>
-    <loc>/tags/shell/</loc>
+    <loc>https://akash-akya.github.io/tags/shell/</loc>
     <lastmod>2020-08-14T22:40:57+05:30</lastmod>
   </url><url>
-    <loc>/tags/elixir/</loc>
+    <loc>https://akash-akya.github.io/tags/elixir/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
   </url><url>
-    <loc>/tags/github/</loc>
+    <loc>https://akash-akya.github.io/tags/github/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
   </url><url>
-    <loc>/tags/programming/</loc>
+    <loc>https://akash-akya.github.io/tags/programming/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
   </url><url>
-    <loc>/post/setting_up_elixir_in_github_actions_for_windows/</loc>
+    <loc>https://akash-akya.github.io/post/setting_up_elixir_in_github_actions_for_windows/</loc>
     <lastmod>2020-08-09T15:00:00+05:30</lastmod>
   </url><url>
-    <loc>/tags/emacs/</loc>
+    <loc>https://akash-akya.github.io/tags/emacs/</loc>
     <lastmod>2019-05-13T16:26:24+05:30</lastmod>
   </url><url>
-    <loc>/post/elixir_source_in_emacs/</loc>
+    <loc>https://akash-akya.github.io/post/elixir_source_in_emacs/</loc>
     <lastmod>2019-05-13T16:26:24+05:30</lastmod>
   </url><url>
-    <loc>/post/atoms_in_elixir/</loc>
+    <loc>https://akash-akya.github.io/post/atoms_in_elixir/</loc>
     <lastmod>2019-01-01T22:08:03+05:30</lastmod>
   </url><url>
-    <loc>/post/college-days/</loc>
+    <loc>https://akash-akya.github.io/post/college-days/</loc>
     <lastmod>2018-06-11T23:54:51+05:30</lastmod>
   </url><url>
-    <loc>/post/programming-for-teaching/</loc>
+    <loc>https://akash-akya.github.io/post/programming-for-teaching/</loc>
     <lastmod>2018-06-11T11:34:51+05:30</lastmod>
   </url><url>
-    <loc>/tags/teaching/</loc>
+    <loc>https://akash-akya.github.io/tags/teaching/</loc>
     <lastmod>2018-06-11T11:34:51+05:30</lastmod>
   </url><url>
-    <loc>/about/</loc>
+    <loc>https://akash-akya.github.io/about/</loc>
   </url><url>
-    <loc>/categories/</loc>
+    <loc>https://akash-akya.github.io/categories/</loc>
   </url>
 </urlset>
