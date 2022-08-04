@@ -319,7 +319,7 @@ jobs:
         run: mix.bat test
 </code></pre>
 <p>This brings down pipeline execution time from 6m 41s to 2m.</p>
-<p><img src="/images/ci.png" alt="new workflow" title="New pipeline execution time"></p>
+<p><img src="/images/setting_up_elixir_in_github_actions_for_windows/ci.png" alt="new workflow" title="New pipeline execution time"></p>
 <p>You can check working setup <a href="https://github.com/akash-akya/ex_cmd/blob/master/.github/workflows/elixir.yml">here</a></p>
 <p>Our new setup is still far from ideal. We are leaking Erlang installation path <code>C:\Program Files\erl10.6</code> which changes with Erlang version. Hopefully we get windows support in setup-elixir soon</p>
 </section>
