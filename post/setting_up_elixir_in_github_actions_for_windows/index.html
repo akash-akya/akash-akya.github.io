@@ -1,42 +1,99 @@
 <!DOCTYPE html>
 
 
-<html lang="en-us" data-theme="">
-<head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="not-ready text-sm lg:text-base" lang="en-us">
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  
+  <title>Setting up Elixir in github-actions for windows - *scratch*</title>
+
+  
+  <meta name="theme-color" />
+  
+  <meta name="description" content="Setting up Elixir in github actions for windows" />
+  <meta name="author" content="" />
+  
+
+  
+  
+  
+  
+  
+  
+  <link rel="preload stylesheet" as="style" href="/main.min.css" />
+
+  
+  
+  
+
+  <script
+    src="highlight.min.js"
+    onload="hljs.highlightAll();"
+  ></script>
+  
+
+  
+  
+  
     
-        
-<meta charset="utf-8">
-<meta name="HandheldFriendly" content="True">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer-when-downgrade">
+  
+  <link
+    rel="preload"
+    as="image"
+    href="theme.png"
+  />
 
-<title>Setting up Elixir in github-actions for windows - *scratch*</title>
-<meta name="description" content="Personal blog">
+  
+  
+  
+  
 
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="apple-touch-icon-precomposed" href="favicon.png">
+  
+  <link rel="preload" as="image" href="github.svg" />
+  
 
+  
+  <link rel="icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 
+  
+  <meta name="generator" content="Hugo 0.101.0" />
 
-    
+  
+  
 
-
-
-
-
-    
-    
-    
-
-    
-        <link rel="stylesheet" href="/css/style.84c1bc3a39c079af1327d737f4b888ce6f99b58a6a7716e82fdcc05bc2b913ba.css" integrity="sha256-hMG8OjnAea8TJ9c39LiIzm&#43;ZtYpqdxboL9zAW8K5E7o=">
-    
-
-
-
-
-
-<meta property="og:title" content="Setting up Elixir in github-actions for windows" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Setting up Elixir in github-actions for windows" />
 <meta property="og:description" content="Setting up Elixir in github actions for windows" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/post/setting_up_elixir_in_github_actions_for_windows/" /><meta property="article:section" content="post" />
@@ -44,88 +101,163 @@
 <meta property="article:modified_time" content="2020-08-09T15:00:00+05:30" />
 
 
-<meta name="twitter:card" content="summary"/>
+  
+  <meta itemprop="name" content="Setting up Elixir in github-actions for windows">
+<meta itemprop="description" content="Setting up Elixir in github actions for windows"><meta itemprop="datePublished" content="2020-08-09T15:00:00+05:30" />
+<meta itemprop="dateModified" content="2020-08-09T15:00:00+05:30" />
+<meta itemprop="wordCount" content="549">
+<meta itemprop="keywords" content="elixir,programming,github," />
+  
+  <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Setting up Elixir in github-actions for windows"/>
 <meta name="twitter:description" content="Setting up Elixir in github actions for windows"/>
 
-
-
-
-
-
-
-
-
-
-
-
-    
+  
+  
 </head>
-<body>
-    <a class="skip-main" href="#main">Skip to main content</a>
-    <div class="container">
-        <header class="common-header"> 
-            
-                <h1 class="site-title">
-    <a href="/"><b><code>*scratch*</code></b></a>
-</h1>
 
-    <nav>
-        
-        
-        <a class="" href="/about" title="About">About</a>
-        
-        <a class="" href="/tags/" title="Tags">Tags</a>
-        
-        <a class="" href="/" title="Archive">Archive</a>
-        
+  <body class="text-black duration-200 ease-out dark:text-white">
+    <header class="mx-auto flex h-[5rem] max-w-3xl px-8 lg:justify-center">
+  <div class="relative z-50 mr-auto flex items-center">
+    <a class="-translate-x-[1px] -translate-y-0.5 text-3xl font-bold" href=""
+      >*scratch*</a
+    >
+    <a
+      class="btn-dark ml-6 h-6 w-6 shrink-0 cursor-pointer [background:url(./theme.svg)_left_center/cover_no-repeat] dark:invert dark:[background-position:right]"
+    ></a>
+  </div>
+
+  <a
+    class="btn-menu relative z-50 -mr-8 flex h-[5rem] w-[5rem] shrink-0 cursor-pointer flex-col items-center justify-center gap-2.5 lg:hidden"
+  ></a>
+
+  <script>
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const htmlClass = document.documentElement.classList;
+    setTimeout(() => htmlClass.remove('not-ready'), 10);
+
+    const setDark = (newDark) => {
+      metaTheme.setAttribute('content', newDark ? '#000' : '#fbfbfb');
+      htmlClass[newDark ? 'add' : 'remove']('dark');
+      localStorage.setItem('dark', newDark);
+    };
+
+    
+    const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkVal = localStorage.getItem('dark');
+    setDark(darkVal ? darkVal === 'true' : darkScheme.matches);
+
+    
+    darkScheme.addEventListener('change', (event) => {
+      setDark(event.matches);
+    });
+
+    
+    const btnDark = document.querySelector('.btn-dark');
+    btnDark.addEventListener('click', () => {
+      setDark(localStorage.getItem('dark') !== 'true');
+    });
+
+    
+    const btnMenu = document.querySelector('.btn-menu');
+    btnMenu.addEventListener('click', () => {
+      htmlClass.toggle('open');
+    });
+  </script>
+
+  <div
+    class="nav-wrapper fixed inset-x-0 top-full z-40 flex h-full select-none flex-col justify-center pb-16 duration-200 dark:bg-black lg:static lg:h-auto lg:flex-row lg:!bg-transparent lg:pb-0 lg:transition-none"
+  >
+    
+    
+    <nav class="lg:ml-12 lg:flex lg:flex-row lg:items-center lg:space-x-6">
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/about"
+        >About</a
+      >
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/"
+        >Archive</a
+      >
+      
     </nav>
-
-
-
-
-            
-        </header>
-        <main id="main" tabindex="-1"> 
-            
     
+
     
-    <article class="post h-entry">
-        <header class="post-header">
-            <h1 class="p-name post-title">Setting up Elixir in github-actions for windows</h1>
-        </header>
-        <div class="content e-content">
-            <p>When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. <a href="https://github.com/features/actions">Github actions</a> makes this task easier than before but unfortunately <a href="https://github.com/actions/setup-elixir">elixir-setup</a> does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library</p>
+    <nav
+      class="mt-12 flex justify-center space-x-10 dark:invert lg:mt-0 lg:ml-12 lg:items-center lg:space-x-6"
+    >
+      
+      <a
+        class="h-8 w-8 [background:var(--url)_center_center/cover_no-repeat] lg:h-6 lg:w-6"
+        style="--url: url(./github.svg)"
+        href=" https://github.com/akash-akya "
+        target="_blank"
+      ></a>
+      
+    </nav>
+    
+  </div>
+</header>
+
+
+    <main
+      class="prose prose-neutral relative mx-auto min-h-[calc(100%-10rem)] max-w-3xl px-8 pt-20 pb-32 dark:prose-invert"
+    >
+      
+
+<article>
+  <header class="mb-20">
+    <h1 class="!my-0 pb-2.5">Setting up Elixir in github-actions for windows</h1>
+
+    
+    <div class="text-sm opacity-60">
+      
+      <time>Aug 9, 2020</time>
+      
+      
+    </div>
+    
+  </header>
+
+  <section><p>When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. <a href="https://github.com/features/actions">Github actions</a> makes this task easier than before but unfortunately <a href="https://github.com/actions/setup-elixir">elixir-setup</a> does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library</p>
 <h2 id="using-chocolatey-package-manager">Using Chocolatey package manager</h2>
 <p>We can use <a href="https://github.com/marketplace/actions/chocolatey-action">Chocolatey Action</a> install elixir. Chocolatey also installs Erlang as elixir dependency for us.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">choco install elixir
-</code></pre></div><p>But we can&rsquo;t access Elixir or mix yet. With github-actions, we have to explicitly update PATH environment variable using an <a href="https://github.community/t/append-path-on-windows/16205/5">undocumented</a> special syntax</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#f1fa8c">&#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&#34;</span>
-</code></pre></div><p>Our workflow for tests might look like this:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ff79c6">name</span>: Elixir
-<span style="color:#ff79c6">on</span>: push
-<span style="color:#ff79c6">jobs</span>:
-  <span style="color:#ff79c6">run_tests</span>:
-    <span style="color:#ff79c6">runs-on</span>: windows-latest
-    <span style="color:#ff79c6">steps</span>:
-      - <span style="color:#ff79c6">uses</span>: actions/checkout@v2
-      - <span style="color:#ff79c6">name</span>: Install Elixir
-        <span style="color:#ff79c6">uses</span>: crazy-max/ghaction-chocolatey@v1.2.2
-        <span style="color:#ff79c6">with</span>:
-          <span style="color:#ff79c6">args</span>: install elixir
-      - <span style="color:#ff79c6">name</span>: Update PATH
-        <span style="color:#ff79c6">run</span>: echo &#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&#34;
-      - <span style="color:#ff79c6">name</span>: Install Dependencies
-        <span style="color:#ff79c6">run</span>: |<span style="color:#f1fa8c">
-</span><span style="color:#f1fa8c">          mix local.hex --force
-</span><span style="color:#f1fa8c">          mix.bat deps.get</span>          
-      - <span style="color:#ff79c6">name</span>: Compile
-        <span style="color:#ff79c6">run</span>: mix.bat compile --force --warnings-as-errors
-      - <span style="color:#ff79c6">name</span>: Check format
-        <span style="color:#ff79c6">run</span>: mix.bat format --check-formatted
-      - <span style="color:#ff79c6">name</span>: Run Tests
-        <span style="color:#ff79c6">run</span>: mix.bat test
-</code></pre></div><p>This approach works, but it has few issues:</p>
+<pre><code class="language-shell">choco install elixir
+</code></pre>
+<p>But we can&rsquo;t access Elixir or mix yet. With github-actions, we have to explicitly update PATH environment variable using an <a href="https://github.community/t/append-path-on-windows/16205/5">undocumented</a> special syntax</p>
+<pre><code class="language-shell">echo &quot;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&quot;
+</code></pre>
+<p>Our workflow for tests might look like this:</p>
+<pre><code class="language-yaml">name: Elixir
+on: push
+jobs:
+  run_tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Elixir
+        uses: crazy-max/ghaction-chocolatey@v1.2.2
+        with:
+          args: install elixir
+      - name: Update PATH
+        run: echo &quot;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&quot;
+      - name: Install Dependencies
+        run: |
+          mix local.hex --force
+          mix.bat deps.get
+      - name: Compile
+        run: mix.bat compile --force --warnings-as-errors
+      - name: Check format
+        run: mix.bat format --check-formatted
+      - name: Run Tests
+        run: mix.bat test
+</code></pre>
+<p>This approach works, but it has few issues:</p>
 <h3 id="pipeline-is-slow">Pipeline is slow</h3>
 <p>When I tested this, the pipeline took 6m 41s. Installation alone took 6m 15s. We install Elixir and Erlang/OTP every time we run this pipeline. This includes downloading packages, extracting and installing.</p>
 <h3 id="changing-elixir-and-erlang-version-is-not-easy">Changing Elixir and Erlang version is not easy</h3>
@@ -141,216 +273,121 @@
 <li>add Elixir to path</li>
 </ul>
 <p>This is slightly more complicated than our previous setup using chocolatey but it is faster and more flexible.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ff79c6">name</span>: Elixir
-<span style="color:#ff79c6">on</span>: push
-<span style="color:#ff79c6">env</span>:
-  <span style="color:#ff79c6">OTP_VERSION</span>: <span style="color:#bd93f9">22.2</span>
-  <span style="color:#ff79c6">ELIXIR_VERSION</span>: <span style="color:#bd93f9">1.9.4</span>
-<span style="color:#ff79c6">jobs</span>:
-  <span style="color:#ff79c6">run_tests</span>:
-    <span style="color:#ff79c6">runs-on</span>: windows-latest
-    <span style="color:#ff79c6">name</span>: Windows
-    <span style="color:#ff79c6">steps</span>:
-      - <span style="color:#ff79c6">name</span>: Cache erlang
-        <span style="color:#ff79c6">uses</span>: actions/cache@v2
-        <span style="color:#ff79c6">id</span>: erlang_cache
-        <span style="color:#ff79c6">with</span>:
-          <span style="color:#ff79c6">path</span>: C:\Program Files\erl10.6
-          <span style="color:#ff79c6">key</span>: erlang-${{ runner.os }}-${{ env.OTP_VERSION }}
-      - <span style="color:#ff79c6">name</span>: Download and install erlang
-        <span style="color:#ff79c6">if</span>: steps.erlang_cache.outputs.cache-hit != &#39;true&#39;
-        <span style="color:#ff79c6">run</span>: |<span style="color:#f1fa8c">
-</span><span style="color:#f1fa8c">          Invoke-WebRequest &#34;http://erlang.org/download/otp_win64_$env:OTP_VERSION.exe&#34; -OutFile &#34;C:\otp_win64_$env:OTP_VERSION.exe&#34;
-</span><span style="color:#f1fa8c">          Start-Process -Wait &#34;C:\otp_win64_$env:OTP_VERSION.exe&#34; /S</span>          
-      - <span style="color:#ff79c6">name</span>: Add erlang to path
-        <span style="color:#ff79c6">run</span>: echo &#34;##[add-path]C:\Program Files\erl10.6\bin&#34;
-      - <span style="color:#ff79c6">name</span>: Cache Elixir
-        <span style="color:#ff79c6">uses</span>: actions/cache@v2
-        <span style="color:#ff79c6">id</span>: elixir_cache
-        <span style="color:#ff79c6">with</span>:
-          <span style="color:#ff79c6">path</span>: c:\elixir
-          <span style="color:#ff79c6">key</span>: elixir-${{ runner.os }}-${{ env.ELIXIR_VERSION }}
-      - <span style="color:#ff79c6">name</span>: Download and install Elixir
-        <span style="color:#ff79c6">if</span>: steps.elixir_cache.outputs.cache-hit != &#39;true&#39;
-        <span style="color:#ff79c6">run</span>: |<span style="color:#f1fa8c">
-</span><span style="color:#f1fa8c">          Invoke-WebRequest &#34;https://github.com/elixir-lang/elixir/releases/download/v$env:ELIXIR_VERSION/Precompiled.zip&#34; -OutFile &#34;C:\elixir_$env:ELIXIR_VERSION.zip&#34;
-</span><span style="color:#f1fa8c">          Expand-Archive &#34;C:\elixir_$env:ELIXIR_VERSION.zip&#34; -DestinationPath c:\elixir</span>          
-      - <span style="color:#ff79c6">name</span>: Add elixir to path
-        <span style="color:#ff79c6">run</span>: echo &#34;##[add-path]C:\elixir\bin&#34;
-      - <span style="color:#ff79c6">name</span>: Install Dependencies
-        <span style="color:#ff79c6">run</span>: |<span style="color:#f1fa8c">
-</span><span style="color:#f1fa8c">          mix local.hex --force
-</span><span style="color:#f1fa8c">          mix.bat deps.get</span>          
-      - <span style="color:#ff79c6">name</span>: Compile
-        <span style="color:#ff79c6">run</span>: mix.bat compile --force --warnings-as-errors
-      - <span style="color:#ff79c6">name</span>: Check format
-        <span style="color:#ff79c6">run</span>: mix.bat format --check-formatted
-      - <span style="color:#ff79c6">name</span>: Run Tests
-        <span style="color:#ff79c6">run</span>: mix.bat test
-</code></pre></div><p>This brings down pipeline execution time from 6m 41s to 2m.</p>
+<pre><code class="language-yaml">name: Elixir
+on: push
+env:
+  OTP_VERSION: 22.2
+  ELIXIR_VERSION: 1.9.4
+jobs:
+  run_tests:
+    runs-on: windows-latest
+    name: Windows
+    steps:
+      - name: Cache erlang
+        uses: actions/cache@v2
+        id: erlang_cache
+        with:
+          path: C:\Program Files\erl10.6
+          key: erlang-${{ runner.os }}-${{ env.OTP_VERSION }}
+      - name: Download and install erlang
+        if: steps.erlang_cache.outputs.cache-hit != 'true'
+        run: |
+          Invoke-WebRequest &quot;http://erlang.org/download/otp_win64_$env:OTP_VERSION.exe&quot; -OutFile &quot;C:\otp_win64_$env:OTP_VERSION.exe&quot;
+          Start-Process -Wait &quot;C:\otp_win64_$env:OTP_VERSION.exe&quot; /S
+      - name: Add erlang to path
+        run: echo &quot;##[add-path]C:\Program Files\erl10.6\bin&quot;
+      - name: Cache Elixir
+        uses: actions/cache@v2
+        id: elixir_cache
+        with:
+          path: c:\elixir
+          key: elixir-${{ runner.os }}-${{ env.ELIXIR_VERSION }}
+      - name: Download and install Elixir
+        if: steps.elixir_cache.outputs.cache-hit != 'true'
+        run: |
+          Invoke-WebRequest &quot;https://github.com/elixir-lang/elixir/releases/download/v$env:ELIXIR_VERSION/Precompiled.zip&quot; -OutFile &quot;C:\elixir_$env:ELIXIR_VERSION.zip&quot;
+          Expand-Archive &quot;C:\elixir_$env:ELIXIR_VERSION.zip&quot; -DestinationPath c:\elixir
+      - name: Add elixir to path
+        run: echo &quot;##[add-path]C:\elixir\bin&quot;
+      - name: Install Dependencies
+        run: |
+          mix local.hex --force
+          mix.bat deps.get
+      - name: Compile
+        run: mix.bat compile --force --warnings-as-errors
+      - name: Check format
+        run: mix.bat format --check-formatted
+      - name: Run Tests
+        run: mix.bat test
+</code></pre>
+<p>This brings down pipeline execution time from 6m 41s to 2m.</p>
 <p><img src="/images/ci.png" alt="new workflow" title="New pipeline execution time"></p>
 <p>You can check working setup <a href="https://github.com/akash-akya/ex_cmd/blob/master/.github/workflows/elixir.yml">here</a></p>
 <p>Our new setup is still far from ideal. We are leaking Erlang installation path <code>C:\Program Files\erl10.6</code> which changes with Erlang version. Hopefully we get windows support in setup-elixir soon</p>
+</section>
 
-        </div>
-        
-
+  
+  
+  <footer class="mt-12 flex flex-wrap">
+     
+    <a
+      class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
+      href="tags/elixir"
+      >elixir</a
+    >
+     
+    <a
+      class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
+      href="tags/programming"
+      >programming</a
+    >
+     
+    <a
+      class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
+      href="tags/github"
+      >github</a
+    >
     
+  </footer>
+  
 
-
-<div class="post-info">
+  
+  
+  
+  <nav class="mt-24 flex rounded-lg bg-black/[3%] text-lg dark:bg-white/[8%]">
     
-        <div class="post-date dt-published">2020-08-09</div>
-    
-    
-    <a class="post-hidden-url u-url" href="/post/setting_up_elixir_in_github_actions_for_windows/">/post/setting_up_elixir_in_github_actions_for_windows/</a>
-    <a href= class="p-name p-author post-hidden-author h-card" rel="me">Akash</a>
-
-
-    <div class="post-taxonomies">
-        
-            
-                <ul class="post-tags">
-                    
-                        <li><a href="tags/elixir">#elixir</a></li>
-                    
-                        <li><a href="tags/programming">#programming</a></li>
-                    
-                        <li><a href="tags/github">#github</a></li>
-                    
-                </ul>
-        
-    </div>
-</div>
-
-    </article>
-
-    
-        
-    <div class="pagination post-pagination">
-        <div class="left pagination-item ">
-            
-                <a href="/post/better-kubectl-interaction/">Better kubectl interaction</a>
-            
-        </div>
-        <div class="right pagination-item ">
-            
-                <a href="/post/elixir_source_in_emacs/">Navigating to Elixir source in Emacs</a>
-            
-        </div>
-    </div>
-
-
-
-
-    
-
-    
-
-    
-
-
-        </main>
-        
-            <footer class="common-footer">
+    <a class="flex w-1/2 items-center p-6 pr-3 no-underline" href="/post/better-kubectl-interaction/"
+      ><span class="mr-1.5">←</span><span>Better kubectl interaction</span></a
+    >
     
     
-
-    <div class="common-footer-bottom">
-        
-        <div class="copyright">
-            <p>© Akash, 2021<br>
-            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
-            
-            </p>  
-        </div> 
-
-        
-
+    <a
+      class="ml-auto flex w-1/2 items-center justify-end p-6 pl-3 no-underline"
+      href="/post/elixir_source_in_emacs/"
+      ><span>Navigating to Elixir source in Emacs</span><span class="ml-1.5">→</span></a
+    >
     
+  </nav>
+  
+
+  
+  
+</article>
 
 
+    </main>
 
-    <button class="theme-switcher">
-        Dark theme
-    </button>
-
-    <script>
-    const STORAGE_KEY = 'user-color-scheme'
-    const defaultTheme = "auto"
-
-    let currentTheme
-    let switchButton
-    let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
-
-    const autoChangeScheme = e => {
-        currentTheme = e.matches ? 'dark' : 'light'
-        document.documentElement.setAttribute('data-theme', currentTheme)
-        changeButtonText()
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        switchButton = document.querySelector('.theme-switcher')
-        currentTheme = detectCurrentScheme()
-        if (currentTheme == 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark')
-        }
-        if (currentTheme == 'auto') {
-            autoChangeScheme(autoDefinedScheme);
-            autoDefinedScheme.addListener(autoChangeScheme);
-        }
-        changeButtonText()
-        switchButton.addEventListener('click', switchTheme, false)
-    })
-
-    function detectCurrentScheme() {
-        if (localStorage.getItem(STORAGE_KEY)) {
-            return localStorage.getItem(STORAGE_KEY)
-        } 
-        if (defaultTheme) {
-            return defaultTheme
-        } 
-        if (!window.matchMedia) {
-            return 'light'
-        } 
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark'
-        }
-        return 'light'
-    }
-
-    function changeButtonText()
-    {   
-        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
-    }
-
-    function switchTheme(e) {
-        if (currentTheme == 'dark') {
-            localStorage.setItem(STORAGE_KEY, 'light')
-            document.documentElement.setAttribute('data-theme', 'light')
-            currentTheme = 'light'
-        } else {
-            localStorage.setItem(STORAGE_KEY, 'dark')
-            document.documentElement.setAttribute('data-theme', 'dark')
-            currentTheme = 'dark'
-        }
-        changeButtonText()
-    }
-    </script>
-   
-    </div>
-
-    <p class="h-card vcard">
-
-    <a href= class="p-name u-url url fn" rel="me">Akash</a> 
-
-    
-
-    
-</p> 
+    <footer class="opaco mx-auto flex h-[5rem] max-w-3xl items-center px-8 text-[0.9em] opacity-60">
+  <div class="mr-auto">
+    &copy; 2022
+    <a class="link" href="">*scratch*</a>
+  </div>
+  <a class="link mx-6" href="https://gohugo.io/" rel="noopener" target="_blank">Powered by Hugo️️</a
+  >️
+  <a class="link" href="https://github.com/nanxiaobei/hugo-paper" rel="noopener" target="_blank"
+    >▷ Paper 6</a
+  >
 </footer>
 
-        
-    </div>
-</body>
+  </body>
 </html>

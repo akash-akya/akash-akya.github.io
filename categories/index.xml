@@ -3,12 +3,8 @@
   <channel>
     <title>Categories on *scratch*</title>
     <link>/categories/</link>
-    <description>*scratch* (Categories)</description>
+    <description>Recent content in Categories on *scratch*</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    
-    <atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <language>en-us</language><atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

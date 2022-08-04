@@ -1,244 +1,248 @@
 <!DOCTYPE html>
 
 
-<html lang="en-us" data-theme="">
-<head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="not-ready text-sm lg:text-base" lang="en-us">
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  
+  <title>emacs - *scratch*</title>
+
+  
+  <meta name="theme-color" />
+  
+  <meta name="description" content="Personal blog" />
+  <meta name="author" content="" />
+  
+
+  
+  
+  
+  
+  
+  
+  <link rel="preload stylesheet" as="style" href="/main.min.css" />
+
+  
+
+  
+  
+  
     
-        
-<meta charset="utf-8">
-<meta name="HandheldFriendly" content="True">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer-when-downgrade">
+  
+  <link
+    rel="preload"
+    as="image"
+    href="theme.png"
+  />
 
-<title>emacs - *scratch*</title>
-<meta name="description" content="Personal blog">
+  
+  
+  
+  
 
-<link rel="alternate" type="application/rss+xml" href="/tags/emacs/index.xml" title="*scratch*" />
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="apple-touch-icon-precomposed" href="favicon.png">
+  
+  <link rel="preload" as="image" href="github.svg" />
+  
 
+  
+  <link rel="icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 
+  
+  <meta name="generator" content="Hugo 0.101.0" />
 
-    
+  
+  
+  <link
+    rel="alternate"
+    type="application/rss&#43;xml"
+    href="/tags/emacs/index.xml"
+    title="*scratch*"
+  />
+  
 
-
-
-
-
-    
-    
-    
-
-    
-        <link rel="stylesheet" href="/css/style.84c1bc3a39c079af1327d737f4b888ce6f99b58a6a7716e82fdcc05bc2b913ba.css" integrity="sha256-hMG8OjnAea8TJ9c39LiIzm&#43;ZtYpqdxboL9zAW8K5E7o=">
-    
-
-
-
-
-
-<meta property="og:title" content="emacs" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="emacs" />
 <meta property="og:description" content="Personal blog" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="/tags/emacs/" />
 
 
-<meta name="twitter:card" content="summary"/>
+  
+  <meta itemprop="name" content="emacs">
+<meta itemprop="description" content="Personal blog">
+  
+  <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="emacs"/>
 <meta name="twitter:description" content="Personal blog"/>
 
-
-
-
-
-
-
-
-
-
-
-
-    
+  
+  
 </head>
-<body>
-    <a class="skip-main" href="#main">Skip to main content</a>
-    <div class="container">
-        <header class="common-header"> 
-            
-                <h1 class="site-title">
-    <a href="/"><b><code>*scratch*</code></b></a>
-</h1>
 
-    <nav>
-        
-        
-        <a class="" href="/about" title="About">About</a>
-        
-        <a class="" href="/tags/" title="Tags">Tags</a>
-        
-        <a class="" href="/" title="Archive">Archive</a>
-        
+  <body class="text-black duration-200 ease-out dark:text-white">
+    <header class="mx-auto flex h-[5rem] max-w-3xl px-8 lg:justify-center">
+  <div class="relative z-50 mr-auto flex items-center">
+    <a class="-translate-x-[1px] -translate-y-0.5 text-3xl font-bold" href=""
+      >*scratch*</a
+    >
+    <a
+      class="btn-dark ml-6 h-6 w-6 shrink-0 cursor-pointer [background:url(./theme.svg)_left_center/cover_no-repeat] dark:invert dark:[background-position:right]"
+    ></a>
+  </div>
+
+  <a
+    class="btn-menu relative z-50 -mr-8 flex h-[5rem] w-[5rem] shrink-0 cursor-pointer flex-col items-center justify-center gap-2.5 lg:hidden"
+  ></a>
+
+  <script>
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const htmlClass = document.documentElement.classList;
+    setTimeout(() => htmlClass.remove('not-ready'), 10);
+
+    const setDark = (newDark) => {
+      metaTheme.setAttribute('content', newDark ? '#000' : '#fbfbfb');
+      htmlClass[newDark ? 'add' : 'remove']('dark');
+      localStorage.setItem('dark', newDark);
+    };
+
+    
+    const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkVal = localStorage.getItem('dark');
+    setDark(darkVal ? darkVal === 'true' : darkScheme.matches);
+
+    
+    darkScheme.addEventListener('change', (event) => {
+      setDark(event.matches);
+    });
+
+    
+    const btnDark = document.querySelector('.btn-dark');
+    btnDark.addEventListener('click', () => {
+      setDark(localStorage.getItem('dark') !== 'true');
+    });
+
+    
+    const btnMenu = document.querySelector('.btn-menu');
+    btnMenu.addEventListener('click', () => {
+      htmlClass.toggle('open');
+    });
+  </script>
+
+  <div
+    class="nav-wrapper fixed inset-x-0 top-full z-40 flex h-full select-none flex-col justify-center pb-16 duration-200 dark:bg-black lg:static lg:h-auto lg:flex-row lg:!bg-transparent lg:pb-0 lg:transition-none"
+  >
+    
+    
+    <nav class="lg:ml-12 lg:flex lg:flex-row lg:items-center lg:space-x-6">
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/about"
+        >About</a
+      >
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/"
+        >Archive</a
+      >
+      
     </nav>
-
-
-
-
-            
-        </header>
-        <main id="main" tabindex="-1"> 
-            
-    <h1>Tag: emacs</h1>
-    <div class="post-info">
-        <a href="/tags">To all tags</a>
-    </div>
-    
-        <article class="post-list h-feed">
-    <header class="post-header">
-        <h1 class="p-name post-title"><a class="u-url" href="/post/elixir_source_in_emacs/">Navigating to Elixir source in Emacs</a></h1>
-    </header>
-
-    <div class="content post-summary p-summary">
-        Getting goto-definition work for Elixir core functions in Emacs
-    </div>
-    
-    
     
 
     
-
-
-<div class="post-info">
+    <nav
+      class="mt-12 flex justify-center space-x-10 dark:invert lg:mt-0 lg:ml-12 lg:items-center lg:space-x-6"
+    >
+      
+      <a
+        class="h-8 w-8 [background:var(--url)_center_center/cover_no-repeat] lg:h-6 lg:w-6"
+        style="--url: url(./github.svg)"
+        href=" https://github.com/akash-akya "
+        target="_blank"
+      ></a>
+      
+    </nav>
     
-        <div class="post-date dt-published">2019-05-13</div>
-    
-    
-    <a class="post-hidden-url u-url" href="/post/elixir_source_in_emacs/">/post/elixir_source_in_emacs/</a>
-    <a href= class="p-name p-author post-hidden-author h-card" rel="me">Akash</a>
+  </div>
+</header>
 
 
-    <div class="post-taxonomies">
-        
-            
-                <ul class="post-tags">
-                    
-                        <li><a href="tags/elixir">#elixir</a></li>
-                    
-                        <li><a href="tags/programming">#programming</a></li>
-                    
-                        <li><a href="tags/emacs">#emacs</a></li>
-                    
-                </ul>
-        
-    </div>
-</div>
-
-</article>
-    
-    
+    <main
+      class="prose prose-neutral relative mx-auto min-h-[calc(100%-10rem)] max-w-3xl px-8 pt-20 pb-32 dark:prose-invert"
+    >
+      
 
 
 
-        </main>
-        
-            <footer class="common-footer">
-    
-    
-
-    <div class="common-footer-bottom">
-        
-        <div class="copyright">
-            <p>© Akash, 2021<br>
-            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
-            
-            </p>  
-        </div> 
-
-        
-
-    
+<h1 class="mb-24">emacs</h1>
 
 
 
-    <button class="theme-switcher">
-        Dark theme
-    </button>
 
-    <script>
-    const STORAGE_KEY = 'user-color-scheme'
-    const defaultTheme = "auto"
 
-    let currentTheme
-    let switchButton
-    let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
 
-    const autoChangeScheme = e => {
-        currentTheme = e.matches ? 'dark' : 'light'
-        document.documentElement.setAttribute('data-theme', currentTheme)
-        changeButtonText()
-    }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        switchButton = document.querySelector('.theme-switcher')
-        currentTheme = detectCurrentScheme()
-        if (currentTheme == 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark')
-        }
-        if (currentTheme == 'auto') {
-            autoChangeScheme(autoDefinedScheme);
-            autoDefinedScheme.addListener(autoChangeScheme);
-        }
-        changeButtonText()
-        switchButton.addEventListener('click', switchTheme, false)
-    })
+ 
 
-    function detectCurrentScheme() {
-        if (localStorage.getItem(STORAGE_KEY)) {
-            return localStorage.getItem(STORAGE_KEY)
-        } 
-        if (defaultTheme) {
-            return defaultTheme
-        } 
-        if (!window.matchMedia) {
-            return 'light'
-        } 
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark'
-        }
-        return 'light'
-    }
 
-    function changeButtonText()
-    {   
-        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
-    }
 
-    function switchTheme(e) {
-        if (currentTheme == 'dark') {
-            localStorage.setItem(STORAGE_KEY, 'light')
-            document.documentElement.setAttribute('data-theme', 'light')
-            currentTheme = 'light'
-        } else {
-            localStorage.setItem(STORAGE_KEY, 'dark')
-            document.documentElement.setAttribute('data-theme', 'dark')
-            currentTheme = 'dark'
-        }
-        changeButtonText()
-    }
-    </script>
-   
-    </div>
 
-    <p class="h-card vcard">
+<section class="relative my-10 first-of-type:mt-0 last-of-type:mb-0">
+  <h2 class="!my-0 pb-1 !leading-none">Navigating to Elixir source in Emacs</h2>
+  <time class="text-sm opacity-60">May 13, 2019</time>
+  <a class="absolute inset-0" href="/post/elixir_source_in_emacs/"></a>
+</section>
 
-    <a href= class="p-name u-url url fn" rel="me">Akash</a> 
 
-    
 
-    
-</p> 
+
+
+
+    </main>
+
+    <footer class="opaco mx-auto flex h-[5rem] max-w-3xl items-center px-8 text-[0.9em] opacity-60">
+  <div class="mr-auto">
+    &copy; 2022
+    <a class="link" href="">*scratch*</a>
+  </div>
+  <a class="link mx-6" href="https://gohugo.io/" rel="noopener" target="_blank">Powered by Hugo️️</a
+  >️
+  <a class="link" href="https://github.com/nanxiaobei/hugo-paper" rel="noopener" target="_blank"
+    >▷ Paper 6</a
+  >
 </footer>
 
-        
-    </div>
-</body>
+  </body>
 </html>

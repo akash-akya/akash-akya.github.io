@@ -1,42 +1,99 @@
 <!DOCTYPE html>
 
 
-<html lang="en-us" data-theme="">
-<head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="not-ready text-sm lg:text-base" lang="en-us">
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  
+  <title>Better kubectl interaction - *scratch*</title>
+
+  
+  <meta name="theme-color" />
+  
+  <meta name="description" content="It&rsquo;s just about using fzf with kubectl" />
+  <meta name="author" content="" />
+  
+
+  
+  
+  
+  
+  
+  
+  <link rel="preload stylesheet" as="style" href="/main.min.css" />
+
+  
+  
+  
+
+  <script
+    src="highlight.min.js"
+    onload="hljs.highlightAll();"
+  ></script>
+  
+
+  
+  
+  
     
-        
-<meta charset="utf-8">
-<meta name="HandheldFriendly" content="True">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer-when-downgrade">
+  
+  <link
+    rel="preload"
+    as="image"
+    href="theme.png"
+  />
 
-<title>Better kubectl interaction - *scratch*</title>
-<meta name="description" content="Personal blog">
+  
+  
+  
+  
 
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="apple-touch-icon-precomposed" href="favicon.png">
+  
+  <link rel="preload" as="image" href="github.svg" />
+  
 
+  
+  <link rel="icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 
+  
+  <meta name="generator" content="Hugo 0.101.0" />
 
-    
+  
+  
 
-
-
-
-
-    
-    
-    
-
-    
-        <link rel="stylesheet" href="/css/style.84c1bc3a39c079af1327d737f4b888ce6f99b58a6a7716e82fdcc05bc2b913ba.css" integrity="sha256-hMG8OjnAea8TJ9c39LiIzm&#43;ZtYpqdxboL9zAW8K5E7o=">
-    
-
-
-
-
-
-<meta property="og:title" content="Better kubectl interaction" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Better kubectl interaction" />
 <meta property="og:description" content="It&rsquo;s just about using fzf with kubectl" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/post/better-kubectl-interaction/" /><meta property="article:section" content="post" />
@@ -44,257 +101,236 @@
 <meta property="article:modified_time" content="2020-08-14T22:40:57+05:30" />
 
 
-<meta name="twitter:card" content="summary"/>
+  
+  <meta itemprop="name" content="Better kubectl interaction">
+<meta itemprop="description" content="It&rsquo;s just about using fzf with kubectl"><meta itemprop="datePublished" content="2020-08-14T22:40:57+05:30" />
+<meta itemprop="dateModified" content="2020-08-14T22:40:57+05:30" />
+<meta itemprop="wordCount" content="507">
+<meta itemprop="keywords" content="shell,kubectl," />
+  
+  <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Better kubectl interaction"/>
 <meta name="twitter:description" content="It&rsquo;s just about using fzf with kubectl"/>
 
-
-
-
-
-
-
-
-
-
-
-
-    
+  
+  
 </head>
-<body>
-    <a class="skip-main" href="#main">Skip to main content</a>
-    <div class="container">
-        <header class="common-header"> 
-            
-                <h1 class="site-title">
-    <a href="/"><b><code>*scratch*</code></b></a>
-</h1>
 
-    <nav>
-        
-        
-        <a class="" href="/about" title="About">About</a>
-        
-        <a class="" href="/tags/" title="Tags">Tags</a>
-        
-        <a class="" href="/" title="Archive">Archive</a>
-        
+  <body class="text-black duration-200 ease-out dark:text-white">
+    <header class="mx-auto flex h-[5rem] max-w-3xl px-8 lg:justify-center">
+  <div class="relative z-50 mr-auto flex items-center">
+    <a class="-translate-x-[1px] -translate-y-0.5 text-3xl font-bold" href=""
+      >*scratch*</a
+    >
+    <a
+      class="btn-dark ml-6 h-6 w-6 shrink-0 cursor-pointer [background:url(./theme.svg)_left_center/cover_no-repeat] dark:invert dark:[background-position:right]"
+    ></a>
+  </div>
+
+  <a
+    class="btn-menu relative z-50 -mr-8 flex h-[5rem] w-[5rem] shrink-0 cursor-pointer flex-col items-center justify-center gap-2.5 lg:hidden"
+  ></a>
+
+  <script>
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const htmlClass = document.documentElement.classList;
+    setTimeout(() => htmlClass.remove('not-ready'), 10);
+
+    const setDark = (newDark) => {
+      metaTheme.setAttribute('content', newDark ? '#000' : '#fbfbfb');
+      htmlClass[newDark ? 'add' : 'remove']('dark');
+      localStorage.setItem('dark', newDark);
+    };
+
+    
+    const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkVal = localStorage.getItem('dark');
+    setDark(darkVal ? darkVal === 'true' : darkScheme.matches);
+
+    
+    darkScheme.addEventListener('change', (event) => {
+      setDark(event.matches);
+    });
+
+    
+    const btnDark = document.querySelector('.btn-dark');
+    btnDark.addEventListener('click', () => {
+      setDark(localStorage.getItem('dark') !== 'true');
+    });
+
+    
+    const btnMenu = document.querySelector('.btn-menu');
+    btnMenu.addEventListener('click', () => {
+      htmlClass.toggle('open');
+    });
+  </script>
+
+  <div
+    class="nav-wrapper fixed inset-x-0 top-full z-40 flex h-full select-none flex-col justify-center pb-16 duration-200 dark:bg-black lg:static lg:h-auto lg:flex-row lg:!bg-transparent lg:pb-0 lg:transition-none"
+  >
+    
+    
+    <nav class="lg:ml-12 lg:flex lg:flex-row lg:items-center lg:space-x-6">
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/about"
+        >About</a
+      >
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/"
+        >Archive</a
+      >
+      
     </nav>
-
-
-
-
-            
-        </header>
-        <main id="main" tabindex="-1"> 
-            
     
+
     
-    <article class="post h-entry">
-        <header class="post-header">
-            <h1 class="p-name post-title">Better kubectl interaction</h1>
-        </header>
-        <div class="content e-content">
-            <p>As many of you know, <a href="https://kubernetes.io/docs/reference/kubectl/kubectl/">kubectl</a> is official command-line client for interacting with the kubernetes cluster. Although kubectl allow us to do almost anything with the cluster, it has a convoluted interface. Especially for interacting with basic entities such pods. Pods are ephemeral entities, and each instance gets an unique name. If a deployment name is <code>kafka-consumer</code> then pods names might be <code>kafka-consumer-654b7df6b-mfx46</code>, <code>kafka-consumer-654b7df6b-yy49i</code>. This name changes every time pod is updated or restarted and all commands which needs to interact with pods needs this unique pod name as its parameter.</p>
+    <nav
+      class="mt-12 flex justify-center space-x-10 dark:invert lg:mt-0 lg:ml-12 lg:items-center lg:space-x-6"
+    >
+      
+      <a
+        class="h-8 w-8 [background:var(--url)_center_center/cover_no-repeat] lg:h-6 lg:w-6"
+        style="--url: url(./github.svg)"
+        href=" https://github.com/akash-akya "
+        target="_blank"
+      ></a>
+      
+    </nav>
+    
+  </div>
+</header>
+
+
+    <main
+      class="prose prose-neutral relative mx-auto min-h-[calc(100%-10rem)] max-w-3xl px-8 pt-20 pb-32 dark:prose-invert"
+    >
+      
+
+<article>
+  <header class="mb-20">
+    <h1 class="!my-0 pb-2.5">Better kubectl interaction</h1>
+
+    
+    <div class="text-sm opacity-60">
+      
+      <time>Aug 14, 2020</time>
+      
+      
+    </div>
+    
+  </header>
+
+  <section><p>As many of you know, <a href="https://kubernetes.io/docs/reference/kubectl/kubectl/">kubectl</a> is official command-line client for interacting with the kubernetes cluster. Although kubectl allow us to do almost anything with the cluster, it has a convoluted interface. Especially for interacting with basic entities such pods. Pods are ephemeral entities, and each instance gets an unique name. If a deployment name is <code>kafka-consumer</code> then pods names might be <code>kafka-consumer-654b7df6b-mfx46</code>, <code>kafka-consumer-654b7df6b-yy49i</code>. This name changes every time pod is updated or restarted and all commands which needs to interact with pods needs this unique pod name as its parameter.</p>
 <p>So the interaction might look like</p>
 <ul>
 <li>list pod names</li>
 <li>copy pod name</li>
 <li>run command with pod name as parameter</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ kubectl get pods
+<pre><code class="language-bash">$ kubectl get pods
 NAME                                   READY   STATUS    RESTARTS   AGE
-consumer-654b7df6b-mfx46               1/1     Running   <span style="color:#bd93f9">0</span>          21d
-server-7df6b9903-oc9m6                 1/1     Running   <span style="color:#bd93f9">0</span>          22d
+consumer-654b7df6b-mfx46               1/1     Running   0          21d
+server-7df6b9903-oc9m6                 1/1     Running   0          22d
 
 $ kubectl delete pod consumer-654b7df6b-mfx46
-</code></pre></div><p>Apart from irritating user by asking him/her to copy some string every time, this interaction breaks all conventional shell workflow. We can&rsquo;t use reverse shell history search (Ctrl+r), it is not composable, it is not repeatable, and it clutters clipboard.</p>
+</code></pre>
+<p>Apart from irritating user by asking him/her to copy some string every time, this interaction breaks all conventional shell workflow. We can&rsquo;t use reverse shell history search (Ctrl+r), it is not composable, it is not repeatable, and it clutters clipboard.</p>
 <p>There are many tools which attempts to solve this, but most of them approach this by hiding kubectl. They provide a wrapper with their own set of options and syntax. Although this might work in most scenarios, there are few concerns: tool might not expose all options of kubectl, more documentation available online for kubectl, and we have to learn new tool. I wanted to solve this without hiding kubectl so that if I need to do something advanced I can always extend. One way to achieve this is by having &ldquo;template command&rdquo; which insert pod name each time we execute it.</p>
 <h3 id="subshell--fzfhttpsgithubcomjunegunnfzf-to-the-rescue">Subshell &amp; <a href="https://github.com/junegunn/fzf">fzf</a> to the rescue</h3>
 <p><code>$(...)</code> is way one of executing a command in separate shell. <code>$(...)</code> will be replaced with its output.</p>
 <p>Consider this</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkdir <span style="color:#ff79c6">$(</span><span style="color:#8be9fd;font-style:italic">read</span> name <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#f1fa8c">&#34;hello-</span><span style="color:#8be9fd;font-style:italic">$name</span><span style="color:#f1fa8c">&#34;</span><span style="color:#ff79c6">)</span>
-</code></pre></div><p>Here we read user input from STDIN and return it with a &ldquo;hello-&rdquo; prefix. If input is &ldquo;world&rdquo;, command will be mkdir hello-world. Important thing to note here is that subshell command is executed before root command, and we can use this to insert a parameter to the command.</p>
+<pre><code class="language-bash">mkdir $(read name &amp;&amp; echo &quot;hello-$name&quot;)
+</code></pre>
+<p>Here we read user input from STDIN and return it with a &ldquo;hello-&rdquo; prefix. If input is &ldquo;world&rdquo;, command will be mkdir hello-world. Important thing to note here is that subshell command is executed before root command, and we can use this to insert a parameter to the command.</p>
 <p>fzf gives an interactive user interface for &ldquo;choosing something&rdquo; from a list. It reads lines from STDIN, ask user for choice and writes this entry to STDOUT.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ls -1 | fzf | wc -c
-</code></pre></div><p>This returns count of characters in the filename depending on our choice.</p>
+<pre><code class="language-bash">ls -1 | fzf | wc -c
+</code></pre>
+<p>This returns count of characters in the filename depending on our choice.</p>
 <h3 id="combining-both">Combining both</h3>
 <p>We use subshell and fzf to dynamically select pod name and pass that to kubectl command template.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl delete pod <span style="color:#ff79c6">$(</span>kubectl get pods | fzf<span style="color:#ff79c6">)</span>
-</code></pre></div><p>We can use shell functions and alias to make this composable by add these to init file. such as <code>~/.profile</code> or <code>~/.oh-my-zsh/config.zsh</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#ff79c6">function</span> kselect <span style="color:#ff79c6">{</span>
-    kubectl get <span style="color:#f1fa8c">&#34;</span><span style="color:#8be9fd;font-style:italic">$@</span><span style="color:#f1fa8c">&#34;</span> --no-headers -o custom-columns<span style="color:#ff79c6">=</span>POD:.metadata.name | fzf --height 25% --border --exact
-<span style="color:#ff79c6">}</span>
+<pre><code class="language-bash">kubectl delete pod $(kubectl get pods | fzf)
+</code></pre>
+<p>We can use shell functions and alias to make this composable by add these to init file. such as <code>~/.profile</code> or <code>~/.oh-my-zsh/config.zsh</code></p>
+<pre><code class="language-bash">function kselect {
+    kubectl get &quot;$@&quot; --no-headers -o custom-columns=POD:.metadata.name | fzf --height 25% --border --exact
+}
 
-<span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_pod</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect pods&#39;</span>
-</code></pre></div><p>Now our command to:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl delete pod <span style="color:#ff79c6">$(</span>select_pod<span style="color:#ff79c6">)</span>
-</code></pre></div><p><em>Select pod in action:</em>
+alias select_pod='kselect pods'
+</code></pre>
+<p>Now our command to:</p>
+<pre><code class="language-bash">kubectl delete pod $(select_pod)
+</code></pre>
+<p><em>Select pod in action:</em>
 <img src="/images/select_pod.gif" alt="demo" title="Select pod in action!"></p>
 <p>We can use <code>kselect</code> for all kubernetes resource objects</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_deployment</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect deployment&#39;</span>
-<span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_statefulset</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect statefulset&#39;</span>
-<span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_configmap</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect configmap&#39;</span>
-<span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_service</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect service&#39;</span>
-<span style="color:#8be9fd;font-style:italic">alias</span> <span style="color:#8be9fd;font-style:italic">select_secret</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;kselect secret&#39;</span>
-</code></pre></div>
-        </div>
-        
+<pre><code class="language-bash">alias select_deployment='kselect deployment'
+alias select_statefulset='kselect statefulset'
+alias select_configmap='kselect configmap'
+alias select_service='kselect service'
+alias select_secret='kselect secret'
+</code></pre>
+</section>
 
+  
+  
+  <footer class="mt-12 flex flex-wrap">
+     
+    <a
+      class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
+      href="tags/shell"
+      >shell</a
+    >
+     
+    <a
+      class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
+      href="tags/kubectl"
+      >kubectl</a
+    >
     
+  </footer>
+  
 
-
-<div class="post-info">
+  
+  
+  
+  <nav class="mt-24 flex rounded-lg bg-black/[3%] text-lg dark:bg-white/[8%]">
     
-        <div class="post-date dt-published">2020-08-14</div>
-    
-    
-    <a class="post-hidden-url u-url" href="/post/better-kubectl-interaction/">/post/better-kubectl-interaction/</a>
-    <a href= class="p-name p-author post-hidden-author h-card" rel="me">Akash</a>
-
-
-    <div class="post-taxonomies">
-        
-            
-                <ul class="post-tags">
-                    
-                        <li><a href="tags/shell">#shell</a></li>
-                    
-                        <li><a href="tags/kubectl">#kubectl</a></li>
-                    
-                </ul>
-        
-    </div>
-</div>
-
-    </article>
-
-    
-        
-    <div class="pagination post-pagination">
-        <div class="left pagination-item ">
-            
-                <a href="/post/kvb_karnana_janana/">ಕರ್ಣಾಟ ಭಾರತ ಕಥಾಮಂಜರಿಯ ಮನನ: ಕರ್ಣನ ಜನನ ಮತ್ತು ಬಾಲ್ಯ</a>
-            
-        </div>
-        <div class="right pagination-item ">
-            
-                <a href="/post/setting_up_elixir_in_github_actions_for_windows/">Setting up Elixir in github-actions for windows</a>
-            
-        </div>
-    </div>
-
-
-
-
-    
-
-    
-
-    
-
-
-        </main>
-        
-            <footer class="common-footer">
+    <a class="flex w-1/2 items-center p-6 pr-3 no-underline" href="/post/kvb_karnana_janana/"
+      ><span class="mr-1.5">←</span><span>ಕರ್ಣಾಟ ಭಾರತ ಕಥಾಮಂಜರಿಯ ಮನನ: ಕರ್ಣನ ಜನನ ಮತ್ತು ಬಾಲ್ಯ</span></a
+    >
     
     
-
-    <div class="common-footer-bottom">
-        
-        <div class="copyright">
-            <p>© Akash, 2021<br>
-            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
-            
-            </p>  
-        </div> 
-
-        
-
+    <a
+      class="ml-auto flex w-1/2 items-center justify-end p-6 pl-3 no-underline"
+      href="/post/setting_up_elixir_in_github_actions_for_windows/"
+      ><span>Setting up Elixir in github-actions for windows</span><span class="ml-1.5">→</span></a
+    >
     
+  </nav>
+  
+
+  
+  
+</article>
 
 
+    </main>
 
-    <button class="theme-switcher">
-        Dark theme
-    </button>
-
-    <script>
-    const STORAGE_KEY = 'user-color-scheme'
-    const defaultTheme = "auto"
-
-    let currentTheme
-    let switchButton
-    let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
-
-    const autoChangeScheme = e => {
-        currentTheme = e.matches ? 'dark' : 'light'
-        document.documentElement.setAttribute('data-theme', currentTheme)
-        changeButtonText()
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        switchButton = document.querySelector('.theme-switcher')
-        currentTheme = detectCurrentScheme()
-        if (currentTheme == 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark')
-        }
-        if (currentTheme == 'auto') {
-            autoChangeScheme(autoDefinedScheme);
-            autoDefinedScheme.addListener(autoChangeScheme);
-        }
-        changeButtonText()
-        switchButton.addEventListener('click', switchTheme, false)
-    })
-
-    function detectCurrentScheme() {
-        if (localStorage.getItem(STORAGE_KEY)) {
-            return localStorage.getItem(STORAGE_KEY)
-        } 
-        if (defaultTheme) {
-            return defaultTheme
-        } 
-        if (!window.matchMedia) {
-            return 'light'
-        } 
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark'
-        }
-        return 'light'
-    }
-
-    function changeButtonText()
-    {   
-        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
-    }
-
-    function switchTheme(e) {
-        if (currentTheme == 'dark') {
-            localStorage.setItem(STORAGE_KEY, 'light')
-            document.documentElement.setAttribute('data-theme', 'light')
-            currentTheme = 'light'
-        } else {
-            localStorage.setItem(STORAGE_KEY, 'dark')
-            document.documentElement.setAttribute('data-theme', 'dark')
-            currentTheme = 'dark'
-        }
-        changeButtonText()
-    }
-    </script>
-   
-    </div>
-
-    <p class="h-card vcard">
-
-    <a href= class="p-name u-url url fn" rel="me">Akash</a> 
-
-    
-
-    
-</p> 
+    <footer class="opaco mx-auto flex h-[5rem] max-w-3xl items-center px-8 text-[0.9em] opacity-60">
+  <div class="mr-auto">
+    &copy; 2022
+    <a class="link" href="">*scratch*</a>
+  </div>
+  <a class="link mx-6" href="https://gohugo.io/" rel="noopener" target="_blank">Powered by Hugo️️</a
+  >️
+  <a class="link" href="https://github.com/nanxiaobei/hugo-paper" rel="noopener" target="_blank"
+    >▷ Paper 6</a
+  >
 </footer>
 
-        
-    </div>
-</body>
+  </body>
 </html>
