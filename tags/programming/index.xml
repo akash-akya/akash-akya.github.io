@@ -6,7 +6,16 @@
     <description>Recent content in programming on *scratch*</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Aug 2020 15:00:00 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/programming/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 14 Nov 2021 08:47:00 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/programming/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Composable Collectable in Elixir</title>
+      <link>https://akash-akya.github.io/post/composable-collectable/</link>
+      <pubDate>Sun, 14 Nov 2021 08:47:00 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/post/composable-collectable/</guid>
+      <description>Building composable collectable for fun and profit</description>
+    </item>
+    
     <item>
       <title>Setting up Elixir in github-actions for windows</title>
       <link>https://akash-akya.github.io/post/setting_up_elixir_in_github_actions_for_windows/</link>

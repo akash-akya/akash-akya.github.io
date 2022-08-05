@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="not-ready text-sm lg:text-base" lang="en-us">
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  
+  <title>Composable Collectable in Elixir - *scratch*</title>
+
+  
+  <meta name="theme-color" />
+  
+  <meta name="description" content="Building composable collectable for fun and profit" />
+  <meta name="author" content="" />
+  
+
+  
+  
+  
+  
+  
+  
+  <link rel="preload stylesheet" as="style" href="https://akash-akya.github.io/main.min.css" />
+
+  
+  <script
+    defer
+    src="https://akash-akya.github.io/highlight.min.js"
+    onload="hljs.highlightAll();"
+  ></script>
+  
+
+  
+  
+  
+    
+  
+  <link
+    rel="preload"
+    as="image"
+    href="https://akash-akya.github.io/theme.png"
+  />
+
+  
+  
+  
+  
+
+  
+  <link rel="preload" as="image" href="https://akash-akya.github.io/github.svg" />
+  
+
+  
+  <link rel="icon" href="https://akash-akya.github.io/favicon.ico" />
+  <link rel="apple-touch-icon" href="https://akash-akya.github.io/apple-touch-icon.png" />
+
+  
+  <meta name="generator" content="Hugo 0.101.0" />
+
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Composable Collectable in Elixir" />
+<meta property="og:description" content="Building composable collectable for fun and profit" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://akash-akya.github.io/post/composable-collectable/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2021-11-14T08:47:00+05:30" />
+<meta property="article:modified_time" content="2021-11-14T08:47:00+05:30" />
+
+
+  
+  <meta itemprop="name" content="Composable Collectable in Elixir">
+<meta itemprop="description" content="Building composable collectable for fun and profit"><meta itemprop="datePublished" content="2021-11-14T08:47:00+05:30" />
+<meta itemprop="dateModified" content="2021-11-14T08:47:00+05:30" />
+<meta itemprop="wordCount" content="2091">
+<meta itemprop="keywords" content="elixir,programming,stream," />
+  
+  <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Composable Collectable in Elixir"/>
+<meta name="twitter:description" content="Building composable collectable for fun and profit"/>
+
+  
+  
+</head>
+
+  <body class="text-black duration-200 ease-out dark:text-white">
+    <header class="mx-auto flex h-[5rem] max-w-3xl px-8 lg:justify-center">
+  <div class="relative z-50 mr-auto flex items-center">
+    <a class="-translate-x-[1px] -translate-y-0.5 text-3xl font-bold" href="https://akash-akya.github.io/"
+      >*scratch*</a
+    >
+    <a
+      class="btn-dark ml-6 h-6 w-6 shrink-0 cursor-pointer [background:url(./theme.svg)_left_center/cover_no-repeat] dark:invert dark:[background-position:right]"
+    ></a>
+  </div>
+
+  <a
+    class="btn-menu relative z-50 -mr-8 flex h-[5rem] w-[5rem] shrink-0 cursor-pointer flex-col items-center justify-center gap-2.5 lg:hidden"
+  ></a>
+
+  <script>
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const htmlClass = document.documentElement.classList;
+    setTimeout(() => htmlClass.remove('not-ready'), 10);
+
+    const setDark = (newDark) => {
+      metaTheme.setAttribute('content', newDark ? '#000' : '#fbfbfb');
+      htmlClass[newDark ? 'add' : 'remove']('dark');
+      localStorage.setItem('dark', newDark);
+    };
+
+    
+    const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkVal = localStorage.getItem('dark');
+    setDark(darkVal ? darkVal === 'true' : darkScheme.matches);
+
+    
+    darkScheme.addEventListener('change', (event) => {
+      setDark(event.matches);
+    });
+
+    
+    const btnDark = document.querySelector('.btn-dark');
+    btnDark.addEventListener('click', () => {
+      setDark(localStorage.getItem('dark') !== 'true');
+    });
+
+    
+    const btnMenu = document.querySelector('.btn-menu');
+    btnMenu.addEventListener('click', () => {
+      htmlClass.toggle('open');
+    });
+  </script>
+
+  <div
+    class="nav-wrapper fixed inset-x-0 top-full z-40 flex h-full select-none flex-col justify-center pb-16 duration-200 dark:bg-black lg:static lg:h-auto lg:flex-row lg:!bg-transparent lg:pb-0 lg:transition-none"
+  >
+    
+    
+    <nav class="lg:ml-12 lg:flex lg:flex-row lg:items-center lg:space-x-6">
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/about"
+        >About</a
+      >
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/"
+        >Archive</a
+      >
+      
+    </nav>
+    
+
+    
+    <nav
+      class="mt-12 flex justify-center space-x-10 dark:invert lg:mt-0 lg:ml-12 lg:items-center lg:space-x-6"
+    >
+      
+      <a
+        class="h-8 w-8 [background:var(--url)_center_center/cover_no-repeat] lg:h-6 lg:w-6"
+        style="--url: url(./github.svg)"
+        href=" https://github.com/akash-akya "
+        target="_blank"
+      ></a>
+      
+    </nav>
+    
+  </div>
+</header>
+
+
+    <main
+      class="prose prose-neutral relative mx-auto min-h-[calc(100%-10rem)] max-w-3xl px-8 pt-20 pb-32 dark:prose-invert"
+    >
+      
+
+<article>
+  <header class="mb-20">
+    <h1 class="!my-0 pb-2.5">Composable Collectable in Elixir</h1>
+
+    
+    <div class="text-sm opacity-60">
+      
+      <time>Nov 14, 2021</time>
+      
+      
+    </div>
+    
+  </header>
+
+  <section><h2 id="what-is-a-collectable">What is a collectable?</h2>
+<p>If you are not familiar with collectable, check it out in <a href="https://hexdocs.pm/elixir/1.14.0-rc.0/Collectable.html">Hex Docs</a>.</p>
+<blockquote>
+<p>If the functions in Enumerable are about taking values out, then
+Collectable is about collecting those values into a structure.</p>
+</blockquote>
+<p>While Enumerable is about the act of pulling values out of
+something. Collectable is about the act of <strong>pushing values into a
+something</strong>. Emphasis is on the act part. We don&rsquo;t really care about
+what the &ldquo;something&rdquo; is. The something might be a list, map, TCP
+connection or a file on disk. Elixir&rsquo;s <code>Enumerable</code> and <code>Collectable</code>
+protocols are an implementation of this abstraction.</p>
+<h2 id="why-we-need-collectable-to-be-composable-">Why we need collectable to be composable ?</h2>
+<p>We need for the same reason why we need <code>Enum</code> and <code>Stream</code> module to work
+with Enumerable. Currently there is no equivalent modules to compose
+Collectable values.</p>
+<p>Let&rsquo;s take an example to illustrate this better.</p>
+<p>You have infinite stream of some kind of logs. Each line in the stream
+can be of different level &ndash; info, warn, error. The problem is to push
+logs to <em>somewhere</em>, and this somewhere is unknown at this point. Not
+only that you need the destination to be configurable, you also need
+complete control over how it is pushed. You might want to push logs to
+aws s3, to a file on disk, push error logs to console and skip
+remaining logs, or buffer logs before making expensive network calls.</p>
+<p>The log stream might look like this</p>
+<pre><code class="language-elixir">log_stream =
+  Stream.repeatedly(fn -&gt;
+    random_str = Base.encode64(:crypto.strong_rand_bytes(5))
+
+    if :rand.uniform_real() &lt; 0.5 do
+      &quot;warn: #{random_str}&quot;
+    else
+      &quot;error: #{random_str}&quot;
+    end
+  end)
+
+
+## `sink` can be aws S3, File on disk, list, string
+# Stream.into(log_stream, sink)
+</code></pre>
+<p>How would you model this keeping the flexibility in mind?</p>
+<p>Cases like these are the reason why we need collectable to be
+composable. Hopefully at the end of the post we solve this better
+using composable collectable, and convince you about the usefulness of
+it.</p>
+<h2 id="push-container">Push Container</h2>
+<p>To avoid getting lost in the details of Collection protocol. Which is
+just one way to implement the idea. Lets build our own push container
+from a bottom-up approach. We get back to Collectable protocol after a
+while.</p>
+<p>So what we we want is something where we can push stuff. We don&rsquo;t care
+about implementation details of this <em>something</em>.</p>
+<p>Lets represent this aspect using function called <code>push</code>. We call
+<code>push</code> function with the &ldquo;where we want to push&rdquo; as first argument and
+&ldquo;the thing we want to push&rdquo; as second argument. So if something wants
+to be a push container, it only has to implement <code>push(something, anything)</code> function.</p>
+<pre><code class="language-elixir">defmodule PushContainer do
+  # string container
+  def push(string, value) when is_binary(string) do
+    string &lt;&gt; value
+  end
+
+  # list container
+  def push(list, value) when is_list(list) do
+    list ++ [value]
+  end
+
+  # void container
+  def push(nil, _) do
+    nil
+  end
+end
+
+defmodule Example do
+  import PushContainer
+
+  def random_binaries(container, count) do
+    Enum.reduce(1..count, container, fn _, container -&gt;
+      bin = :crypto.strong_rand_bytes(5)
+      push(container, bin)
+    end)
+  end
+end
+
+import Example
+random_binaries(&lt;&lt;&gt;&gt;, 10) |&gt; IO.inspect(label: &quot;binary&quot;)
+random_binaries([], 10) |&gt; IO.inspect(label: &quot;list&quot;)
+random_binaries(nil, 10) |&gt; IO.inspect(label: &quot;nil&quot;)
+</code></pre>
+<p>Container here does not have to be a data structure, It can be a
+process, gen-server, socket or file. While data structure only need
+<code>push</code> function to work, for resources we need a way to initialise and
+release. For example, to create a file container, first step
+(initialise) to open it, then push values and at the end close it
+(release). So let&rsquo;s add support to these stages. While at it lets
+group all these 3 functions into a module so it is easier to build
+container for different type.</p>
+<pre><code class="language-elixir">defmodule PushContainer do
+  defstruct [:acc, :init, :func, :finish]
+
+  def build(init, func, finish) do
+    %__MODULE__{init: init, func: func, finish: finish}
+  end
+
+  def init(%PushContainer{init: init} = pc) do
+    %PushContainer{pc | acc: init.(), init: :done}
+  end
+
+  def push(%PushContainer{acc: acc, func: func} = pc, value) do
+    %PushContainer{pc | acc: func.(value, acc)}
+  end
+
+  def finish(%PushContainer{acc: acc, finish: finish}) do
+    finish.(acc)
+  end
+end
+
+# change exmaple to adopt this new interface
+
+defmodule Example do
+  def random_binaries(%PushContainer{} = pc, count) do
+    pc = PushContainer.init(pc)
+
+    pc =
+      Enum.reduce(1..count, pc, fn _, pc -&gt;
+        bin = :crypto.strong_rand_bytes(5)
+        PushContainer.push(pc, bin)
+      end)
+
+    PushContainer.finish(pc)
+  end
+end
+</code></pre>
+<p>Lets build few push containers using new interface:</p>
+<pre><code class="language-elixir">binary_pc =
+  PushContainer.build(
+    fn -&gt; &lt;&lt;&gt;&gt; end,
+    fn val, acc -&gt; acc &lt;&gt; val end,
+    fn acc -&gt; acc end
+  )
+
+list_pc =
+  PushContainer.build(
+    fn -&gt; [] end,
+    fn val, acc -&gt; acc ++ [val] end,
+    fn acc -&gt; acc end
+  )
+
+file_pc =
+  PushContainer.build(
+    fn -&gt; File.open!(&quot;somefile.txt&quot;, [:write, :binary]) end,
+    fn val, file -&gt;
+      :ok = IO.binwrite(file, val)
+      file
+    end,
+    fn file -&gt; File.close(file) end
+  )
+
+import Example
+random_binaries(binary_pc, 10) |&gt; IO.inspect(label: :binary)
+random_binaries(list_pc, 10) |&gt; IO.inspect(label: :list)
+
+:ok = random_binaries(file_pc, 10)
+File.read!(&quot;somefile.txt&quot;)
+</code></pre>
+<p>Now that we are familiar with push containers as building
+blocks. Let&rsquo;s head back to composability aspect.</p>
+<h2 id="composing-push-containers">Composing push containers</h2>
+<p>In the above example the function call <code>random_binaries(..., 1000)</code> is
+pushing binaries to the container. Now say we want to encode the
+binaries using base64 before we push. How would we support this?</p>
+<p>As before, let&rsquo;s create a function called <code>map</code> which wraps the
+original <code>push</code> for the container with a given function and return it
+as a new push container. It is same as <code>Enum.map</code> but for push
+container.</p>
+<pre><code class="language-elixir">defmodule PushContainerHelpers do
+  @spec map(PushContainer.t(), (any -&gt; any)) :: PushContainer.t()
+  def map(%PushContainer{} = inner_pc, func) do
+    PushContainer.build(
+      fn -&gt; PushContainer.init(inner_pc) end,
+      fn elem, inner_pc -&gt; PushContainer.push(inner_pc, func.(elem)) end,
+      fn inner_pc -&gt; PushContainer.finish(inner_pc) end
+    )
+  end
+end
+</code></pre>
+<p>Notice that <code>map</code> takes a push container and returns a push container.</p>
+<pre><code class="language-elixir">import PushContainerHelpers
+
+encoded =
+  random_binaries(
+    map(binary_pc, &amp;Base.encode64/1),
+    10
+  )
+
+IO.puts(&quot;Base64 encoded binaries: #{strinencoded_binaries}&quot;)
+
+# string -&gt; encode64 -&gt; upcase -&gt; collect
+upcased_encoded =
+  random_binaries(
+    map(
+      map(
+        binary_pc,
+        &amp;String.upcase/1
+      ),
+      &amp;Base.encode64/1
+    ),
+    10
+  )
+
+IO.puts(&quot;Base64 encoded binaries in upcase: #{upcased_encoded_binaries}&quot;)
+</code></pre>
+<p>We can compose push container like this by plugging functions
+dynamically and building new push containers on-the-fly. This works
+but as you can see in the last example it not really easy to
+read. Let&rsquo;s see if it improves if we format it differently.</p>
+<h2 id="readability">Readability</h2>
+<p>Does formatting the expression improves the readability?</p>
+<pre><code class="language-elixir">import PushContainerHelpers
+
+# string -&gt; encode64 -&gt; upcase -&gt; collect-as-string
+
+# formatting as single line
+random_binaries(map(map(binary_pc, &amp;String.upcase/1), &amp;Base.encode64/1), 10)
+
+# formatting using pipe
+binary_pc
+|&gt; map(&amp;String.upcase/1)
+|&gt; map(&amp;Base.encode64/1)
+|&gt; random_binaries(10)
+</code></pre>
+<p>As you can see formatting differently is not helping. Using beloved
+pipe makes it even worse! notice how the logical order of operations
+(how we read code) are in reverse. We have to read it from
+bottom-to-top.</p>
+<p>Lets visualise the order of execution for push-containers to make the
+issue more clear.</p>
+<figure class="image">
+    <figcaption>Without pipe:</figcaption>
+    <img src="/images/composable-collectable/push-left-to-right.gif" alt="Push without pipe">
+</figure>
+<p>Works for small chains. order of execution is outside-to-inside,
+left-to-right in this case. But it is still confusing for long chains.</p>
+<figure class="image">
+    <figcaption>With pipe:</figcaption>
+    <img src="/images/composable-collectable/push-pipe.gif" alt="With pipe">
+</figure>
+<p>Pipe does not work at all with push containers!</p>
+<h3 id="what-is-going-on-here">What is going on here?</h3>
+<p>The issue is that we are trained to read code from top to bottom by
+various programming languages, and we associate order of reading with
+the execution / control-flow of the operations. That&rsquo;s how most
+programming languages model code and execution. If these two does not
+match then it will be hard for us to understand the execution. In fact
+this why we have pipe operator <code>|&gt;</code> in the first place. pipe is
+basically a macro-magic we use to trick our brain to make chaining
+<code>Enum</code> more readable.</p>
+<pre><code class="language-elixir"># Enum functions without pipe
+Enum.map(Enum.map(random_binaries(10), &amp;String.upcase/1), &amp;Base.encode64/1)
+
+# Enum functions with pipe
+random_binaries(10)
+|&gt; Enum.map(&amp;String.upcase/1)
+|&gt; Enum.map(&amp;Base.encode64/1)
+</code></pre>
+<p>Pipe works for Enum because first argument for <code>Enum</code> functions is the
+&ldquo;input&rdquo; the function needs, from where the input values are pulled. So
+moving the <em>input</em> expression a line before the function makes the
+movement of values natural &ndash; top-to-bottom.</p>
+<p>It is more obvious if we visualise the way code is executed or values
+are passed</p>
+<figure class="image">
+    <figcaption>Without pipe:</figcaption>
+    <img src="/images/composable-collectable/enum-left-to-right.gif" alt="Without pipe">
+</figure>
+<p>Works for single Enum function call, but confusing if there are
+function call chain. Since the order of execution is
+inside-to-outside, right-to-left. Which is looks unnatural when
+compared to more common left-to-right reading.</p>
+<figure class="image">
+    <figcaption>With pipe:</figcaption>
+    <img src="/images/composable-collectable/enum-top-to-bottom.gif" alt="With pipe">
+</figure>
+<p>As we can see with pipe it is pleasant to read. Order of execution is
+top-to-bottom which matches perfectly with how we read code.</p>
+<p><strong>Why pipe is not working for push-container?</strong></p>
+<p>It is because a push-container value we are passing is not an input we
+pass to the function, it is where where the function should push the
+output. So using pipe here breaks our expectation of input appearing
+before operation, so it looks confusing.</p>
+<p><strong>How to solve this?</strong></p>
+<p>Let&rsquo;s make push-container param as last argument to the function since output is something which comes after operation is done right?</p>
+<pre><code class="language-elixir"># formatting as single line
+random_binaries(10, map(&amp;Base.encode64/1, map(&amp;String.upcase/1, binary_pc)))
+
+# formatting as multiple lines
+random_binaries(
+  10,
+  map(
+    &amp;Base.encode64/1,
+    map(
+      &amp;String.upcase/1,
+      binary_pc
+    )
+  )
+)
+</code></pre>
+<figure class="image">
+    <figcaption>Container as last param:</figcaption>
+    <img src="/images/composable-collectable/push-last-param-oneline.gif" alt="Container as last param">
+</figure>
+<figure class="image">
+    <figcaption>Container as last param with multi line formatting:</figcaption>
+    <img src="/images/composable-collectable/push-last-param-chain.gif" alt="Container as last param with multi line formatting">
+</figure>
+<p>This is much better and nearly addresses our concern. We could go one
+step further and create a new operator macro like <code>|&gt;</code>, which takes
+two expressions and adds second expression as last argument to first
+expression. This is not that difficult since Elixir let us to define
+our own operators. One important thing to note is that the operator
+must be <em>right associative</em> for this to work. Why it won&rsquo;t work
+otherwise is left as exercise to readers :)</p>
+<p>Let&rsquo;s pick <code>+++</code> operator for demonstration purpose.</p>
+<pre><code class="language-elixir">defmodule PushOp do
+  defmacro left +++ right do
+    {func, meta, args} = left
+    {func, meta, args ++ [unq]}
+  end
+end
+
+require PushOp
+import PushOp
+
+string =
+  random_binaries(10)
+  +++ map(&amp;Base.encode64/1)
+  +++ map(&amp;String.upcase/1)
+  +++ binary_pc
+
+IO.puts(&quot;=&gt; #{string}&quot;)
+</code></pre>
+<p>This reads even better than previous approach. Logical order of
+execution is matching how we read, exactly like pipe operator. And all
+we did was push param to last a a helper macro so we can split
+function calls across multiple lines.</p>
+<p>Now that readability side quest is complete, lets get back to the main
+mission.</p>
+<h2 id="remaining-push-container-functions">Remaining push container functions</h2>
+<p>Implementing other basic operation is straight forward. let&rsquo;s bundle
+all push container helper functions as <code>Contr</code> module. Similar to
+<code>Enum</code> module for <code>Enumerable</code>.</p>
+<pre><code class="language-elixir">defmodule Contr do
+  def reduce(func, %PushContainer{} = pc) do
+    PushContainer.new(
+      fn -&gt;
+        PushContainer.init(pc)
+      end,
+      fn elem, pc -&gt;
+        func.(elem, pc)
+      end,
+      fn pc -&gt;
+        PushContainer.finish(pc)
+      end
+    )
+  end
+
+  # redefining map using reduce
+  def map(func, %PushContainer{} = pc) do
+    reduce(
+      fn elem, pc -&gt;
+        PushContainer.call(pc, func.(elem))
+      end,
+      pc
+    )
+  end
+
+  def filter(func, %PushContainer{} = pc) do
+    reduce(
+      fn elem, pc -&gt;
+        if func.(elem) do
+          PushContainer.call(pc, elem)
+        else
+          pc
+        end
+      end,
+      pc
+    )
+  end
+
+  def split(func, %PushContainer{} = true_pc, %PushContainer{} = false_pc) do
+    PushContainer.new(
+      fn -&gt;
+        {PushContainer.init(true_pc), PushContainer.init(false_pc)}
+      end,
+      fn elem, {t, f} -&gt;
+        if func.(elem) do
+          {PushContainer.push(t, elem), f}
+        else
+          {t, PushContainer.push(f, elem)}
+        end
+      end,
+      fn {t, f} -&gt;
+        {PushContainer.finish(t), PushContainer.finish(f)}
+      end
+    )
+  end
+end
+</code></pre>
+<p>Equipped with these, we can compose push containers in multiple ways
+similar to Enum.</p>
+<pre><code class="language-elixir">import Example
+import PushOp
+
+_string =
+  random_binaries(10)
+  +++ Contr.map(fn bin -&gt; Base.encode64(bin) end)
+  +++ Contr.filter(fn str -&gt; str =~ ~r/^[a-zA-Z=]+$/ end)
+  +++ binary_pc
+
+# =&gt; &quot;olHQItQ=OWPYlAY=&quot;
+</code></pre>
+<p>All we need now is a way to bridge the <code>PushContainer</code> and
+<code>Collectable</code> protocol for interoperability.</p>
+<pre><code class="language-elixir">defmodule PushContainer do
+  defstruct [:acc, :init, :func, :finish]
+
+  def build(init, func, finish) do
+    %__MODULE__{init: init, func: func, finish: finish}
+  end
+
+  def init(%PushContainer{init: init} = pc) do
+    %PushContainer{pc | acc: init.(), init: :done}
+  end
+
+  def push(%PushContainer{acc: acc, func: func} = pc, value) do
+    %PushContainer{pc | acc: func.(value, acc)}
+  end
+
+  def finish(%PushContainer{acc: acc, finish: finish}, status) do
+    if is_function(finish, 1) do
+      finish.(acc)
+    else
+      finish.(acc, status)
+    end
+  end
+
+  def from_collectable(collectable) do
+    PushContainer.build(
+      fn -&gt;
+        Collectable.into(collectable)
+      end,
+      fn {acc, collector_func}, elem -&gt;
+        collector_func.(acc, {:cont, elem})
+      end,
+      fn {acc, collector_func}, status -&gt;
+        collector_func.(acc, status)
+      end
+    )
+  end
+end
+
+defimpl Collectable, for: PushContainer do
+  def into(%PushContainer{} = pc) do
+    collector_func = fn
+      acc, {:cont, elem} -&gt;
+        PushContainer.push(acc, elem)
+
+      acc, :halt -&gt;
+        PushContainer.finish(acc, :halt)
+
+      acc, :done -&gt;
+        PushContainer.finish(acc, :done)
+    end
+
+    acc = PushContainer.init(pc)
+    {acc, collector_func}
+  end
+end
+</code></pre>
+<pre><code class="language-elixir">import Example
+import PushOp, only: [{:+++, 2}]
+
+square_set_container =
+  Contr.map(
+    fn num -&gt; num * num end,
+    PushContainer.from_collectable(MapSet.new())
+  )
+
+square_set = Enum.into(1..10, square_set_container)
+# =&gt; #MapSet&lt;[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]&gt;
+</code></pre>
+<p><strong>As for the original sample problem about stream of logs:</strong></p>
+<pre><code class="language-elixir">import Example
+import PushOp, only: [{:+++, 2}]
+
+defmodule Demo do
+  def collect_logs(sink) do
+    log_stream
+    |&gt; Stream.take(10)
+    |&gt; Enum.into(sink)
+  end
+end
+
+error_sink =
+  Contr.map(fn &quot;error: &quot; &lt;&gt; line -&gt; line end)
+  +++ Contr.map(fn line -&gt; String.upcase(line) end)
+  +++ list_pc
+
+warn_sink =
+  Contr.map(fn &quot;warn: &quot; &lt;&gt; line -&gt; line end)
+  +++ Contr.map(fn line -&gt; line &lt;&gt; &quot;\n&quot; end)
+  +++ binary_pc
+
+Demo.collect_logs(
+  Contr.split(
+    &amp;String.starts_with?(&amp;1, &quot;warn: &quot;),
+    warn_sink,
+    error_sink
+  )
+)
+</code></pre>
+<p>More about streams:</p>
+<ul>
+<li><a href="https://ananthakumaran.in/2017/11/28/stream.html">https://ananthakumaran.in/2017/11/28/stream.html</a></li>
+<li><a href="https://hexdocs.pm/elixir/Collectable.html">https://hexdocs.pm/elixir/Collectable.html</a></li>
+</ul>
+</section>
+
+  
+  
+  <footer class="mt-12 flex flex-wrap">
+     
+    <a
+      class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
+      href="https://akash-akya.github.io/tags/elixir"
+      >elixir</a
+    >
+     
+    <a
+      class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
+      href="https://akash-akya.github.io/tags/programming"
+      >programming</a
+    >
+     
+    <a
+      class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
+      href="https://akash-akya.github.io/tags/stream"
+      >stream</a
+    >
+    
+  </footer>
+  
+
+  
+  
+  
+  <nav class="mt-24 flex rounded-lg bg-black/[3%] text-lg dark:bg-white/[8%]">
+    
+    
+    <a
+      class="ml-auto flex w-1/2 items-center justify-end p-6 pl-3 no-underline"
+      href="https://akash-akya.github.io/post/old_textbook_art/"
+      ><span>Art in old textbook</span><span class="ml-1.5">→</span></a
+    >
+    
+  </nav>
+  
+
+  
+  
+</article>
+
+
+    </main>
+
+    <footer class="opaco mx-auto flex h-[5rem] max-w-3xl items-center px-8 text-[0.9em] opacity-60">
+  <div class="mr-auto">
+    &copy; 2022
+    <a class="link" href="https://akash-akya.github.io/">*scratch*</a>
+  </div>
+  <a class="link mx-6" href="https://gohugo.io/" rel="noopener" target="_blank">Powered by Hugo️️</a
+  >️
+  <a class="link" href="https://github.com/nanxiaobei/hugo-paper" rel="noopener" target="_blank"
+    >▷ Paper 6</a
+  >
+</footer>
+
+  </body>
+</html>
