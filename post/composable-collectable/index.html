@@ -103,8 +103,8 @@
   <meta itemprop="name" content="Composable Collectable in Elixir">
 <meta itemprop="description" content="Building composable collectable for fun and profit"><meta itemprop="datePublished" content="2021-11-14T08:47:00+05:30" />
 <meta itemprop="dateModified" content="2021-11-14T08:47:00+05:30" />
-<meta itemprop="wordCount" content="2253">
-<meta itemprop="keywords" content="elixir,programming,stream," />
+<meta itemprop="wordCount" content="2274">
+<meta itemprop="keywords" content="elixir,programming,collectable,stream," />
   
   <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Composable Collectable in Elixir"/>
@@ -232,12 +232,14 @@ Collectable is about collecting those values into a structure.</p>
 </blockquote>
 <p>While Enumerable is about the act of pulling values out of
 something. Collectable is about the act of <strong>pushing values into a
-something</strong>. Emphasis is on the act part. What the &ldquo;something&rdquo; is
+something</strong>. Emphasis is on the act part. <strong>The something</strong> itself is
 not important. The something might be a list, map, TCP connection or a
 file on disk. Elixir&rsquo;s <code>Enumerable</code> and <code>Collectable</code> protocols are an
 implementation of this abstraction.</p>
 <p>In this article we will understand how to make collectable (the act of
-pushing something) composable, and why we should care about it.</p>
+pushing something) composable, and why we should care about it. We
+also address an unique readability issue related to Collectable. And
+ensure back-pressure, error handling is in check while building it.</p>
 <h2 id="why-we-need-collectable-to-be-composable-">Why we need collectable to be composable ?</h2>
 <p>We need it to be composable for the same reason why we need <code>Enum</code> and
 <code>Stream</code> module to work with Enumerable. Currently there is no
@@ -802,6 +804,12 @@ Demo.collect_logs(
       class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
       href="https://akash-akya.github.io/tags/programming"
       >programming</a
+    >
+     
+    <a
+      class="mr-1.5 mb-1.5 rounded-lg bg-black/[3%] px-5 py-2 no-underline dark:bg-white/[8%]"
+      href="https://akash-akya.github.io/tags/collectable"
+      >collectable</a
     >
      
     <a
