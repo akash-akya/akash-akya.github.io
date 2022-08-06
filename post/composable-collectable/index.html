@@ -103,7 +103,7 @@
   <meta itemprop="name" content="Composable Collectable in Elixir">
 <meta itemprop="description" content="Building composable collectable for fun and profit"><meta itemprop="datePublished" content="2021-11-14T08:47:00+05:30" />
 <meta itemprop="dateModified" content="2021-11-14T08:47:00+05:30" />
-<meta itemprop="wordCount" content="2230">
+<meta itemprop="wordCount" content="2253">
 <meta itemprop="keywords" content="elixir,programming,stream," />
   
   <meta name="twitter:card" content="summary"/>
@@ -232,10 +232,12 @@ Collectable is about collecting those values into a structure.</p>
 </blockquote>
 <p>While Enumerable is about the act of pulling values out of
 something. Collectable is about the act of <strong>pushing values into a
-something</strong>. Emphasis is on the act part. What the &ldquo;something&rdquo; is is
+something</strong>. Emphasis is on the act part. What the &ldquo;something&rdquo; is
 not important. The something might be a list, map, TCP connection or a
 file on disk. Elixir&rsquo;s <code>Enumerable</code> and <code>Collectable</code> protocols are an
 implementation of this abstraction.</p>
+<p>In this article we will understand how to make collectable (the act of
+pushing something) composable, and why we should care about it.</p>
 <h2 id="why-we-need-collectable-to-be-composable-">Why we need collectable to be composable ?</h2>
 <p>We need it to be composable for the same reason why we need <code>Enum</code> and
 <code>Stream</code> module to work with Enumerable. Currently there is no
@@ -271,7 +273,7 @@ using composable collectable.</p>
 <h2 id="push-container">Push Container</h2>
 <p>Elixir&rsquo;s Collectable protocol is an implementation of the idea. To
 avoid getting lost in the details of the protocol, let&rsquo;s build our own
-push container from bottom-up approach. We get back to Collectable
+push container from bottom-up approach. We will get back to Collectable
 protocol after a while.</p>
 <p>So what we we want is something where we can push stuff. We don&rsquo;t care
 about implementation details of this <em>something</em>.</p>
