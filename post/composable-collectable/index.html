@@ -103,7 +103,7 @@
   <meta itemprop="name" content="Composable Collectable in Elixir">
 <meta itemprop="description" content="Building composable collectable for fun and profit"><meta itemprop="datePublished" content="2021-11-14T08:47:00+05:30" />
 <meta itemprop="dateModified" content="2021-11-14T08:47:00+05:30" />
-<meta itemprop="wordCount" content="2091">
+<meta itemprop="wordCount" content="2230">
 <meta itemprop="keywords" content="elixir,programming,stream," />
   
   <meta name="twitter:card" content="summary"/>
@@ -222,31 +222,33 @@
     
   </header>
 
-  <section><h2 id="what-is-a-collectable">What is a collectable?</h2>
-<p>If you are not familiar with collectable, check it out in <a href="https://hexdocs.pm/elixir/1.14.0-rc.0/Collectable.html">Hex Docs</a>.</p>
+  <section><h2 id="collectable">Collectable</h2>
+<p>If you are not familiar with collectable, check out <a href="https://hexdocs.pm/elixir/1.14.0-rc.0/Collectable.html">Hex
+Docs</a> for more
+detailed introduction.</p>
 <blockquote>
 <p>If the functions in Enumerable are about taking values out, then
 Collectable is about collecting those values into a structure.</p>
 </blockquote>
 <p>While Enumerable is about the act of pulling values out of
 something. Collectable is about the act of <strong>pushing values into a
-something</strong>. Emphasis is on the act part. We don&rsquo;t really care about
-what the &ldquo;something&rdquo; is. The something might be a list, map, TCP
-connection or a file on disk. Elixir&rsquo;s <code>Enumerable</code> and <code>Collectable</code>
-protocols are an implementation of this abstraction.</p>
+something</strong>. Emphasis is on the act part. What the &ldquo;something&rdquo; is is
+not important. The something might be a list, map, TCP connection or a
+file on disk. Elixir&rsquo;s <code>Enumerable</code> and <code>Collectable</code> protocols are an
+implementation of this abstraction.</p>
 <h2 id="why-we-need-collectable-to-be-composable-">Why we need collectable to be composable ?</h2>
-<p>We need for the same reason why we need <code>Enum</code> and <code>Stream</code> module to work
-with Enumerable. Currently there is no equivalent modules to compose
-Collectable values.</p>
+<p>We need it to be composable for the same reason why we need <code>Enum</code> and
+<code>Stream</code> module to work with Enumerable. Currently there is no
+equivalent modules to compose Collectable values.</p>
 <p>Let&rsquo;s take an example to illustrate this better.</p>
 <p>You have infinite stream of some kind of logs. Each line in the stream
-can be of different level &ndash; info, warn, error. The problem is to push
+can be of different level &ndash; info, warn, error. Our task is to push
 logs to <em>somewhere</em>, and this somewhere is unknown at this point. Not
-only that you need the destination to be configurable, you also need
+only that we need the destination to be configurable, you also need
 complete control over how it is pushed. You might want to push logs to
-aws s3, to a file on disk, push error logs to console and skip
+AWS s3, to a file on disk, push error logs to console and skip
 remaining logs, or buffer logs before making expensive network calls.</p>
-<p>The log stream might look like this</p>
+<p>The log stream might look like this:</p>
 <pre><code class="language-elixir">log_stream =
   Stream.repeatedly(fn -&gt;
     random_str = Base.encode64(:crypto.strong_rand_bytes(5))
@@ -265,13 +267,12 @@ remaining logs, or buffer logs before making expensive network calls.</p>
 <p>How would you model this keeping the flexibility in mind?</p>
 <p>Cases like these are the reason why we need collectable to be
 composable. Hopefully at the end of the post we solve this better
-using composable collectable, and convince you about the usefulness of
-it.</p>
+using composable collectable.</p>
 <h2 id="push-container">Push Container</h2>
-<p>To avoid getting lost in the details of Collection protocol. Which is
-just one way to implement the idea. Lets build our own push container
-from a bottom-up approach. We get back to Collectable protocol after a
-while.</p>
+<p>Elixir&rsquo;s Collectable protocol is an implementation of the idea. To
+avoid getting lost in the details of the protocol, let&rsquo;s build our own
+push container from bottom-up approach. We get back to Collectable
+protocol after a while.</p>
 <p>So what we we want is something where we can push stuff. We don&rsquo;t care
 about implementation details of this <em>something</em>.</p>
 <p>Lets represent this aspect using function called <code>push</code>. We call
@@ -307,8 +308,14 @@ defmodule Example do
 end
 
 import Example
+
+# returns values as a single binary
 random_binaries(&lt;&lt;&gt;&gt;, 10) |&gt; IO.inspect(label: &quot;binary&quot;)
+
+# returns values as a list of binaries
 random_binaries([], 10) |&gt; IO.inspect(label: &quot;list&quot;)
+
+# discards the values and returns nil (similar to /dev/null)
 random_binaries(nil, 10) |&gt; IO.inspect(label: &quot;nil&quot;)
 </code></pre>
 <p>Container here does not have to be a data structure, It can be a
@@ -322,18 +329,24 @@ container for different type.</p>
 <pre><code class="language-elixir">defmodule PushContainer do
   defstruct [:acc, :init, :func, :finish]
 
+  @type acc :: any
+
+  @spec build((() -&gt; acc), (any, acc -&gt; acc), (acc -&gt; any)) :: PushContainer.t()
   def build(init, func, finish) do
     %__MODULE__{init: init, func: func, finish: finish}
   end
 
+  @spec init(PushContainer.t()) :: PushContainer.t()
   def init(%PushContainer{init: init} = pc) do
     %PushContainer{pc | acc: init.(), init: :done}
   end
 
+  @spec push(PushContainer.t(), any) :: PushContainer.t()
   def push(%PushContainer{acc: acc, func: func} = pc, value) do
     %PushContainer{pc | acc: func.(value, acc)}
   end
 
+  @spec push(PushContainer.t()) :: PushContainer.t()
   def finish(%PushContainer{acc: acc, finish: finish}) do
     finish.(acc)
   end
@@ -436,10 +449,10 @@ IO.puts(&quot;Base64 encoded binaries in upcase: #{upcased_encoded_binaries}&quo
 </code></pre>
 <p>We can compose push container like this by plugging functions
 dynamically and building new push containers on-the-fly. This works
-but as you can see in the last example it not really easy to
-read. Let&rsquo;s see if it improves if we format it differently.</p>
+but as you can see in the last example it not easy to read. Let&rsquo;s see
+if it improves if we format it differently or if we use pipe.</p>
 <h2 id="readability">Readability</h2>
-<p>Does formatting the expression improves the readability?</p>
+<p>Does formatting improves the readability in the above examples?</p>
 <pre><code class="language-elixir">import PushContainerHelpers
 
 # string -&gt; encode64 -&gt; upcase -&gt; collect-as-string
@@ -453,67 +466,86 @@ binary_pc
 |&gt; map(&amp;Base.encode64/1)
 |&gt; random_binaries(10)
 </code></pre>
-<p>As you can see formatting differently is not helping. Using beloved
-pipe makes it even worse! notice how the logical order of operations
-(how we read code) are in reverse. We have to read it from
-bottom-to-top.</p>
-<p>Lets visualise the order of execution for push-containers to make the
-issue more clear.</p>
+<p>As you can see formatting is not helping. Using our beloved pipe makes
+reading even worse! We have to read the expressions from bottom-to-top
+to understand what is going on. We can visualise it to make the issue
+more clear.</p>
 <figure class="image">
     <figcaption>Without pipe:</figcaption>
     <img src="/images/composable-collectable/push-left-to-right.gif" alt="Push without pipe">
 </figure>
-<p>Works for small chains. order of execution is outside-to-inside,
-left-to-right in this case. But it is still confusing for long chains.</p>
+<p>Sort of works for small chains, but we still need to address it for
+long expressions.</p>
 <figure class="image">
     <figcaption>With pipe:</figcaption>
     <img src="/images/composable-collectable/push-pipe.gif" alt="With pipe">
 </figure>
-<p>Pipe does not work at all with push containers!</p>
+<p>Using pipes does not work at all with push containers!</p>
 <h3 id="what-is-going-on-here">What is going on here?</h3>
-<p>The issue is that we are trained to read code from top to bottom by
-various programming languages, and we associate order of reading with
-the execution / control-flow of the operations. That&rsquo;s how most
-programming languages model code and execution. If these two does not
-match then it will be hard for us to understand the execution. In fact
-this why we have pipe operator <code>|&gt;</code> in the first place. pipe is
-basically a macro-magic we use to trick our brain to make chaining
-<code>Enum</code> more readable.</p>
-<pre><code class="language-elixir"># Enum functions without pipe
+<p>The issue is that we prefer to read an expression as <code>INPUT, FUNCTION, OUTPUT</code> in that exact order. This is especially important when we have
+nested function calls with multiple parameters. Why we like
+expressions to be in this order? I don&rsquo;t know for sure but my guess is
+that, it is so because that&rsquo;s how most programming languages are
+modelled. We are trained to read code like that and expect
+order-of-reading with logical order-of-execution. It also might be
+because most our languages are written from left-to-right,
+top-to-bottom (there are few exceptions to this). Or more
+fundamentally the natural order of <em>cause and effect</em>. If order of an
+expression is not <code>INPUT, FUNCTION, OUTPUT</code> then that will counter
+intuitive. This is also the reason why we have pipe operator <code>|&gt;</code> in
+the first place. Pipe is basically a macro-magic we use to make
+function chaining more readable by changing the order expressions.</p>
+<pre><code class="language-elixir"># Enum functions without pipe:
+#
+# Enum.map(...)
+# FUNCTION, INPUT
+#
+# OUPUT is implicit here as return value
 Enum.map(Enum.map(random_binaries(10), &amp;String.upcase/1), &amp;Base.encode64/1)
 
+
 # Enum functions with pipe
+#
+# ... |&gt; Enum.map()
+# INPUT, FUNCTION
 random_binaries(10)
 |&gt; Enum.map(&amp;String.upcase/1)
 |&gt; Enum.map(&amp;Base.encode64/1)
 </code></pre>
-<p>Pipe works for Enum because first argument for <code>Enum</code> functions is the
-&ldquo;input&rdquo; the function needs, from where the input values are pulled. So
-moving the <em>input</em> expression a line before the function makes the
-movement of values natural &ndash; top-to-bottom.</p>
-<p>It is more obvious if we visualise the way code is executed or values
-are passed</p>
+<p>Pipe works for Enum because first argument we pass to the <code>Enum</code>
+function is the &ldquo;input&rdquo;. So moving <em>input</em> expression a line before
+the function call makes the movement of values appear natural.</p>
+<p>It is more obvious if we visualise this:</p>
 <figure class="image">
     <figcaption>Without pipe:</figcaption>
     <img src="/images/composable-collectable/enum-left-to-right.gif" alt="Without pipe">
 </figure>
-<p>Works for single Enum function call, but confusing if there are
-function call chain. Since the order of execution is
-inside-to-outside, right-to-left. Which is looks unnatural when
-compared to more common left-to-right reading.</p>
 <figure class="image">
     <figcaption>With pipe:</figcaption>
     <img src="/images/composable-collectable/enum-top-to-bottom.gif" alt="With pipe">
 </figure>
-<p>As we can see with pipe it is pleasant to read. Order of execution is
-top-to-bottom which matches perfectly with how we read code.</p>
-<p><strong>Why pipe is not working for push-container?</strong></p>
-<p>It is because a push-container value we are passing is not an input we
-pass to the function, it is where where the function should push the
-output. So using pipe here breaks our expectation of input appearing
-before operation, so it looks confusing.</p>
+<p>As we can see, using pipe with when multiple functions are involved is
+pleasant to read. By using pipe we turned <code>FUNCTION INPUT</code> into
+<code>INPUT FUNCTION</code> which matches perfectly with how we read code.</p>
+<p><strong>Why pipe is not working for push container?</strong></p>
+<pre><code class="language-elixir"># Without pipe:
+#
+# FUNCTION, OUTPUT, INPUT
+random_binaries(binary_pc, 10)
+
+# With pipe:
+#
+# OUTPUT, FUNCTION, INPUT
+binary_pc
+|&gt; random_binaries(10)
+</code></pre>
+<p>The &ldquo;push container&rdquo; value (<code>binary_pc</code> in the example) we are passing
+is not an input we pass to the operation in logical sense. It is
+something where the function should <em>push</em> the output. So using pipe
+here breaks our expectation and looks confusing.</p>
 <p><strong>How to solve this?</strong></p>
-<p>Let&rsquo;s make push-container param as last argument to the function since output is something which comes after operation is done right?</p>
+<p>Let&rsquo;s correct the order <code>FUNCTION, OUTPUT, INPUT</code> to <code>FUNCTION, INPUT, OUTPUT</code> by making push-container (<code>binary_pc</code>) value as last argument
+to the function.</p>
 <pre><code class="language-elixir"># formatting as single line
 random_binaries(10, map(&amp;Base.encode64/1, map(&amp;String.upcase/1, binary_pc)))
 
@@ -529,6 +561,7 @@ random_binaries(
   )
 )
 </code></pre>
+<p>When visualise this:</p>
 <figure class="image">
     <figcaption>Container as last param:</figcaption>
     <img src="/images/composable-collectable/push-last-param-oneline.gif" alt="Container as last param">
@@ -537,14 +570,15 @@ random_binaries(
     <figcaption>Container as last param with multi line formatting:</figcaption>
     <img src="/images/composable-collectable/push-last-param-chain.gif" alt="Container as last param with multi line formatting">
 </figure>
-<p>This is much better and nearly addresses our concern. We could go one
-step further and create a new operator macro like <code>|&gt;</code>, which takes
-two expressions and adds second expression as last argument to first
-expression. This is not that difficult since Elixir let us to define
-our own operators. One important thing to note is that the operator
-must be <em>right associative</em> for this to work. Why it won&rsquo;t work
-otherwise is left as exercise to readers :)</p>
-<p>Let&rsquo;s pick <code>+++</code> operator for demonstration purpose.</p>
+<p>This reads much better and nearly addresses our concern. Although
+formatting function nested function calls as multiple lines make it
+more readable, we could go one step further and create a new operator
+like <code>|&gt;</code> for cases like this. Our new operator takes two expressions
+A and B, and appends B as last argument to A. One important thing to
+note is that the operator must be <em>right associative</em> for this to
+work. Why it won&rsquo;t work otherwise is left as exercise to readers :)</p>
+<p>Let&rsquo;s pick <code>+++</code> operator for demonstration purpose which is right
+associate.</p>
 <pre><code class="language-elixir">defmodule PushOp do
   defmacro left +++ right do
     {func, meta, args} = left
@@ -563,16 +597,17 @@ string =
 
 IO.puts(&quot;=&gt; #{string}&quot;)
 </code></pre>
-<p>This reads even better than previous approach. Logical order of
-execution is matching how we read, exactly like pipe operator. And all
-we did was push param to last a a helper macro so we can split
-function calls across multiple lines.</p>
+<p>This is even better than previous code, since we got back to our
+<code>INPUT, FUNCTION, OUTPUT</code> ordering. Exactly like how pipe operator
+worked for Enum. To recap, all we did was to make collectable param as
+last param and created helper macro to improve the ordering of the
+expression.</p>
 <p>Now that readability side quest is complete, lets get back to the main
 mission.</p>
 <h2 id="remaining-push-container-functions">Remaining push container functions</h2>
-<p>Implementing other basic operation is straight forward. let&rsquo;s bundle
-all push container helper functions as <code>Contr</code> module. Similar to
-<code>Enum</code> module for <code>Enumerable</code>.</p>
+<p>Implementing other basic helper functions like reduce, filter etc is
+straight forward. Let&rsquo;s bundle all functions as <code>Contr</code>
+module. Similar to <code>Enum</code> module for <code>Enumerable</code>.</p>
 <pre><code class="language-elixir">defmodule Contr do
   def reduce(func, %PushContainer{} = pc) do
     PushContainer.new(
@@ -643,8 +678,9 @@ _string =
 
 # =&gt; &quot;olHQItQ=OWPYlAY=&quot;
 </code></pre>
-<p>All we need now is a way to bridge the <code>PushContainer</code> and
-<code>Collectable</code> protocol for interoperability.</p>
+<p>Only thing pending now is to bridge the <code>PushContainer</code> and
+<code>Collectable</code> protocol for interoperability, so we can take advantage
+of modules which already implements Collectable protocol.</p>
 <pre><code class="language-elixir">defmodule PushContainer do
   defstruct [:acc, :init, :func, :finish]
 
