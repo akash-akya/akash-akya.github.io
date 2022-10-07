@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.28.5">
+    <meta name="project" content="geo v0.1.0">
+
+    <title>Geo — geo v0.1.0</title>
+    <link rel="stylesheet" href="dist/elixir-64c5e2b63575bddb1c5b.css" />
+
+    <script src="dist/sidebar_items-196fbd0258.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-b5f3440501744dc8be3d.js"></script>
+
+
+  </head>
+  <body data-type="extras">
+    <script>
+
+      try {
+        var settings = JSON.parse(localStorage.getItem('ex_doc:settings') || '{}');
+
+        if (settings.theme === 'dark' ||
+           ((settings.theme === 'system' || settings.theme == null) &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)
+           ) {
+          document.body.classList.add('dark')
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+
+<section class="sidebar">
+  <button class="sidebar-button sidebar-toggle" aria-label="toggle sidebar">
+    <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+  </button>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <i class="ri-search-2-line" aria-hidden="true" title="Submit search"></i>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <i class="ri-close-line ri-lg" aria-hidden="true" title="Cancel search"></i>
+    </button>
+    <label class="search-label">
+      <p class="sr-only">Search</p>
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+
+    <div class="sidebar-projectDetails">
+      <a href="https://github.com/akash-akya/geo" class="sidebar-projectName" translate="no">
+geo
+      </a>
+      <strong class="sidebar-projectVersion" translate="no">
+        v0.1.0
+      </strong>
+    </div>
+    <ul class="sidebar-listNav">
+      <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+        <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+        <li><a id="tasks-list-link" href="#full-list"><span translate="no">Mix</span> Tasks</a></li>
+
+    </ul>
+  </div>
+
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <output role="status" id="toast"></output>
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>
+<button class="settings display-settings">
+  <i class="ri-settings-3-line"></i>
+  <span class="sr-only">Settings</span>
+</button>
+
+
+    <a href="https://github.com/akash-akya/geo/blob/v0.1.0/README.md#L1" title="View Source" class="view-source" rel="help">
+      <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+      <span class="sr-only">View Source</span>
+    </a>
+
+  <span>Geo</span>
+</h1>
+
+<p>Library to store and fetch IP Geo-location</p><p>An interface between database to store and fetch IP location. Import
+IP location mapping using a CSV file and fetch location for given
+IP. Data is stored in a PostgreSQL database.</p><h3 id="dependencies" class="section-heading">
+  <a href="#dependencies" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">dependencies</p>
+  </a>
+  Dependencies
+</h3>
+<ul><li><p>PostgreSQL</p></li><li><p>Elixir v1.14</p></li><li><p>Erlang/OTP v25.x</p></li></ul><h2 id="installation" class="section-heading">
+  <a href="#installation" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">installation</p>
+  </a>
+  Installation
+</h2>
+<p>Currently the library is in a private GitHub repository. So to use the
+library you should use the whitelisted deploy key or use your
+access-token repo.</p><ul><li><p>ssh key pair is present in <code class="inline">deploy_keys</code> folder. Don't worry this
+key is generated and used only to access this repo</p></li><li><p>to generate token, go to <code class="inline">https://github.com/settings/tokens</code> and
+follow the steps</p></li></ul><pre><code class="makeup elixir" translate="no"><span class="kd">def</span><span class="w"> </span><span class="nf">deps</span><span class="w"> </span><span class="k" data-group-id="1452818831-1">do</span><span class="w">
+
+  </span><span class="p" data-group-id="1452818831-2">{</span><span class="ss">:geo</span><span class="p">,</span><span class="w"> </span><span class="ss">git</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;git@github.com:akash-akya/geo.git&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;v0.1.0&quot;</span><span class="p" data-group-id="1452818831-2">}</span><span class="w">
+  </span><span class="c1"># if you are using token</span><span class="w">
+  </span><span class="c1"># {:geo, git: &quot;https://&lt;TOKEN&gt;:@github.com/akash-akya/geo.git&quot;, tag: &quot;v0.1.0&quot;}</span><span class="w">
+</span><span class="k" data-group-id="1452818831-1">end</span></code></pre><p>Much simpler alternatively is to clone the git repo and use the file
+system path</p><pre><code class="makeup elixir" translate="no"><span class="kd">def</span><span class="w"> </span><span class="nf">deps</span><span class="w"> </span><span class="k" data-group-id="1819447155-1">do</span><span class="w">
+  </span><span class="p" data-group-id="1819447155-2">{</span><span class="ss">:geo</span><span class="p">,</span><span class="w"> </span><span class="ss">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;path/to/geo&quot;</span><span class="p" data-group-id="1819447155-2">}</span><span class="w">
+</span><span class="k" data-group-id="1819447155-1">end</span></code></pre><p>These slightly complicated steps won't be there if we publish the
+library to hex.pm.</p><h3 id="using-the-library" class="section-heading">
+  <a href="#using-the-library" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">using-the-library</p>
+  </a>
+  Using the library
+</h3>
+<p>Configure database credentials. See for
+(Ecto.Repo)[<a href="https://hexdocs.pm/ecto/Ecto.Repo.html]">https://hexdocs.pm/ecto/Ecto.Repo.html]</a> documentation for
+more details about the config</p><pre><code class="makeup elixir" translate="no"><span class="n">config</span><span class="w"> </span><span class="ss">:geo</span><span class="p">,</span><span class="w"> </span><span class="nc">Geo.Repo</span><span class="p">,</span><span class="w">
+  </span><span class="ss">database</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ip_geolocation_dev&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;postgres&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;postgres&quot;</span><span class="p">,</span><span class="w">
+  </span><span class="ss">hostname</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost&quot;</span><span class="p">,</span></code></pre><p>Create database and run migration</p><pre><code class="makeup sh" translate="no"><span class=""># create database
+</span><span class="gp unselectable">$ </span><span class="">mix ecto.create
+</span><span class="">
+</span><span class=""># run migrations
+</span><span class="gp unselectable">$ </span><span class="">mix ecto.migrate
+</span></code></pre><p>Create csv file containing the IP Location data</p><p><code class="inline">data.csv</code></p><pre><code class="csv">ip_address,country_code,country,city,latitude,longitude,mystery_value
+200.106.141.15,SI,Nepal,DuBuquemouth,-84.87503094689836,7.206435933364332,7823011346</code></pre><p>Import data from a csv file using mix task</p><pre><code class="makeup sh" translate="no"><span class=""># run `mix help geo.import` for more information
+</span><span class="gp unselectable">$ </span><span class="">mix geo.import data.csv --verbose
+</span></code></pre><p>Alternatively you can import programmatically using
+<a href="Geo.html#batch_upsert/1"><code class="inline">Geo.batch_upsert/1</code></a> helper function</p><p>Access mapping data using <a href="Geo.html#get_location/1"><code class="inline">Geo.get_location/1</code></a> or using <a href="Geo.Repo.html"><code class="inline">Geo.Repo</code></a></p><pre><code class="makeup elixir" translate="no"><span class="err">$</span><span class="w"> </span><span class="n">iex</span><span class="w"> </span><span class="o">-</span><span class="nc">S</span><span class="w"> </span><span class="n">mix</span><span class="w">
+</span><span class="c1"># using helper function</span><span class="w">
+</span><span class="n">iex</span><span class="p" data-group-id="6884168344-1">(</span><span class="p" data-group-id="6884168344-1">)</span><span class="o">&gt;</span><span class="w"> </span><span class="p" data-group-id="6884168344-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">location</span><span class="p" data-group-id="6884168344-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Geo</span><span class="o">.</span><span class="n">get_location</span><span class="p" data-group-id="6884168344-3">(</span><span class="s">&quot;200.106.141.15&quot;</span><span class="p" data-group-id="6884168344-3">)</span><span class="w">
+
+</span><span class="c1"># using Geo.Repo for more complex querying</span><span class="w">
+</span><span class="n">iex</span><span class="p" data-group-id="6884168344-4">(</span><span class="p" data-group-id="6884168344-4">)</span><span class="o">&gt;</span><span class="w"> </span><span class="kn">import</span><span class="w"> </span><span class="nc">Ecto.Query</span><span class="p">,</span><span class="w"> </span><span class="ss">only</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6884168344-5">[</span><span class="ss">from</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p" data-group-id="6884168344-5">]</span><span class="w">
+</span><span class="n">iex</span><span class="p" data-group-id="6884168344-6">(</span><span class="p" data-group-id="6884168344-6">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">locations</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Ecto.Query</span><span class="o">.</span><span class="n">from</span><span class="p" data-group-id="6884168344-7">(</span><span class="nc">Geo.Location</span><span class="p">,</span><span class="w"> </span><span class="ss">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="6884168344-7">)</span><span class="w"> </span><span class="o">|&gt;</span><span class="w"> </span><span class="nc">Geo.Repo</span><span class="o">.</span><span class="n">all</span><span class="p" data-group-id="6884168344-8">(</span><span class="p" data-group-id="6884168344-8">)</span></code></pre><p>For more detailed information please check the documentation</p><h3 id="production-deployment" class="section-heading">
+  <a href="#production-deployment" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">production-deployment</p>
+  </a>
+  Production Deployment
+</h3>
+<p><strong>Running Migrations</strong></p><p>Since mix tasks won't be available in the mix release. A convenience
+helper module is provided to run the migrations. You can call this
+function to run the migration from your production environment</p><pre><code class="makeup elixir" translate="no"><span class="c1"># SSH to prod server and run</span><span class="w">
+</span><span class="err">$</span><span class="w"> </span><span class="n">bin</span><span class="o">/</span><span class="n">my_app</span><span class="w"> </span><span class="n">eval</span><span class="w"> </span><span class="s">&quot;Geo.Release.migrate&quot;</span></code></pre><h3 id="development" class="section-heading">
+  <a href="#development" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">development</p>
+  </a>
+  Development
+</h3>
+<p>To get started you can use <code class="inline">docker-compose</code> run PostgreSQL</p><pre><code class="makeup bash" translate="no"><span class=""># start database
+</span><span class="gp unselectable">$ </span><span class="">docker-compose up
+</span><span class="">
+</span><span class=""># create database
+</span><span class="gp unselectable">$ </span><span class="">mix ecto.create
+</span><span class="">
+</span><span class=""># run migrations
+</span><span class="gp unselectable">$ </span><span class="">mix ecto.migrate
+</span></code></pre><p>Load sample dummy data</p><pre><code class="makeup bash" translate="no"><span class="gp unselectable">$ </span><span class="">mix geo.import test/support/import_files/sample.csv
+</span></code></pre><h3 id="running-tests" class="section-heading">
+  <a href="#running-tests" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">running-tests</p>
+  </a>
+  Running Tests
+</h3>
+<pre><code class="makeup bash" translate="no"><span class=""># start database
+</span><span class="gp unselectable">$ </span><span class="">docker-compose up
+</span><span class="">
+</span><span class="gp unselectable">$ </span><span class="">mix test --trace
+</span></code></pre>
+<div class="bottom-actions">
+  <div class="bottom-actions-item">
+
+      <a href="api-reference.html" class="bottom-actions-button" rel="prev">
+        <span class="subheader">
+          ← Previous Page
+        </span>
+        <span class="title">
+API Reference
+        </span>
+      </a>
+
+  </div>
+  <div class="bottom-actions-item">
+
+  </div>
+</div>
+
+      <footer class="footer">
+
+          <p>
+            On Hex.pm:
+
+            <span class="line">
+              <a href="https://hex.pm/packages/geo/0.1.0" class="line footer-hex-package">Package</a>
+              <a href="https://preview.hex.pm/preview/geo/0.1.0" class="line">Preview</a>
+
+                <a href="https://preview.hex.pm/preview/geo/0.1.0/show/README.md">(current file)</a>
+
+            </span>
+
+            <button class="line footer-button display-quick-switch">
+              Search
+            </button>
+          </p>
+
+        <p>
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.28.5) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

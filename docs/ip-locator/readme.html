@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.28.5">
+    <meta name="project" content="ip_locator v0.1.0">
+
+    <title>IP Locator — ip_locator v0.1.0</title>
+    <link rel="stylesheet" href="dist/elixir-64c5e2b63575bddb1c5b.css" />
+
+    <script src="dist/sidebar_items-d96dcbc139.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/app-b5f3440501744dc8be3d.js"></script>
+
+
+  </head>
+  <body data-type="extras">
+    <script>
+
+      try {
+        var settings = JSON.parse(localStorage.getItem('ex_doc:settings') || '{}');
+
+        if (settings.theme === 'dark' ||
+           ((settings.theme === 'system' || settings.theme == null) &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)
+           ) {
+          document.body.classList.add('dark')
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+
+<section class="sidebar">
+  <button class="sidebar-button sidebar-toggle" aria-label="toggle sidebar">
+    <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+  </button>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <i class="ri-search-2-line" aria-hidden="true" title="Submit search"></i>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <i class="ri-close-line ri-lg" aria-hidden="true" title="Cancel search"></i>
+    </button>
+    <label class="search-label">
+      <p class="sr-only">Search</p>
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+
+    <div class="sidebar-projectDetails">
+      <a href="https://github.com/akash-akya/ip_locator" class="sidebar-projectName" translate="no">
+ip_locator
+      </a>
+      <strong class="sidebar-projectVersion" translate="no">
+        v0.1.0
+      </strong>
+    </div>
+    <ul class="sidebar-listNav">
+      <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+        <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+    </ul>
+  </div>
+
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <output role="status" id="toast"></output>
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>
+<button class="settings display-settings">
+  <i class="ri-settings-3-line"></i>
+  <span class="sr-only">Settings</span>
+</button>
+
+
+    <a href="https://github.com/akash-akya/ip_locator/blob/v0.1.0/README.md#L1" title="View Source" class="view-source" rel="help">
+      <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+      <span class="sr-only">View Source</span>
+    </a>
+
+  <span>IP Locator</span>
+</h1>
+
+<p><a href="https://akash-akya.github.io/docs/ip-locator/readme.html"><img src="https://img.shields.io/badge/docs-hexpm-blue.svg" alt="docs"/></a></p><p>Simple Plug based HTTP server for querying IP location</p><p>This is a HTTP wrapper for <a href="https://github.com/akash-akya/geo"><code class="inline">Geo</code></a> library.</p><p>Sample server is deployed at <code class="inline">ip-locator.fly.dev</code>, check it out!</p><pre><code class="makeup bash" translate="no"><span class="">curl -sLi ip-locator.fly.dev/location/180.219.213.135
+</span></code></pre><p>This server is loaded with provided sample dummy data.</p><p>Documentation: <a href="https://akash-akya.github.io/docs/ip-locator">https://akash-akya.github.io/docs/ip-locator</a></p><h3 id="endpoints" class="section-heading">
+  <a href="#endpoints" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">endpoints</p>
+  </a>
+  Endpoints
+</h3>
+<p>Server exposes single endpoint.</p><ul><li><p><code class="inline">GET /location/&lt;IP Address&gt;</code></p><p>Returns json encoded location data as response. Please check API
+spec in <code class="inline">openapi.yaml</code> for more details</p></li></ul><h3 id="dependencies" class="section-heading">
+  <a href="#dependencies" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">dependencies</p>
+  </a>
+  Dependencies
+</h3>
+<ul><li><p>PostgreSQL</p></li><li><p>Elixir v1.14</p></li><li><p>Erlang/OTP v25.x</p></li></ul><h3 id="development" class="section-heading">
+  <a href="#development" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">development</p>
+  </a>
+  Development
+</h3>
+<p>To get started you can use <code class="inline">docker-compose</code> run PostgreSQL which is a
+dependency for <a href="https://hexdocs.pm/geo/0.1.0/Geo.html"><code class="inline">Geo</code></a></p><pre><code class="makeup bash" translate="no"><span class=""># start database
+</span><span class="gp unselectable">$ </span><span class="">docker-compose up
+</span><span class="">
+</span><span class=""># create database
+</span><span class="gp unselectable">$ </span><span class="">mix ecto.create -r Geo.Repo
+</span><span class="">
+</span><span class=""># run migrations
+</span><span class="gp unselectable">$ </span><span class="">mix ecto.migrate -r Geo.Repo
+</span></code></pre><p>Load sample dummy data</p><pre><code class="makeup bash" translate="no"><span class="gp unselectable">$ </span><span class="">mix geo.import samples/sample.csv
+</span></code></pre><p>Run the application server</p><pre><code class="makeup bash" translate="no"><span class="gp unselectable">$ </span><span class="">mix run --no-halt
+</span></code></pre><p>Test the API</p><pre><code class="makeup bash" translate="no"><span class="gp unselectable">$ </span><span class="">curl -si localhost:4001/location/180.219.213.135
+</span></code></pre><p><strong>NOTE</strong></p><p>Not using Phoenix since as the requirement is simple.</p><h3 id="production-deployment" class="section-heading">
+  <a href="#production-deployment" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">production-deployment</p>
+  </a>
+  Production Deployment
+</h3>
+<p><strong>Building the container</strong></p><p><code class="inline">Dockerfile</code> is provided to build a the server as container to
+simplify the packaging and deployment. We use <a href="https://hexdocs.pm/mix/Mix.Tasks.Release.html"><code class="inline">mix release</code></a> to package
+the server which is then copied to a container which is easier to
+deploy</p><p>Since <a href="https://hexdocs.pm/geo/0.1.0/Geo.html"><code class="inline">Geo</code></a> is in a private git repo we need to pass a whitelisted
+private key to be able to pull the code.</p><pre><code class="makeup bash" translate="no"><span class="">docker build --build-arg IP_LOCATOR_PRIVATE_KEY=&quot;$(cat id_ed25519 | base64)&quot; -t ip_locator .
+</span></code></pre><p>You can now push this container to docker registry of your choice and
+can run the container.</p><p><strong>Configuration</strong></p><p>Set following environment variables</p><ul><li><p>DATABASE_URL : (mandatory) database URL string, example: <code class="inline">ecto://USER:PASS@HOST/DATABASE</code></p></li><li><p>PORT : (optional) HTTP server port. Defaults to <code class="inline">4001</code></p></li></ul><p>Refer <a href="https://hexdocs.pm/geo/0.1.0/Geo.html"><code class="inline">Geo</code></a> docs for running the migrations.</p><p><strong>Metrics</strong></p><p>By default server emit multiple Prometheus metrics in production
+environment. Metrics will be available at port <code class="inline">9091</code> and path
+<code class="inline">/metrics</code> you can configure your server to collect metrics at this
+endpoint</p><p><strong>Importing Location Data</strong></p><p>There are multiple ways to import data in production</p><ul><li><p>connect to production database locally and run the mix task, this is
+simpler approach with Platforms like Fly.io</p></li><li><p>copy csv file to production server and run the mix task in a
+production server. If you don't have access to mix task then you can
+use an approach similar to the one mentioned for database migration
+above</p></li></ul><p>Above approaches works but might be unsafe since we are exposing
+access to production database and server. Safer approach can be to run
+scheduled job and import data programattically either using any
+background job scheduler or using Kubernetes Job if you are already
+running Kubernetes.</p><p>If you are deploying this server in <a href="https://fly.io">Fly.io</a> you can use
+check <code class="inline">fly.toml</code> configuration as reference. This is the config which
+used for running <code class="inline">ip-locator.fly.dev</code> server.</p><h3 id="running-tests" class="section-heading">
+  <a href="#running-tests" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">running-tests</p>
+  </a>
+  Running Tests
+</h3>
+<pre><code class="makeup bash" translate="no"><span class=""># start postgres
+</span><span class="gp unselectable">$ </span><span class="">docker-compose up
+</span><span class="">
+</span><span class="gp unselectable">$ </span><span class="">mix test --trace
+</span></code></pre>
+<div class="bottom-actions">
+  <div class="bottom-actions-item">
+
+      <a href="api-reference.html" class="bottom-actions-button" rel="prev">
+        <span class="subheader">
+          ← Previous Page
+        </span>
+        <span class="title">
+API Reference
+        </span>
+      </a>
+
+  </div>
+  <div class="bottom-actions-item">
+
+  </div>
+</div>
+
+      <footer class="footer">
+
+        <p>
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.28.5) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>
