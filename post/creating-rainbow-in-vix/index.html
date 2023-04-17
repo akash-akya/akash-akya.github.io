@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html class="not-ready text-sm lg:text-base" lang="en-us">
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  
+  <title>Creating Rainbow using Vix 🌈 - *scratch*</title>
+
+  
+  <meta name="theme-color" />
+  
+  <meta name="description" content="This is a blog version of the Livebook. You can try the interactive version here
+Mix.install([ {:vix, &quot;~&gt; 0.17.0&quot;}, {:kino, &quot;~&gt; 0.9.1&quot;} ]) Introduction Libvips provides over 300 image processing operations, but getting the intuition behind what is possible and how to combine the primitive image processing operations can be a challenging.
+With this notebook we look into some and of the core operations while trying to achieve a simple goal, which is to generate a rainbow 🌈." />
+  <meta name="author" content="" />
+  
+
+  
+  
+  
+  
+  
+  
+  <link rel="preload stylesheet" as="style" href="https://akash-akya.github.io/main.min.css" />
+
+  
+  <script
+    defer
+    src="https://akash-akya.github.io/highlight.min.js"
+    onload="hljs.highlightAll();"
+  ></script>
+  
+
+  
+  
+  
+    
+  
+  <link
+    rel="preload"
+    as="image"
+    href="https://akash-akya.github.io/theme.png"
+  />
+
+  
+  
+  
+  
+
+  
+  <link rel="preload" as="image" href="https://akash-akya.github.io/github.svg" />
+  
+
+  
+  <link rel="icon" href="https://akash-akya.github.io/favicon.ico" />
+  <link rel="apple-touch-icon" href="https://akash-akya.github.io/apple-touch-icon.png" />
+
+  
+  <meta name="generator" content="Hugo 0.101.0" />
+
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Creating Rainbow using Vix 🌈" />
+<meta property="og:description" content="This is a blog version of the Livebook. You can try the interactive version here
+Mix.install([ {:vix, &quot;~&gt; 0.17.0&quot;}, {:kino, &quot;~&gt; 0.9.1&quot;} ]) Introduction Libvips provides over 300 image processing operations, but getting the intuition behind what is possible and how to combine the primitive image processing operations can be a challenging.
+With this notebook we look into some and of the core operations while trying to achieve a simple goal, which is to generate a rainbow 🌈." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://akash-akya.github.io/post/creating-rainbow-in-vix/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-04-17T16:46:49+05:30" />
+<meta property="article:modified_time" content="2023-04-17T16:46:49+05:30" />
+
+
+  
+  <meta itemprop="name" content="Creating Rainbow using Vix 🌈">
+<meta itemprop="description" content="This is a blog version of the Livebook. You can try the interactive version here
+Mix.install([ {:vix, &quot;~&gt; 0.17.0&quot;}, {:kino, &quot;~&gt; 0.9.1&quot;} ]) Introduction Libvips provides over 300 image processing operations, but getting the intuition behind what is possible and how to combine the primitive image processing operations can be a challenging.
+With this notebook we look into some and of the core operations while trying to achieve a simple goal, which is to generate a rainbow 🌈."><meta itemprop="datePublished" content="2023-04-17T16:46:49+05:30" />
+<meta itemprop="dateModified" content="2023-04-17T16:46:49+05:30" />
+<meta itemprop="wordCount" content="1575">
+<meta itemprop="keywords" content="" />
+  
+  <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Creating Rainbow using Vix 🌈"/>
+<meta name="twitter:description" content="This is a blog version of the Livebook. You can try the interactive version here
+Mix.install([ {:vix, &quot;~&gt; 0.17.0&quot;}, {:kino, &quot;~&gt; 0.9.1&quot;} ]) Introduction Libvips provides over 300 image processing operations, but getting the intuition behind what is possible and how to combine the primitive image processing operations can be a challenging.
+With this notebook we look into some and of the core operations while trying to achieve a simple goal, which is to generate a rainbow 🌈."/>
+
+  
+  
+</head>
+
+  <body class="text-black duration-200 ease-out dark:text-white">
+    <header class="mx-auto flex h-[5rem] max-w-3xl px-8 lg:justify-center">
+  <div class="relative z-50 mr-auto flex items-center">
+    <a class="-translate-x-[1px] -translate-y-0.5 text-3xl font-bold" href="https://akash-akya.github.io/"
+      >*scratch*</a
+    >
+    <a
+      class="btn-dark ml-6 h-6 w-6 shrink-0 cursor-pointer [background:url(./theme.svg)_left_center/cover_no-repeat] dark:invert dark:[background-position:right]"
+    ></a>
+  </div>
+
+  <a
+    class="btn-menu relative z-50 -mr-8 flex h-[5rem] w-[5rem] shrink-0 cursor-pointer flex-col items-center justify-center gap-2.5 lg:hidden"
+  ></a>
+
+  <script>
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const htmlClass = document.documentElement.classList;
+    setTimeout(() => htmlClass.remove('not-ready'), 10);
+
+    const setDark = (newDark) => {
+      metaTheme.setAttribute('content', newDark ? '#000' : '#fbfbfb');
+      htmlClass[newDark ? 'add' : 'remove']('dark');
+      localStorage.setItem('dark', newDark);
+    };
+
+    
+    const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkVal = localStorage.getItem('dark');
+    setDark(darkVal ? darkVal === 'true' : darkScheme.matches);
+
+    
+    darkScheme.addEventListener('change', (event) => {
+      setDark(event.matches);
+    });
+
+    
+    const btnDark = document.querySelector('.btn-dark');
+    btnDark.addEventListener('click', () => {
+      setDark(localStorage.getItem('dark') !== 'true');
+    });
+
+    
+    const btnMenu = document.querySelector('.btn-menu');
+    btnMenu.addEventListener('click', () => {
+      htmlClass.toggle('open');
+    });
+  </script>
+
+  <div
+    class="nav-wrapper fixed inset-x-0 top-full z-40 flex h-full select-none flex-col justify-center pb-16 duration-200 dark:bg-black lg:static lg:h-auto lg:flex-row lg:!bg-transparent lg:pb-0 lg:transition-none"
+  >
+    
+    
+    <nav class="lg:ml-12 lg:flex lg:flex-row lg:items-center lg:space-x-6">
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/about"
+        >About</a
+      >
+      
+      <a
+        class="block text-center text-2xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/"
+        >Archive</a
+      >
+      
+    </nav>
+    
+
+    
+    <nav
+      class="mt-12 flex justify-center space-x-10 dark:invert lg:mt-0 lg:ml-12 lg:items-center lg:space-x-6"
+    >
+      
+      <a
+        class="h-8 w-8 [background:var(--url)_center_center/cover_no-repeat] lg:h-6 lg:w-6"
+        style="--url: url(./github.svg)"
+        href=" https://github.com/akash-akya "
+        target="_blank"
+      ></a>
+      
+    </nav>
+    
+  </div>
+</header>
+
+
+    <main
+      class="prose prose-neutral relative mx-auto min-h-[calc(100%-10rem)] max-w-3xl px-8 pt-20 pb-32 dark:prose-invert"
+    >
+      
+
+<article>
+  <header class="mb-20">
+    <h1 class="!my-0 pb-2.5">Creating Rainbow using Vix 🌈</h1>
+
+    
+    <div class="text-sm opacity-60">
+      
+      <time>Apr 17, 2023</time>
+      
+      
+    </div>
+    
+  </header>
+
+  <section><p>This is a blog version of the Livebook. You can try the interactive version here</p>
+<p><a href="https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Fakash-akya%2Fvix%2Fblob%2Fmaster%2Flivebooks%2Frainbow.livemd"><img src="https://livebook.dev/badge/v1/blue.svg" alt="Run in Livebook"></a></p>
+<pre><code class="language-elixir">Mix.install([
+  {:vix, &quot;~&gt; 0.17.0&quot;},
+  {:kino, &quot;~&gt; 0.9.1&quot;}
+])
+</code></pre>
+<h2 id="introduction">Introduction</h2>
+<p>Libvips provides over 300 image processing operations, but getting the
+intuition behind what is possible and how to combine the primitive
+image processing operations can be a challenging.</p>
+<p>With this notebook we look into some and of the core operations while
+trying to achieve a simple goal, which is to generate a rainbow
+🌈. Rainbow should have the half-circular arch, there should be a
+smooth blend between the colors.</p>
+<h2 id="generating-the-colors">Generating the colors</h2>
+<p>First let&rsquo;s look into just generating the rainbow colors. We need to
+generate the whole spectrum with the smooth blend between them.</p>
+<p>libvips provides <code>buildlut</code> function which generate a pointwise
+intermediate values between the provided points. <code>lut</code> here means
+<strong>L</strong>ook <strong>U</strong>p <strong>T</strong>able. buildlut takes a 1D matrix where each value
+represent different points of the format <code>[position, bands]</code> and
+buildlut will build a single band, one pixel height image with a
+smooth poitwise transition between the points. If you pass <code>[0, 0]</code>
+(at position zero pixel value is zero) <code>[255, 255]</code> (at position 255
+value is 255), the buildlut will return an image with pixels <code>0</code> at
+position 0, <code>1</code> at position 1, <code>2</code> at position 2 etc, ending with
+<code>255</code> at position 255. We can think of it as range <code>0..255</code>.</p>
+<pre><code class="language-elixir">alias Vix.Vips.Image
+alias Vix.Vips.Operation
+
+# buildlut needs matrix image.
+# we can create matrix-image using `Image.new_matrix_from_array` which takes
+# list and return an vips-image which can be passed to buildlut
+{:ok, mat} = Image.new_matrix_from_array(2, 2, [[0, 0], [255, 255]])
+
+gradient = Operation.buildlut!(mat)
+</code></pre>
+<p><img src="/images/creating-rainbow-in-vix/1.png" alt="Gradient"></p>
+<p>We can see the gradient clearly if we increase the image height</p>
+<pre><code class="language-elixir">Operation.resize!(gradient, 3, vscale: 50)
+</code></pre>
+<p><img src="/images/creating-rainbow-in-vix/2.png" alt="Resized Gradient"></p>
+<p><code>buildlut</code> accepts multiple bands as well. So we can generate gradient
+for colors too, not just between black and white</p>
+<pre><code class="language-elixir">defmodule Vix.KinoUtils do
+  # Utility to read color and parse hex string into list of
+  # 8-bit integers.
+  def read_colors do
+    start_color = Kino.Input.color(&quot;Start&quot;, default: &quot;#DDDD55&quot;)
+    end_color = Kino.Input.color(&quot;End&quot;, default: &quot;#FF2200&quot;)
+
+    [start_color, end_color]
+    |&gt; Kino.Layout.grid(columns: 6)
+    |&gt; Kino.render()
+
+    start_color = read(start_color)
+    end_color = read(end_color)
+
+    {start_color, end_color}
+  end
+
+  defp read(input) do
+    &quot;#&quot; &lt;&gt; color = Kino.Input.read(input)
+
+    for &lt;&lt;hex::binary-size(2) &lt;- color&gt;&gt; do
+      String.to_integer(hex, 16)
+    end
+  end
+end
+
+# read user input
+{start_color, end_color} = Vix.KinoUtils.read_colors()
+
+{:ok, mat} =
+  Image.new_matrix_from_array(4, 2, [
+    [0 | start_color],
+    [255 | end_color]
+  ])
+
+mat
+|&gt; Operation.buildlut!()
+|&gt; Operation.cast!(:VIPS_FORMAT_UCHAR)
+|&gt; Operation.resize!(3, vscale: 50)
+
+# change the `Start` and `End` colors and evaluate
+</code></pre>
+<p><img src="/images/creating-rainbow-in-vix/3.png" alt="Coloured Gradient"></p>
+<p>To generate the rainbow colors, the pixel values in RGB colour space
+will be <code>[255, 0, 0] (red), [255, 165, 0] (orange) ... [143, 0, 255] (violet)</code>. We could generate these values but it is inconvenient to
+juggle all 3 bands.</p>
+<p>Generating the colors in HSV color space we need <code>[0, 255, 255] (red), [24, 255, 255] (orange) ... [212, 255, 255] (violet)</code>. Which is much
+nicer to work with, since we only need to change one value.</p>
+<pre><code class="language-elixir">{:ok, mat} =
+  Image.new_matrix_from_array(4, 2, [
+    # position 0   - [0,   255, 255]
+    [0, 0, 255, 255],
+    # position 255 - [255, 255, 255]
+    [255, 255, 255, 255]
+  ])
+
+gradient = Operation.buildlut!(mat)
+
+# by default the colour space won't be HSV.
+# We make a shallow copy and set the colorspace to HSV.
+# While also setting band format to `unsigned char`
+rainbow_colors =
+  Operation.copy!(gradient,
+    band_format: :VIPS_FORMAT_UCHAR,
+    interpretation: :VIPS_INTERPRETATION_HSV
+  )
+
+# resize to make it visible
+Operation.resize!(rainbow_colors, 3, vscale: 50)
+
+# notice that the output spectrum starts from RED and ends with RED.
+# this is slightly incorrect, since rainbow ends with violet. We'll fix this later
+</code></pre>
+<p><img src="/images/creating-rainbow-in-vix/4.png" alt="Rainbow Gradient"></p>
+<h2 id="generating-the-arch">Generating the Arch</h2>
+<p>How to generate the half circular arch? there are several way to
+approach this but we are going to use complex band format and polar
+coordinates.</p>
+<h3 id="complex-numbers">Complex Numbers</h3>
+<p>A pixel on the image has a position represented its x coordinate and y
+coordinate. value <code>x</code> represent point position along the width and <code>y</code>
+axis along the height, ie. we need 2 values to form a point. In
+complex number system a pixel is a single complex number value. A
+value in complex number system represents a point on a 2D plane
+instead of a value on an axis. You can just think of it as just a
+fancy way to represent position on 2D plane. Internally a complex
+number is just a pair of <strong>Real</strong> part and <strong>Imaginary</strong> part.</p>
+<p>There are two different ways to locate a point on 2D plane</p>
+<ul>
+<li>Cartesian coordinate system</li>
+<li>Polar coordinate system</li>
+</ul>
+<p><strong>Cartesian coordinate System</strong></p>
+<p>Here real part represent x coordinate and imaginary part represents y coordinate.</p>
+<p><img src="/images/creating-rainbow-in-vix/5.png" alt="Cartesian"></p>
+<p><code>a</code> and <code>b</code> is used to locate the point <code>z</code></p>
+<p><strong>Polar System</strong></p>
+<p>Here real part represents distance from the origin and imaginary part represents angle</p>
+<p><img src="/images/creating-rainbow-in-vix/6.png" alt="Polar"></p>
+<p>Angle <code>φ</code> and distance <code>r</code> is used to locate point <code>z</code></p>
+<p><strong>But why do we need complex number?</strong></p>
+<p>Because it makes certain operations simple. Operations which operate
+on plane rather than axis. For example, to draw a circle on a polar
+plane we only need to vary angle keeping the distance constant.</p>
+<p>Lets take an example and see libvips operations on complex
+planes. First let&rsquo;s create a image at with its origin at the center of
+the image. It makes it easy to understand what is happening.</p>
+<pre><code class="language-elixir">use Vix.Operator
+
+width = height = 255
+
+# create 200 x 200 matrix where each pixel represent its own position.
+# pixel at left-top will be `{0, 0}` (black)
+# pixel right-bottom will be `{255, 255}` (white)
+xy = Operation.xyz!(width, height)
+
+# Display how axis values are chaning
+Kino.Layout.grid([Kino.Text.new(&quot;X-Axis&quot;), Kino.Text.new(&quot;Y-Axis&quot;), xy[0], xy[1]], columns: 2)
+|&gt; Kino.render()
+
+# move origin to center of the image
+xy = (xy - [width / 2, height / 2]) * 2
+
+# Display how axis values are changing after moving the origin.
+# Notice that origin black pixel starts at top-left before
+# and at center after moving the origin
+Kino.Layout.grid(
+  [Kino.Text.new(&quot;Centered X-Axis&quot;), Kino.Text.new(&quot;Centered Y-Axis&quot;), xy[0], xy[1]],
+  columns: 2
+)
+</code></pre>
+<p><img src="/images/creating-rainbow-in-vix/7.png" alt="Complex Index"></p>
+<p>Now that we have an image, we can see how it looks in polar plane</p>
+<pre><code class="language-elixir"># convert band format to complex number format.
+# we specify that read 2 bands to form a single complx band.
+# x axis becomes the real part of the complex number
+# y axis becomes the Imaginary part of the complex number
+complex_xy = Operation.copy!(xy, format: :VIPS_FORMAT_COMPLEX, bands: 1)
+
+# change complex number plane to polar plane.
+# vips reads complex number and converts that to polar value for all pixels.
+# real part will be distance from the origin
+# imaginary part will be the angle in degree
+polar_xy = Operation.complex!(complex_xy, :VIPS_OPERATION_COMPLEX_POLAR)
+
+# convert the complex number back to 2 band float image.
+# x axis is the real part of the complex number
+# y asix is the imaginary part of the complex number
+xy = Operation.copy!(polar_xy, format: :VIPS_FORMAT_FLOAT, bands: 2)
+
+# angle will be in degree (from 0 to 360), scale it back to 255
+xy = xy * [1, height / 360]
+
+Kino.Layout.grid([Kino.Text.new(&quot;X-Axis&quot;), Kino.Text.new(&quot;Y-Axis&quot;), xy[0], xy[1]], columns: 2)
+</code></pre>
+<p><img src="/images/creating-rainbow-in-vix/8.png" alt="Polar Index"></p>
+<p>As you can see x axis is the real part of the complex number, which is
+distance from the origin and Y axis is the imaginary part of the
+complex number which is the angle.</p>
+<p>This is much easier to understand if we draw few line on the input
+image. and see how it changes in the polar plane</p>
+<pre><code class="language-elixir">defmodule ComplexOps do
+  def to_polar(img, background \\ [0, 0, 0]) do
+    %{width: width, height: height} = Image.headers(img)
+    xy = Operation.xyz!(width, height)
+    xy = xy - [width / 2, height / 2]
+
+    scale = min(height, width) / width
+    xy = xy * 2 / scale
+
+    xy =
+      xy
+      |&gt; Operation.copy!(format: :VIPS_FORMAT_COMPLEX, bands: 1)
+      |&gt; Operation.complex!(:VIPS_OPERATION_COMPLEX_POLAR)
+      |&gt; Operation.copy!(format: :VIPS_FORMAT_FLOAT, bands: 2)
+
+    xy = xy * [1, height / 360]
+
+    # mapim takes an input and a `map` and generates an output image
+    # where input image pixels are moved based on map.
+    #
+    # [new_x, new_y] = map[x, y]
+    # out[x, y] = img[new_x, new_y]
+    #
+    # mapim is to roate, displace, distort, any type of spatial operations.
+    # where the pixel value (color) remain same but the position is changed.
+    Operation.mapim!(img, xy, background: background)
+  end
+end
+
+x_line = Operation.black!(10, height) + 255
+y_line = Operation.black!(width, 10) + 125
+
+# create a black image and draw 2 lines
+# an x axis at 50
+# a y axis at 50
+img =
+  Operation.black!(width, height)
+  |&gt; Operation.insert!(x_line, 50, 0)
+  |&gt; Operation.insert!(y_line, 0, 50)
+
+# convert img to polar
+out = ComplexOps.to_polar(img)
+
+Kino.Layout.grid([Kino.Text.new(&quot;Input&quot;), Kino.Text.new(&quot;Output&quot;), img, out], columns: 2)
+</code></pre>
+<p><img src="/images/creating-rainbow-in-vix/9.png" alt="Lines"></p>
+<p>A line on the x axis becomes a circle on the polar plane and a line on
+the y axis becomes a line from the origin.</p>
+<p>So to draw a rainbow circle we just need to draw a rainbow line on the
+x axis and convert that to polar plane!</p>
+<pre><code class="language-elixir">rainbow_colors
+|&gt; Operation.resize!(100 / 255, vscale: 400)
+|&gt; Operation.embed!(150, 0, 600, 400)
+# wrap moves the image to origin
+|&gt; Operation.wrap!()
+|&gt; ComplexOps.to_polar()
+</code></pre>
+<p><img src="/images/creating-rainbow-in-vix/10.png" alt="Rainbow"></p>
+<p>All that is left now is to make few final adjustments to make it pretty</p>
+<pre><code class="language-elixir"># create colors from violet to red instead of red to red
+{:ok, mat} = Image.new_matrix_from_array(4, 2, [[0, 220, 255, 255], [255, 0, 255, 255]])
+
+rainbow_colors =
+  Operation.copy!(Operation.buildlut!(mat),
+    band_format: :VIPS_FORMAT_UCHAR,
+    interpretation: :VIPS_INTERPRETATION_HSV
+  )
+
+sky_color = [135, 100, 255]
+
+rainbow_colors
+|&gt; Operation.resize!(100 / 255, vscale: 500)
+|&gt; Operation.embed!(50, 0, 500, 500, background: sky_color)
+|&gt; Operation.wrap!()
+|&gt; ComplexOps.to_polar(sky_color)
+# take only top half of the image
+|&gt; Operation.copy!(height: 250, width: 500)
+</code></pre>
+<p><img src="/images/creating-rainbow-in-vix/11.png" alt="Rainbow Final"></p>
+</section>
+
+  
+  
+
+  
+  
+  
+  <nav class="mt-24 flex rounded-lg bg-black/[3%] text-lg dark:bg-white/[8%]">
+    
+    
+    <a
+      class="ml-auto flex w-1/2 items-center justify-end p-6 pl-3 no-underline"
+      href="https://akash-akya.github.io/post/composable-collectable/"
+      ><span>Composable Collectable in Elixir</span><span class="ml-1.5">→</span></a
+    >
+    
+  </nav>
+  
+
+  
+  
+</article>
+
+
+    </main>
+
+    <footer class="opaco mx-auto flex h-[5rem] max-w-3xl items-center px-8 text-[0.9em] opacity-60">
+  <div class="mr-auto">
+    &copy; 2023
+    <a class="link" href="https://akash-akya.github.io/">*scratch*</a>
+  </div>
+  <a class="link mx-6" href="https://gohugo.io/" rel="noopener" target="_blank">Powered by Hugo️️</a
+  >️
+  <a class="link" href="https://github.com/nanxiaobei/hugo-paper" rel="noopener" target="_blank"
+    >▷ Paper 6</a
+  >
+</footer>
+
+  </body>
+</html>
