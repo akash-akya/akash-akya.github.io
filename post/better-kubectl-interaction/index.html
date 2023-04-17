@@ -141,7 +141,7 @@
     };
 
     
-    const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkScheme = window.matchMedia('(prefers-color-scheme: light)');
     const darkVal = localStorage.getItem('dark');
     setDark(darkVal ? darkVal === 'true' : darkScheme.matches);
 
