@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    
+    
+    <title>memdump | Elixir GitHub Action for Windows</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<body>
+    <div id="top-strip"></div>
+    <div class="content"><header>
+    <div class="center">
+        <a href="/" class="quiet-link">
+            <div class="monospace title">
+                <h1 style="margin-top: 0.3em; margin-bottom: 0.3em;">memdump</h1>
+            </div>
+        </a>
+
+        <div class="nav">
+            
+            
+            <a href="/">
+                home
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/posts/">
+                posts
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/tags/">
+                tags
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/about">
+                about
+            </a>
+            
+        </div>
+    </div>
+</header>
+<div class="content">
+<h1>Elixir GitHub Action for Windows</h1>
+
+
+
+<div class="publish-date">
+    <time datetime="2020-08-09">09 Aug 2020</time>
+</div>
+
+
+<p>When our Elixir code is directly interacting with host operating system, it is nice to have automated tests integrated for all targeted operating systems. <a href="https://github.com/features/actions">Github actions</a> makes this task easier than before but unfortunately <a href="https://github.com/actions/setup-elixir">elixir-setup</a> does not support operating systems other than ubuntu yet. I tried to find a solution for this for one of my elixir library</p>
+<h2 id="using-chocolatey-package-manager">Using Chocolatey package manager</h2>
+<p>We can use <a href="https://github.com/marketplace/actions/chocolatey-action">Chocolatey Action</a> install elixir. Chocolatey also installs Erlang as elixir dependency for us.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>choco install elixir
+</span></span></code></pre></div><p>But we can&rsquo;t access Elixir or mix yet. With github-actions, we have to explicitly update PATH environment variable using an <a href="https://github.community/t/append-path-on-windows/16205/5">undocumented</a> special syntax</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#0086b3">echo</span> <span style="color:#d14">&#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&#34;</span>
+</span></span></code></pre></div><p>Our workflow for tests might look like this:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Elixir<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">on</span>:<span style="color:#bbb"> </span>push<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">jobs</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">run_tests</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">runs-on</span>:<span style="color:#bbb"> </span>windows-latest<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">steps</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">uses</span>:<span style="color:#bbb"> </span>actions/checkout@v2<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Install Elixir<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">uses</span>:<span style="color:#bbb"> </span>crazy-max/ghaction-chocolatey@v1.2.2<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">with</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">          </span><span style="color:#000080">args</span>:<span style="color:#bbb"> </span>install elixir<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Update PATH<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>echo &#34;##[add-path]C:\ProgramData\chocolatey\lib\Elixir\bin&#34;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Install Dependencies<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>|<span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">          mix local.hex --force
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">          mix.bat deps.get</span><span style="color:#bbb">          
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Compile<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>mix.bat compile --force --warnings-as-errors<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Check format<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>mix.bat format --check-formatted<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Run Tests<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>mix.bat test<span style="color:#bbb">
+</span></span></span></code></pre></div><p>This approach works, but it has few issues:</p>
+<h3 id="pipeline-is-slow">Pipeline is slow</h3>
+<p>When I tested this, the pipeline took 6m 41s. Installation alone took 6m 15s. We install Elixir and Erlang/OTP every time we run this pipeline. This includes downloading packages, extracting and installing.</p>
+<h3 id="changing-elixir-and-erlang-version-is-not-easy">Changing Elixir and Erlang version is not easy</h3>
+<p>We <em>can</em> change Elixir version with <code>--version</code> parameter with chocolatey, but now we sort of depend on chocolatey. Also, we can not combine different Erlang and Elixir with this. Moreover, we are already leaking installation by setting path environment variable explicitly.</p>
+<h2 id="manual-setup-with-cache">Manual setup with cache</h2>
+<p>Quick look at chocolatey revealed that installing Erlang and Elixir from command-line is not as complicated as I thought. New approach is to manually install Erlang and Elixir and setup action-cache to reuse installation across pipelines.</p>
+<ul>
+<li>check Erlang installation cache</li>
+<li>download and install Erlang if not in cache</li>
+<li>add Erlang to path</li>
+<li>check Elixir installation cache</li>
+<li>download and install Elixir if not in cache</li>
+<li>add Elixir to path</li>
+</ul>
+<p>This is slightly more complicated than our previous setup using chocolatey but it is faster and more flexible.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Elixir<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">on</span>:<span style="color:#bbb"> </span>push<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">env</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">OTP_VERSION</span>:<span style="color:#bbb"> </span><span style="color:#099">22.2</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">ELIXIR_VERSION</span>:<span style="color:#bbb"> </span><span style="color:#099">1.9.4</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">jobs</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">run_tests</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">runs-on</span>:<span style="color:#bbb"> </span>windows-latest<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Windows<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">steps</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Cache erlang<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">uses</span>:<span style="color:#bbb"> </span>actions/cache@v2<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">id</span>:<span style="color:#bbb"> </span>erlang_cache<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">with</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">          </span><span style="color:#000080">path</span>:<span style="color:#bbb"> </span>C:\Program Files\erl10.6<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">          </span><span style="color:#000080">key</span>:<span style="color:#bbb"> </span>erlang-${{ runner.os }}-${{ env.OTP_VERSION }}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Download and install erlang<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">if</span>:<span style="color:#bbb"> </span>steps.erlang_cache.outputs.cache-hit != &#39;true&#39;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>|<span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">          Invoke-WebRequest &#34;http://erlang.org/download/otp_win64_$env:OTP_VERSION.exe&#34; -OutFile &#34;C:\otp_win64_$env:OTP_VERSION.exe&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">          Start-Process -Wait &#34;C:\otp_win64_$env:OTP_VERSION.exe&#34; /S</span><span style="color:#bbb">          
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Add erlang to path<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>echo &#34;##[add-path]C:\Program Files\erl10.6\bin&#34;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Cache Elixir<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">uses</span>:<span style="color:#bbb"> </span>actions/cache@v2<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">id</span>:<span style="color:#bbb"> </span>elixir_cache<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">with</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">          </span><span style="color:#000080">path</span>:<span style="color:#bbb"> </span>c:\elixir<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">          </span><span style="color:#000080">key</span>:<span style="color:#bbb"> </span>elixir-${{ runner.os }}-${{ env.ELIXIR_VERSION }}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Download and install Elixir<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">if</span>:<span style="color:#bbb"> </span>steps.elixir_cache.outputs.cache-hit != &#39;true&#39;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>|<span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">          Invoke-WebRequest &#34;https://github.com/elixir-lang/elixir/releases/download/v$env:ELIXIR_VERSION/Precompiled.zip&#34; -OutFile &#34;C:\elixir_$env:ELIXIR_VERSION.zip&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">          Expand-Archive &#34;C:\elixir_$env:ELIXIR_VERSION.zip&#34; -DestinationPath c:\elixir</span><span style="color:#bbb">          
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Add elixir to path<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>echo &#34;##[add-path]C:\elixir\bin&#34;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Install Dependencies<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>|<span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">          mix local.hex --force
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">          mix.bat deps.get</span><span style="color:#bbb">          
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Compile<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>mix.bat compile --force --warnings-as-errors<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Check format<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>mix.bat format --check-formatted<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>- <span style="color:#000080">name</span>:<span style="color:#bbb"> </span>Run Tests<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">run</span>:<span style="color:#bbb"> </span>mix.bat test<span style="color:#bbb">
+</span></span></span></code></pre></div><p>This brings down pipeline execution time from 6m 41s to 2m.</p>
+<p><img src="/images/setting_up_elixir_in_github_actions_for_windows/ci.png" alt="new workflow" title="New pipeline execution time"></p>
+<p>You can check working setup <a href="https://github.com/akash-akya/ex_cmd/blob/master/.github/workflows/elixir.yml">here</a></p>
+<p>Our new setup is still far from ideal. We are leaking Erlang installation path <code>C:\Program Files\erl10.6</code> which changes with Erlang version. Hopefully we get windows support in setup-elixir soon</p>
+
+
+<div class="footer">
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/elixir">Elixir</a> &NonBreakingSpace;
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/programming">Programming</a> &NonBreakingSpace;
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/github">GitHub</a> &NonBreakingSpace;
+    
+</div>
+
+
+</div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Emacs on memdump</title>
+    <link>https://akash-akya.github.io/tags/emacs/</link>
+    <description>Recent content in Emacs on memdump</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 13 May 2019 16:26:24 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/emacs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Navigating Elixir Standard Library in Emacs</title>
+      <link>https://akash-akya.github.io/posts/elixir_source_in_emacs/</link>
+      <pubDate>Mon, 13 May 2019 16:26:24 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/posts/elixir_source_in_emacs/</guid>
+      <description>Getting goto-definition work for Elixir core functions in Emacs</description>
+    </item>
+    
+  </channel>
+</rss>

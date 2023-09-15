@@ -1,0 +1,275 @@
+@charset "UTF-8";
+
+body {
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    font: 400 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+a {
+    color: #0074D9;
+}
+
+a:visited {
+    color: #0041A6;
+}
+
+pre {
+    border: 1px solid #ccc;
+    padding: 1em;
+    white-space: pre-wrap;
+}
+
+.footnote-definition {
+    display: flex;
+    flex-direction: row;
+
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.footnote-definition p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.footnote-definition-label {
+    display: inline;
+
+    margin-top: auto;
+    margin-bottom: auto;
+
+    padding-right: 10px;
+
+    font-size: medium;
+}
+
+.footnote-definition-label::after {
+    content: ".";
+}
+
+/*
+ * TODO: make responsive
+ */
+.content {
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 1em;
+    max-width: 70ch;
+}
+
+.center {
+    text-align: center;
+}
+
+.contact {
+    border: solid black;
+    display: inline-block;
+    padding: 1em 2em;
+
+    background-color: #FDF;
+}
+
+.align-left {
+    text-align: left;
+}
+
+.monospace {
+    font-family: monospace;
+}
+
+.title {
+    background-color: #B1D4E0;
+    border: solid black;
+    box-shadow: 5px 5px 0px #145DA0;
+    display: inline-block;
+    padding: 0em 2em;
+}
+
+.home-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.home-column {
+    margin: 1em;
+}
+
+/*
+ * TODO: accessibility: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+ * TODO: webkit functionality -- maybe use a CSS preprocessor
+ */
+.blink {
+    animation: blink-animation 1s steps(2, start) infinite;
+
+}
+
+@keyframes blink-animation {
+    to {
+        visibility: hidden;
+    }
+}
+
+.quiet-link {
+    color: inherit;
+    text-decorations: inherit;
+}
+
+.quiet-link:visited {
+    color: inherit;
+    text-decorations: inherit;
+}
+
+.no-underline {
+    text-decoration: none;
+}
+
+.nav {
+    margin-top: 1.5em;
+    font-size: 1.05em
+}
+
+:not(pre)>code {
+    white-space: pre-wrap !important;
+    background: #E4F1F7;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    font-size: 0.9em;
+    border: 1px solid #DFE6EA;
+    border-radius: 3px;
+}
+
+blockquote {
+    font-style: italic;
+    border-left: 4px solid #b6dcea;
+    padding-left: 15px;
+    margin: 0;
+}
+
+figcaption {
+    text-align: center;
+    font-size: 0.9em;
+    color: grey;
+}
+
+img {
+    max-width: 100%;
+}
+
+.banner {
+    /* in the center */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    /* take up entire width */
+    width: 100%;
+
+    /* gray background, white text */
+    background-color: #555;
+    color: white;
+}
+
+.banner div {
+    margin: 0.5em;
+}
+
+.banner a {
+    color: #7FDBFF;
+}
+
+/* padding between list elements */
+li {
+    margin: 0.5em;
+}
+
+.embeddable-buttondown-form {
+    margin-top: 1em;
+    padding: 1em;
+
+    display: flex;
+    flex-direction: column;
+
+    border: solid black;
+
+    box-shadow: 6px 6px 0px #F5A9B8;
+}
+
+.embeddable-buttondown-form input {
+    margin: 0.5em;
+
+    border: 1px solid darkgrey;
+    border-radius: 0.5em;
+    box-shadow: 0px 0px 0px;
+
+    font-size: 100%;
+
+    max-width: 100%;
+}
+
+.embeddable-buttondown-form input[type="submit"] {
+    border: 1px solid black;
+    border-radius: 0.5em;
+
+    font-size: 100%;
+    font-weight: bold;
+
+    box-shadow: 6px 6px 0px #5BCEFA;
+}
+
+.footer {
+    margin-top: 2em;
+    margin-bottom: 3em;
+    border-top: 1px solid #e5e5e5;
+    padding-top: 1.5em;
+    color: #a4a4a4;
+}
+
+.separator {
+    margin-top: 2em;
+    margin-bottom: 2em;
+    border-top: 1px solid #e5e5e5;
+}
+
+body #top-strip {
+    height: .4em;
+    background-color: #145DA0;
+    margin-bottom: 0.75em;
+}
+
+.summary {
+    color: black;
+}
+
+.tag {
+    background: #D5F3FD;
+    padding: 0.3em;
+    border: 1px solid #B5D9F9;
+    border-radius: 3px;
+}
+
+.blog-list-entry-title {
+    font-size: 1.3em;
+    margin: 0em;
+    font-weight: normal;
+}
+
+a.blog-list-entry:hover {
+    opacity: 0.5;
+}
+
+.highlight {
+    font-size: 13px;
+    line-height: 1.6em;
+}
+
+.publish-date {
+    margin-top: -1em;
+    margin-bottom: 1.5em;
+    color: #808080;
+}

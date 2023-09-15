@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Stream on memdump</title>
+    <link>https://akash-akya.github.io/tags/stream/</link>
+    <description>Recent content in Stream on memdump</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 14 Nov 2021 08:47:00 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/stream/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Composable Collectable in Elixir</title>
+      <link>https://akash-akya.github.io/posts/composable-collectable/</link>
+      <pubDate>Sun, 14 Nov 2021 08:47:00 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/posts/composable-collectable/</guid>
+      <description>Building composable collectable for fun and profit</description>
+    </item>
+    
+  </channel>
+</rss>

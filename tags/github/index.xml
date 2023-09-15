@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>GitHub on memdump</title>
+    <link>https://akash-akya.github.io/tags/github/</link>
+    <description>Recent content in GitHub on memdump</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 09 Aug 2020 15:00:00 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/github/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Elixir GitHub Action for Windows</title>
+      <link>https://akash-akya.github.io/posts/setting_up_elixir_in_github_actions_for_windows/</link>
+      <pubDate>Sun, 09 Aug 2020 15:00:00 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/posts/setting_up_elixir_in_github_actions_for_windows/</guid>
+      <description>Setting up Elixir in github actions for windows</description>
+    </item>
+    
+  </channel>
+</rss>

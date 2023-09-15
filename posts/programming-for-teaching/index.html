@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    
+    
+    <title>memdump | Programming Languages for Teaching</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<body>
+    <div id="top-strip"></div>
+    <div class="content"><header>
+    <div class="center">
+        <a href="/" class="quiet-link">
+            <div class="monospace title">
+                <h1 style="margin-top: 0.3em; margin-bottom: 0.3em;">memdump</h1>
+            </div>
+        </a>
+
+        <div class="nav">
+            
+            
+            <a href="/">
+                home
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/posts/">
+                posts
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/tags/">
+                tags
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/about">
+                about
+            </a>
+            
+        </div>
+    </div>
+</header>
+<div class="content">
+<h1>Programming Languages for Teaching</h1>
+
+
+
+<div class="publish-date">
+    <time datetime="2018-06-11">11 Jun 2018</time>
+</div>
+
+
+
+<p>
+<strong><em>Note that following article is dated and my opinions changed significantly since then</em></strong></p>
+<p>
+While reading <a href="http://sarabander.github.io/sicp/">Structure and Interpretation of Computer Programs</a> book
+(sicp for short), I was amazed by how well the topics are explained.
+At first glance, the book looks like it&#39;s about programming, but it&#39;s
+actually more than that. Even though I&#39;m still at chapter 3, I&#39;m
+already in love with the book. Among other things it truly changes the
+way of thinking in general. All these things got me into thinking what
+made sicp so special? Why not all other topics are explained in
+such a manner in general teaching?  I think among other things it&#39;s
+the explaining things with a mixture of natural language and a formal
+language. switching between them whenever necessary. Natural language
+for explaining common topics and formal languages for explaining
+&#34;definite&#34; topics. The formal language I mean programming language. As
+I&#39;m interested in linguistics, I have been thinking why not use this
+innate ability of programming languages to teach other topics as well
+and get the same benefit?. I firmly believe this is to be true. That&#39;s
+a bold claim! Let&#39;s see a few points which I think backs up this
+claim. This idea may not be something new. My main intention in
+writing this to get a clear picture for me and have a discussion
+with others to improve my understanding.</p>
+<div id="outline-container-headline-1" class="outline-3">
+<h3 id="headline-1">
+Premises
+</h3>
+<div id="outline-text-headline-1" class="outline-text-3">
+<p>The key difference between natural language and formal language is ambiguity or inexactness. Its surprising to see how we even make sense of any natural language sentence. The framing of words,
+ sentences, sounds(phonetics) everything is full of special cases. There is no single generic rule (or grammar) for these things. The natural language I mean the language we all learn, the one we speak. Not the one taught in school, which is more of standardized language. See <a href="https://en.wikipedia.org/wiki/Constructed_language">constructed language</a>.</p>
+<p>
+ Ambiguity in natural languages mainly due to its reliance on context to make sense. When someone says &#34;Write your name&#34;, it&#39;s grammatically correct but it&#39;s unclear whether he is asking to write the name of the person or to write &#34;your name&#34;. Though we make sense of sentences like this daily. Formal languages are exactly opposite in this regard. By definition they are unambiguous. A formal language sentence can&#39;t have two different meanings. That&#39;s why we have a
+ special formal language for mathematics.</p>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-3">
+<h3 id="headline-2">
+Programming language
+</h3>
+<div id="outline-text-headline-2" class="outline-text-3">
+<p>Programming language a formal language. When we think of programming
+language we usually think of &#34;telling&#34; computer what to
+do. Programming languages are now separated enough from the computer
+that we can now write programs without actually understanding how the
+computer works.</p>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-3">
+<h3 id="headline-3">
+So what?
+</h3>
+<div id="outline-text-headline-3" class="outline-text-3">
+<p>Just as natural language serves as a tool for thinking, we can use a
+ the programming language to understand things better or easier; as a tool for education. We can use a programming language to understand topics which are &#39;exact&#39; in nature. We have mathematics for the exact same
+ reason but I think a programming language huge benefit over it. not
+ only that mathematics have various confusing different notations
+ (does &lt;code&gt;d(x+1)/dx&lt;/code&gt; means division or differentiation) it
+ also unifies all different notation for describing things which are
+ &#39;exact&#39;.</p>
+</div>
+</div>
+<div id="outline-container-headline-4" class="outline-3">
+<h3 id="headline-4">
+How?
+</h3>
+<div id="outline-text-headline-4" class="outline-text-3">
+<div id="outline-container-headline-5" class="outline-4">
+<h4 id="headline-5">
+For understanding.
+</h4>
+<div id="outline-text-headline-5" class="outline-text-4">
+<p>DSL (Domain Specific Language) with and <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a> kind of environment is
+the best tool to just try out different possibilities. Take the
+example of understanding kinetics. In the current model of teaching
+students are taught some rules and formulas and some cliché examples
+and expected to understand and get intuition. Instead, if you provide
+an environment with proper DSL for the topic (maybe be some fancy
+animation), students can explore possibilities to get the intuition of
+the topic. One might ask &#34;why bother with a programming language? a
+simple UI with GUI elements such as seek-bar and an input box to
+change parameter is more than enough!&#34;. but only so much you can do
+with the limited combination, instead if we provide the ability to
+combine different things (such as ability to try different formula
+itself), students can try different combinations of the rules and
+figure out why things are the way they are. What we are essentially
+giving here is the ability to &#34;change&#34; and &#34;define&#34; the rules
+itself. Unlike playing along with the already defined rules, which
+traditional teaching promotes. This ability to combine and define
+different things cannot be fully realized without a language,
+language&#39;s recursive nature is very essential in combination.</p>
+</div>
+</div>
+<div id="outline-container-headline-6" class="outline-4">
+<h4 id="headline-6">
+For experimenting
+</h4>
+<div id="outline-text-headline-6" class="outline-text-4">
+<p>To understand a topic, experimenting with it is essential, current
+model of teaching provides very less importance to experimenting.
+Programming languages might fill that gap and give easy means to
+&#39;experiment&#39; and pattern match the results. Seeing the changes
+immediately makes the learning more interesting and more
+involved. Bret Victor <a href="https://www.youtube.com/watch?v=PUv66718DII">talk on &#34;Inventing on Principle&#34;</a> may be relevant
+here.</p>
+</div>
+</div>
+<div id="outline-container-headline-7" class="outline-4">
+<h4 id="headline-7">
+For expressing
+</h4>
+<div id="outline-text-headline-7" class="outline-text-4">
+<p>I often find myself struggling to explain topics which are &#34;mathsy&#34; or
+related to logic. Almost always I end up mixing words from the programming
+language and natural language. Having common languages explain these
+sort of things might solve this problem. Maths fill this void but
+partially because of lack of uniformity. A common programming language
+might fill this gap. It can act like a natural language for explaining
+topic leaned towards logic.</p>
+</div>
+</div>
+<div id="outline-container-headline-8" class="outline-4">
+<h4 id="headline-8">
+As a tool to hide the complexity
+</h4>
+<div id="outline-text-headline-8" class="outline-text-4">
+<p>All high-level programming language has a weapon called &#34;Abstraction&#34;
+to fight complexity. Abstraction is a tool to hide complexity by
+separating problem into layers. This aspect can be utilized to make
+teaching focused on one topic or layer. Like having a DSL and
+explaining the topics incrementally make the topic at hand simple and
+focused. Sicp has a various example illustrating this. Especially
+picture language, explaining the combination of drawing first and then
+explaining the drawing primitive. This aspect forces us to think why
+we have to define primitives in the first place. Another example of
+finding square root is the best to showcase how things can be
+explained incrementally. Gradually explaining the fixed point formula
+is arguably the best way to explain some topic. Though abstraction is
+not unique to a programming language, programming language forces us
+to think in a certain way and draws the clear line between layers of
+abstraction.  From my personal experience understanding and
+implementing
+<a href="https://www.cs.unc.edu/~stotts/723/Lambda/church.html">church
+numerals</a> was a insightful experience. I think It is possible because
+of clear abstraction.</p>
+</div>
+</div>
+<div id="outline-container-headline-9" class="outline-4">
+<h4 id="headline-9">
+For evaluation
+</h4>
+<div id="outline-text-headline-9" class="outline-text-4">
+<p>With the current model students are evaluated based on their
+&#34;explanation&#34; of the topic or asking for things they &#34;remember&#34;. I
+don&#39;t think explanation actually reveal much about
+understanding. Sometimes they can&#39;t explain the intuition they
+have. Ability to explain is definitely a good thing to have but that
+should not be a measure to evaluate understanding. Evaluating practical activity which utilizes their understanding might be
+better. For example, to evaluate students understanding of kinetics, we
+can provide a physics environment with slightly different DSL to the
+student. And can ask them to show or create something in that
+environment based on the understanding.</p>
+</div>
+</div>
+<div id="outline-container-headline-10" class="outline-4">
+<h4 id="headline-10">
+Just as a language, for its own sake!
+</h4>
+<div id="outline-text-headline-10" class="outline-text-4">
+<p>Same as natural languages, we can explore programming language to
+create/express art. There are already various examples, which use
+programming language as a tool to create something. To name few <a href="https://sonic-pi.net/">sonic
+pi</a> for sound processing and <a href="https://processing.org/">processing</a> for generative art and all
+other kinds of visual art.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-11" class="outline-3">
+<h3 id="headline-11">
+What languages should we use?
+</h3>
+<div id="outline-text-headline-11" class="outline-text-3">
+<p>All this fine and dandy only if we have a simple language. If teaching language itself is a big hurdle then there is no point in doing so. Current programming languages are more focused on
+ &#34;programming&#34; aspect, we need something more &#39;simple&#39;(no pointer etc). As this is a tool for explaining general topics. I think something like Lisp fits perfectly. Its simple enough that basic syntax can be explained in 4-5 hours and its <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconic</a> nature blurs the line between code and data distinction which is essential <sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup>. obviously, I&#39;m biased because of sicp.<sup class="footnote-reference"><a id="footnote-reference-2" href="#footnote-2">2</a></sup> The point is it&#39;s not about the language&#39;s syntax but the properties of all high-level language.</p>
+</div>
+</div>
+<div id="outline-container-headline-12" class="outline-3">
+<h3 id="headline-12">
+Final thoughts
+</h3>
+<div id="outline-text-headline-12" class="outline-text-3">
+<p>There is no doubt that we understand some topic better with a
+ different approach or explained using a different medium (for example, <a href="https://www.youtube.com/watch?v=WUvTyaaNkzM&amp;list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr">Explaining calculus visually</a>). The languages we use might actually <a href="https://en.wikipedia.org/wiki/Language_and_thought">affect our thinking</a>. We just have to try. Using programming language for teaching is partially explored. For example <a href="https://en.wikipedia.org/wiki/Scratch_(programming_language)">scratch</a> (But
+ the goal is different though).  Maybe using formal language is not that effective in practice or maybe teaching the language itself is a big problem. But It&#39;s worth exploring</p>
+</div>
+</div>
+<div class="footnotes">
+<hr class="footnotes-separatator">
+<div class="footnote-definitions">
+<div class="footnote-definition">
+<sup id="footnote-1"><a href="#footnote-reference-1">1</a></sup>
+<div class="footnote-body">
+<p>See sicp examples for the same</p>
+</div>
+</div>
+<div class="footnote-definition">
+<sup id="footnote-2"><a href="#footnote-reference-2">2</a></sup>
+<div class="footnote-body">
+<p>Lisp is infamous as &#34;Lots of Irritating Stupid Parentheses&#34;</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="footer">
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/programming">Programming</a> &NonBreakingSpace;
+    
+</div>
+
+
+</div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kubernetes on memdump</title>
+    <link>https://akash-akya.github.io/tags/kubernetes/</link>
+    <description>Recent content in Kubernetes on memdump</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 14 Aug 2020 22:40:57 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Better Kubectl Interaction</title>
+      <link>https://akash-akya.github.io/posts/better-kubectl-interaction/</link>
+      <pubDate>Fri, 14 Aug 2020 22:40:57 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/posts/better-kubectl-interaction/</guid>
+      <description>It&amp;rsquo;s just about using &lt;code&gt;fzf&lt;/code&gt; with &lt;code&gt;kubectl&lt;/code&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    
+    
+    <title>memdump | Creating Rainbow using Vix 🌈</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<body>
+    <div id="top-strip"></div>
+    <div class="content"><header>
+    <div class="center">
+        <a href="/" class="quiet-link">
+            <div class="monospace title">
+                <h1 style="margin-top: 0.3em; margin-bottom: 0.3em;">memdump</h1>
+            </div>
+        </a>
+
+        <div class="nav">
+            
+            
+            <a href="/">
+                home
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/posts/">
+                posts
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/tags/">
+                tags
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/about">
+                about
+            </a>
+            
+        </div>
+    </div>
+</header>
+<div class="content">
+<h1>Creating Rainbow using Vix 🌈</h1>
+
+
+
+<div class="publish-date">
+    <time datetime="2023-04-17">17 Apr 2023</time>
+</div>
+
+
+<p>This is a blog version of the Livebook. You can try the interactive version here</p>
+<p><a href="https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Fakash-akya%2Fvix%2Fblob%2Fmaster%2Flivebooks%2Frainbow.livemd"><img src="https://livebook.dev/badge/v1/blue.svg" alt="Run in Livebook"></a></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Mix</span><span style="color:#000;font-weight:bold">.</span>install([
+</span></span><span style="display:flex;"><span>  {<span style="color:#990073">:vix</span>, <span style="color:#d14">&#34;~&gt; 0.17.0&#34;</span>},
+</span></span><span style="display:flex;"><span>  {<span style="color:#990073">:kino</span>, <span style="color:#d14">&#34;~&gt; 0.9.1&#34;</span>}
+</span></span><span style="display:flex;"><span>])
+</span></span></code></pre></div><h2 id="introduction">Introduction</h2>
+<p>Libvips provides over 300 image processing operations, but getting the
+intuition behind what is possible and how to combine the primitive
+image processing operations can be a challenging.</p>
+<p>With this notebook we look into some and of the core operations while
+trying to achieve a simple goal, which is to generate a rainbow
+🌈. Rainbow should have the half-circular arch, there should be a
+smooth blend between the colors.</p>
+<h2 id="generating-the-colors">Generating the colors</h2>
+<p>First let&rsquo;s look into just generating the rainbow colors. We need to
+generate the whole spectrum with the smooth blend between them.</p>
+<p>libvips provides <code>buildlut</code> function which generate a pointwise
+intermediate values between the provided points. <code>lut</code> here means
+<strong>L</strong>ook <strong>U</strong>p <strong>T</strong>able. buildlut takes a 1D matrix where each value
+represent different points of the format <code>[position, bands]</code> and
+buildlut will build a single band, one pixel height image with a
+smooth poitwise transition between the points. If you pass <code>[0, 0]</code>
+(at position zero pixel value is zero) <code>[255, 255]</code> (at position 255
+value is 255), the buildlut will return an image with pixels <code>0</code> at
+position 0, <code>1</code> at position 1, <code>2</code> at position 2 etc, ending with
+<code>255</code> at position 255. We can think of it as range <code>0..255</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">alias</span> <span style="color:#458;font-weight:bold">Vix.Vips.Image</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">alias</span> <span style="color:#458;font-weight:bold">Vix.Vips.Operation</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># buildlut needs matrix image.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># we can create matrix-image using `Image.new_matrix_from_array` which takes</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># list and return an vips-image which can be passed to buildlut</span>
+</span></span><span style="display:flex;"><span>{<span style="color:#990073">:ok</span>, mat} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Image</span><span style="color:#000;font-weight:bold">.</span>new_matrix_from_array(<span style="color:#099">2</span>, <span style="color:#099">2</span>, [[<span style="color:#099">0</span>, <span style="color:#099">0</span>], [<span style="color:#099">255</span>, <span style="color:#099">255</span>]])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>gradient <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>buildlut!(mat)
+</span></span></code></pre></div><p><img src="/images/creating-rainbow-in-vix/1.png" alt="Gradient"></p>
+<p>We can see the gradient clearly if we increase the image height</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>resize!(gradient, <span style="color:#099">3</span>, <span style="color:#990073">vscale</span>: <span style="color:#099">50</span>)
+</span></span></code></pre></div><p><img src="/images/creating-rainbow-in-vix/2.png" alt="Resized Gradient"></p>
+<p><code>buildlut</code> accepts multiple bands as well. So we can generate gradient
+for colors too, not just between black and white</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">Vix.KinoUtils</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic"># Utility to read color and parse hex string into list of</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic"># 8-bit integers.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> read_colors <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    start_color <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Kino.Input</span><span style="color:#000;font-weight:bold">.</span>color(<span style="color:#d14">&#34;Start&#34;</span>, <span style="color:#990073">default</span>: <span style="color:#d14">&#34;</span><span style="color:#a61717;background-color:#e3d2d2">#</span><span style="color:#d14">DDDD55&#34;</span>)
+</span></span><span style="display:flex;"><span>    end_color <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Kino.Input</span><span style="color:#000;font-weight:bold">.</span>color(<span style="color:#d14">&#34;End&#34;</span>, <span style="color:#990073">default</span>: <span style="color:#d14">&#34;</span><span style="color:#a61717;background-color:#e3d2d2">#</span><span style="color:#d14">FF2200&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    [start_color, end_color]
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Kino.Layout</span><span style="color:#000;font-weight:bold">.</span>grid(<span style="color:#990073">columns</span>: <span style="color:#099">6</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Kino</span><span style="color:#000;font-weight:bold">.</span>render()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    start_color <span style="color:#000;font-weight:bold">=</span> read(start_color)
+</span></span><span style="display:flex;"><span>    end_color <span style="color:#000;font-weight:bold">=</span> read(end_color)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    {start_color, end_color}
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">defp</span> read(input) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#d14">&#34;</span><span style="color:#a61717;background-color:#e3d2d2">#</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">&lt;&gt;</span> color <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Kino.Input</span><span style="color:#000;font-weight:bold">.</span>read(input)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">for</span> &lt;&lt;hex<span style="color:#000;font-weight:bold">::</span>binary<span style="color:#000;font-weight:bold">-</span>size(<span style="color:#099">2</span>) <span style="color:#000;font-weight:bold">&lt;-</span> color&gt;&gt; <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>to_integer(hex, <span style="color:#099">16</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># read user input</span>
+</span></span><span style="display:flex;"><span>{start_color, end_color} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Vix.KinoUtils</span><span style="color:#000;font-weight:bold">.</span>read_colors()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{<span style="color:#990073">:ok</span>, mat} <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Image</span><span style="color:#000;font-weight:bold">.</span>new_matrix_from_array(<span style="color:#099">4</span>, <span style="color:#099">2</span>, [
+</span></span><span style="display:flex;"><span>    [<span style="color:#099">0</span> <span style="color:#000;font-weight:bold">|</span> start_color],
+</span></span><span style="display:flex;"><span>    [<span style="color:#099">255</span> <span style="color:#000;font-weight:bold">|</span> end_color]
+</span></span><span style="display:flex;"><span>  ])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mat
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>buildlut!()
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>cast!(<span style="color:#990073">:VIPS_FORMAT_UCHAR</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>resize!(<span style="color:#099">3</span>, <span style="color:#990073">vscale</span>: <span style="color:#099">50</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># change the `Start` and `End` colors and evaluate</span>
+</span></span></code></pre></div><p><img src="/images/creating-rainbow-in-vix/3.png" alt="Coloured Gradient"></p>
+<p>To generate the rainbow colors, the pixel values in RGB colour space
+will be <code>[255, 0, 0] (red), [255, 165, 0] (orange) ... [143, 0, 255] (violet)</code>. We could generate these values but it is inconvenient to
+juggle all 3 bands.</p>
+<p>Generating the colors in HSV color space we need <code>[0, 255, 255] (red), [24, 255, 255] (orange) ... [212, 255, 255] (violet)</code>. Which is much
+nicer to work with, since we only need to change one value.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>{<span style="color:#990073">:ok</span>, mat} <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Image</span><span style="color:#000;font-weight:bold">.</span>new_matrix_from_array(<span style="color:#099">4</span>, <span style="color:#099">2</span>, [
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># position 0   - [0,   255, 255]</span>
+</span></span><span style="display:flex;"><span>    [<span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">255</span>, <span style="color:#099">255</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># position 255 - [255, 255, 255]</span>
+</span></span><span style="display:flex;"><span>    [<span style="color:#099">255</span>, <span style="color:#099">255</span>, <span style="color:#099">255</span>, <span style="color:#099">255</span>]
+</span></span><span style="display:flex;"><span>  ])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>gradient <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>buildlut!(mat)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># by default the colour space won&#39;t be HSV.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># We make a shallow copy and set the colorspace to HSV.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># While also setting band format to `unsigned char`</span>
+</span></span><span style="display:flex;"><span>rainbow_colors <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(gradient,
+</span></span><span style="display:flex;"><span>    <span style="color:#990073">band_format</span>: <span style="color:#990073">:VIPS_FORMAT_UCHAR</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#990073">interpretation</span>: <span style="color:#990073">:VIPS_INTERPRETATION_HSV</span>
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># resize to make it visible</span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>resize!(rainbow_colors, <span style="color:#099">3</span>, <span style="color:#990073">vscale</span>: <span style="color:#099">50</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># notice that the output spectrum starts from RED and ends with RED.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># this is slightly incorrect, since rainbow ends with violet. We&#39;ll fix this later</span>
+</span></span></code></pre></div><p><img src="/images/creating-rainbow-in-vix/4.png" alt="Rainbow Gradient"></p>
+<h2 id="generating-the-arch">Generating the Arch</h2>
+<p>How to generate the half circular arch? there are several way to
+approach this but we are going to use complex band format and polar
+coordinates.</p>
+<h3 id="complex-numbers">Complex Numbers</h3>
+<p>A pixel on the image has a position represented its x coordinate and y
+coordinate. value <code>x</code> represent point position along the width and <code>y</code>
+axis along the height, ie. we need 2 values to form a point. In
+complex number system a pixel is a single complex number value. A
+value in complex number system represents a point on a 2D plane
+instead of a value on an axis. You can just think of it as just a
+fancy way to represent position on 2D plane. Internally a complex
+number is just a pair of <strong>Real</strong> part and <strong>Imaginary</strong> part.</p>
+<p>There are two different ways to locate a point on 2D plane</p>
+<ul>
+<li>Cartesian coordinate system</li>
+<li>Polar coordinate system</li>
+</ul>
+<p><strong>Cartesian coordinate System</strong></p>
+<p>Here real part represent x coordinate and imaginary part represents y coordinate.</p>
+<p><img src="/images/creating-rainbow-in-vix/5.png" alt="Cartesian"></p>
+<p><code>a</code> and <code>b</code> is used to locate the point <code>z</code></p>
+<p><strong>Polar System</strong></p>
+<p>Here real part represents distance from the origin and imaginary part represents angle</p>
+<p><img src="/images/creating-rainbow-in-vix/6.png" alt="Polar"></p>
+<p>Angle <code>φ</code> and distance <code>r</code> is used to locate point <code>z</code></p>
+<p><strong>But why do we need complex number?</strong></p>
+<p>Because it makes certain operations simple. Operations which operate
+on plane rather than axis. For example, to draw a circle on a polar
+plane we only need to vary angle keeping the distance constant.</p>
+<p>Lets take an example and see libvips operations on complex
+planes. First let&rsquo;s create a image at with its origin at the center of
+the image. It makes it easy to understand what is happening.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">use</span> <span style="color:#458;font-weight:bold">Vix.Operator</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>width <span style="color:#000;font-weight:bold">=</span> height <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">255</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># create 200 x 200 matrix where each pixel represent its own position.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># pixel at left-top will be `{0, 0}` (black)</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># pixel right-bottom will be `{255, 255}` (white)</span>
+</span></span><span style="display:flex;"><span>xy <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>xyz!(width, height)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Display how axis values are chaning</span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Kino.Layout</span><span style="color:#000;font-weight:bold">.</span>grid([<span style="color:#458;font-weight:bold">Kino.Text</span><span style="color:#000;font-weight:bold">.</span>new(<span style="color:#d14">&#34;X-Axis&#34;</span>), <span style="color:#458;font-weight:bold">Kino.Text</span><span style="color:#000;font-weight:bold">.</span>new(<span style="color:#d14">&#34;Y-Axis&#34;</span>), xy[<span style="color:#099">0</span>], xy[<span style="color:#099">1</span>]], <span style="color:#990073">columns</span>: <span style="color:#099">2</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Kino</span><span style="color:#000;font-weight:bold">.</span>render()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># move origin to center of the image</span>
+</span></span><span style="display:flex;"><span>xy <span style="color:#000;font-weight:bold">=</span> (xy <span style="color:#000;font-weight:bold">-</span> [width <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>, height <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>]) <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Display how axis values are changing after moving the origin.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Notice that origin black pixel starts at top-left before</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># and at center after moving the origin</span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Kino.Layout</span><span style="color:#000;font-weight:bold">.</span>grid(
+</span></span><span style="display:flex;"><span>  [<span style="color:#458;font-weight:bold">Kino.Text</span><span style="color:#000;font-weight:bold">.</span>new(<span style="color:#d14">&#34;Centered X-Axis&#34;</span>), <span style="color:#458;font-weight:bold">Kino.Text</span><span style="color:#000;font-weight:bold">.</span>new(<span style="color:#d14">&#34;Centered Y-Axis&#34;</span>), xy[<span style="color:#099">0</span>], xy[<span style="color:#099">1</span>]],
+</span></span><span style="display:flex;"><span>  <span style="color:#990073">columns</span>: <span style="color:#099">2</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p><img src="/images/creating-rainbow-in-vix/7.png" alt="Complex Index"></p>
+<p>Now that we have an image, we can see how it looks in polar plane</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># convert band format to complex number format.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># we specify that read 2 bands to form a single complx band.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># x axis becomes the real part of the complex number</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># y axis becomes the Imaginary part of the complex number</span>
+</span></span><span style="display:flex;"><span>complex_xy <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(xy, <span style="color:#990073">format</span>: <span style="color:#990073">:VIPS_FORMAT_COMPLEX</span>, <span style="color:#990073">bands</span>: <span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># change complex number plane to polar plane.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># vips reads complex number and converts that to polar value for all pixels.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># real part will be distance from the origin</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># imaginary part will be the angle in degree</span>
+</span></span><span style="display:flex;"><span>polar_xy <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>complex!(complex_xy, <span style="color:#990073">:VIPS_OPERATION_COMPLEX_POLAR</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># convert the complex number back to 2 band float image.</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># x axis is the real part of the complex number</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># y asix is the imaginary part of the complex number</span>
+</span></span><span style="display:flex;"><span>xy <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(polar_xy, <span style="color:#990073">format</span>: <span style="color:#990073">:VIPS_FORMAT_FLOAT</span>, <span style="color:#990073">bands</span>: <span style="color:#099">2</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># angle will be in degree (from 0 to 360), scale it back to 255</span>
+</span></span><span style="display:flex;"><span>xy <span style="color:#000;font-weight:bold">=</span> xy <span style="color:#000;font-weight:bold">*</span> [<span style="color:#099">1</span>, height <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">360</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Kino.Layout</span><span style="color:#000;font-weight:bold">.</span>grid([<span style="color:#458;font-weight:bold">Kino.Text</span><span style="color:#000;font-weight:bold">.</span>new(<span style="color:#d14">&#34;X-Axis&#34;</span>), <span style="color:#458;font-weight:bold">Kino.Text</span><span style="color:#000;font-weight:bold">.</span>new(<span style="color:#d14">&#34;Y-Axis&#34;</span>), xy[<span style="color:#099">0</span>], xy[<span style="color:#099">1</span>]], <span style="color:#990073">columns</span>: <span style="color:#099">2</span>)
+</span></span></code></pre></div><p><img src="/images/creating-rainbow-in-vix/8.png" alt="Polar Index"></p>
+<p>As you can see x axis is the real part of the complex number, which is
+distance from the origin and Y axis is the imaginary part of the
+complex number which is the angle.</p>
+<p>This is much easier to understand if we draw few line on the input
+image. and see how it changes in the polar plane</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">ComplexOps</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> to_polar(img, background \\ [<span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">0</span>]) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    %{<span style="color:#990073">width</span>: width, <span style="color:#990073">height</span>: height} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Image</span><span style="color:#000;font-weight:bold">.</span>headers(img)
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>xyz!(width, height)
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span> xy <span style="color:#000;font-weight:bold">-</span> [width <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>, height <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    scale <span style="color:#000;font-weight:bold">=</span> min(height, width) <span style="color:#000;font-weight:bold">/</span> width
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span> xy <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">2</span> <span style="color:#000;font-weight:bold">/</span> scale
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>      xy
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(<span style="color:#990073">format</span>: <span style="color:#990073">:VIPS_FORMAT_COMPLEX</span>, <span style="color:#990073">bands</span>: <span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>complex!(<span style="color:#990073">:VIPS_OPERATION_COMPLEX_POLAR</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(<span style="color:#990073">format</span>: <span style="color:#990073">:VIPS_FORMAT_FLOAT</span>, <span style="color:#990073">bands</span>: <span style="color:#099">2</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span> xy <span style="color:#000;font-weight:bold">*</span> [<span style="color:#099">1</span>, height <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">360</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># mapim takes an input and a `map` and generates an output image</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># where input image pixels are moved based on map.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic">#</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># [new_x, new_y] = map[x, y]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># out[x, y] = img[new_x, new_y]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic">#</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># mapim is to roate, displace, distort, any type of spatial operations.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># where the pixel value (color) remain same but the position is changed.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>mapim!(img, xy, <span style="color:#990073">background</span>: background)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>x_line <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>black!(<span style="color:#099">10</span>, height) <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">255</span>
+</span></span><span style="display:flex;"><span>y_line <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>black!(width, <span style="color:#099">10</span>) <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">125</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># create a black image and draw 2 lines</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># an x axis at 50</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># a y axis at 50</span>
+</span></span><span style="display:flex;"><span>img <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>black!(width, height)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>insert!(x_line, <span style="color:#099">50</span>, <span style="color:#099">0</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>insert!(y_line, <span style="color:#099">0</span>, <span style="color:#099">50</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># convert img to polar</span>
+</span></span><span style="display:flex;"><span>out <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">ComplexOps</span><span style="color:#000;font-weight:bold">.</span>to_polar(img)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Kino.Layout</span><span style="color:#000;font-weight:bold">.</span>grid([<span style="color:#458;font-weight:bold">Kino.Text</span><span style="color:#000;font-weight:bold">.</span>new(<span style="color:#d14">&#34;Input&#34;</span>), <span style="color:#458;font-weight:bold">Kino.Text</span><span style="color:#000;font-weight:bold">.</span>new(<span style="color:#d14">&#34;Output&#34;</span>), img, out], <span style="color:#990073">columns</span>: <span style="color:#099">2</span>)
+</span></span></code></pre></div><p><img src="/images/creating-rainbow-in-vix/9.png" alt="Lines"></p>
+<p>A line on the x axis becomes a circle on the polar plane and a line on
+the y axis becomes a line from the origin.</p>
+<p>So to draw a rainbow circle we just need to draw a rainbow line on the
+x axis and convert that to polar plane!</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>rainbow_colors
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>resize!(<span style="color:#099">100</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">255</span>, <span style="color:#990073">vscale</span>: <span style="color:#099">400</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>embed!(<span style="color:#099">150</span>, <span style="color:#099">0</span>, <span style="color:#099">600</span>, <span style="color:#099">400</span>)
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># wrap moves the image to origin</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>wrap!()
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">ComplexOps</span><span style="color:#000;font-weight:bold">.</span>to_polar()
+</span></span></code></pre></div><p><img src="/images/creating-rainbow-in-vix/10.png" alt="Rainbow"></p>
+<p>All that is left now is to make few final adjustments to make it pretty</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># create colors from violet to red instead of red to red</span>
+</span></span><span style="display:flex;"><span>{<span style="color:#990073">:ok</span>, mat} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Image</span><span style="color:#000;font-weight:bold">.</span>new_matrix_from_array(<span style="color:#099">4</span>, <span style="color:#099">2</span>, [[<span style="color:#099">0</span>, <span style="color:#099">220</span>, <span style="color:#099">255</span>, <span style="color:#099">255</span>], [<span style="color:#099">255</span>, <span style="color:#099">0</span>, <span style="color:#099">255</span>, <span style="color:#099">255</span>]])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>rainbow_colors <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(<span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>buildlut!(mat),
+</span></span><span style="display:flex;"><span>    <span style="color:#990073">band_format</span>: <span style="color:#990073">:VIPS_FORMAT_UCHAR</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#990073">interpretation</span>: <span style="color:#990073">:VIPS_INTERPRETATION_HSV</span>
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sky_color <span style="color:#000;font-weight:bold">=</span> [<span style="color:#099">135</span>, <span style="color:#099">100</span>, <span style="color:#099">255</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>rainbow_colors
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>resize!(<span style="color:#099">100</span> <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">255</span>, <span style="color:#990073">vscale</span>: <span style="color:#099">500</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>embed!(<span style="color:#099">50</span>, <span style="color:#099">0</span>, <span style="color:#099">500</span>, <span style="color:#099">500</span>, <span style="color:#990073">background</span>: sky_color)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>wrap!()
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">ComplexOps</span><span style="color:#000;font-weight:bold">.</span>to_polar(sky_color)
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># take only top half of the image</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(<span style="color:#990073">height</span>: <span style="color:#099">250</span>, <span style="color:#990073">width</span>: <span style="color:#099">500</span>)
+</span></span></code></pre></div><figure class="image center">
+    <img src="/images/creating-rainbow-in-vix/11.png" alt="Final Rainbow">
+    <figcaption>Final Result</figcaption>
+</figure>
+
+
+<div class="footer">
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/elixir">Elixir</a> &NonBreakingSpace;
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/programming">Programming</a> &NonBreakingSpace;
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/vix">Vix</a> &NonBreakingSpace;
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/image-processing">Image Processing</a> &NonBreakingSpace;
+    
+</div>
+
+
+</div>
+    </div>
+</body>
+
+</html>

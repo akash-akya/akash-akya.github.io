@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    
+    
+    <title>memdump | Composable Collectable in Elixir</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<body>
+    <div id="top-strip"></div>
+    <div class="content"><header>
+    <div class="center">
+        <a href="/" class="quiet-link">
+            <div class="monospace title">
+                <h1 style="margin-top: 0.3em; margin-bottom: 0.3em;">memdump</h1>
+            </div>
+        </a>
+
+        <div class="nav">
+            
+            
+            <a href="/">
+                home
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/posts/">
+                posts
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/tags/">
+                tags
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/about">
+                about
+            </a>
+            
+        </div>
+    </div>
+</header>
+<div class="content">
+<h1>Composable Collectable in Elixir</h1>
+
+
+
+<div class="publish-date">
+    <time datetime="2021-11-14">14 Nov 2021</time>
+</div>
+
+
+<h2 id="collectable">Collectable</h2>
+<p>If you are not familiar with collectable, check out <a href="https://hexdocs.pm/elixir/1.14.0-rc.0/Collectable.html">Hex
+Docs</a> for more
+detailed introduction.</p>
+<blockquote>
+<p>If the functions in Enumerable are about taking values out, then
+Collectable is about collecting those values into a structure.</p>
+</blockquote>
+<p>While Enumerable is about the act of pulling values out of
+something. Collectable is about the act of <strong>pushing values into a
+something</strong>. Emphasis is on the act part. <strong>The something</strong> itself is
+not important. The something might be a list, map, TCP connection or a
+file on disk. Elixir&rsquo;s <code>Enumerable</code> and <code>Collectable</code> protocols are an
+implementation of this abstraction.</p>
+<p>In this article we will understand how to make collectable (the act of
+pushing something) composable, and why we should care about it. We
+also address an unique readability issue related to Collectable. And
+ensure back-pressure, error handling is in check while building it.</p>
+<h2 id="why-we-need-collectable-to-be-composable-">Why we need collectable to be composable ?</h2>
+<p>We need it to be composable for the same reason why we need <code>Enum</code> and
+<code>Stream</code> module to work with Enumerable. Currently there is no
+equivalent modules to compose Collectable values.</p>
+<p>Let&rsquo;s take an example to illustrate this better.</p>
+<p>You have infinite stream of some kind of logs. Each line in the stream
+can be of different level &ndash; info, warn, error. Our task is to push
+logs to <em>somewhere</em>, and this somewhere is unknown at this point. Not
+only that we need the destination to be configurable, you also need
+complete control over how it is pushed. You might want to push logs to
+AWS s3, to a file on disk, push error logs to console and skip
+remaining logs, or buffer logs before making expensive network calls.</p>
+<p>The log stream might look like this:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>log_stream <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Stream</span><span style="color:#000;font-weight:bold">.</span>repeatedly(<span style="color:#000;font-weight:bold">fn</span> <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>    random_str <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64(<span style="color:#990073">:crypto</span><span style="color:#000;font-weight:bold">.</span>strong_rand_bytes(<span style="color:#099">5</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#990073">:rand</span><span style="color:#000;font-weight:bold">.</span>uniform_real() <span style="color:#000;font-weight:bold">&lt;</span> <span style="color:#099">0.5</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#d14">&#34;warn: </span><span style="color:#d14">#{</span>random_str<span style="color:#d14">}</span><span style="color:#d14">&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">else</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#d14">&#34;error: </span><span style="color:#d14">#{</span>random_str<span style="color:#d14">}</span><span style="color:#d14">&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">## `sink` can be aws S3, File on disk, list, string</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Stream.into(log_stream, sink)</span>
+</span></span></code></pre></div><p>How would you model this keeping the flexibility in mind?</p>
+<p>Cases like these are the reason why we need collectable to be
+composable. Hopefully at the end of the post we solve this better
+using composable collectable.</p>
+<h2 id="push-container">Push Container</h2>
+<p>Elixir&rsquo;s Collectable protocol is an implementation of the idea. To
+avoid getting lost in the details of the protocol, let&rsquo;s build our own
+push container from bottom-up approach. We will get back to Collectable
+protocol after a while.</p>
+<p>So what we we want is something where we can push stuff. We don&rsquo;t care
+about implementation details of this <em>something</em>.</p>
+<p>Lets represent this aspect using function called <code>push</code>. We call
+<code>push</code> function with the &ldquo;where we want to push&rdquo; as first argument and
+&ldquo;the thing we want to push&rdquo; as second argument. So if something wants
+to be a push container, it only has to implement <code>push(something, anything)</code> function.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">PushContainer</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic"># string container</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> push(string, value) <span style="color:#000;font-weight:bold">when</span> is_binary(string) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    string <span style="color:#000;font-weight:bold">&lt;&gt;</span> value
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic"># list container</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> push(list, value) <span style="color:#000;font-weight:bold">when</span> is_list(list) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    list <span style="color:#000;font-weight:bold">++</span> [value]
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic"># void container</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> push(<span style="color:#008080">nil</span>, _) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#008080">nil</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">Example</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">PushContainer</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> random_binaries(container, count) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>reduce(<span style="color:#099">1</span><span style="color:#000;font-weight:bold">..</span>count, container, <span style="color:#000;font-weight:bold">fn</span> _, container <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>      bin <span style="color:#000;font-weight:bold">=</span> <span style="color:#990073">:crypto</span><span style="color:#000;font-weight:bold">.</span>strong_rand_bytes(<span style="color:#099">5</span>)
+</span></span><span style="display:flex;"><span>      push(container, bin)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">Example</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># returns values as a single binary</span>
+</span></span><span style="display:flex;"><span>random_binaries(&lt;&lt;&gt;&gt;, <span style="color:#099">10</span>) <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>inspect(<span style="color:#990073">label</span>: <span style="color:#d14">&#34;binary&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># returns values as a list of binaries</span>
+</span></span><span style="display:flex;"><span>random_binaries([], <span style="color:#099">10</span>) <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>inspect(<span style="color:#990073">label</span>: <span style="color:#d14">&#34;list&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># discards the values and returns nil (similar to /dev/null)</span>
+</span></span><span style="display:flex;"><span>random_binaries(<span style="color:#008080">nil</span>, <span style="color:#099">10</span>) <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>inspect(<span style="color:#990073">label</span>: <span style="color:#d14">&#34;nil&#34;</span>)
+</span></span></code></pre></div><p>Container here does not have to be a data structure, It can be a
+process, gen-server, socket or file. While data structure only need
+<code>push</code> function to work, for resources we need a way to initialise and
+release. For example, to create a file container, first step
+(initialise) to open it, then push values and at the end close it
+(release). So let&rsquo;s add support to these stages. While at it lets
+group all these 3 functions into a module so it is easier to build
+container for different type.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">PushContainer</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">defstruct</span> [<span style="color:#990073">:acc</span>, <span style="color:#990073">:init</span>, <span style="color:#990073">:func</span>, <span style="color:#990073">:finish</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@type</span> acc <span style="color:#000;font-weight:bold">::</span> any
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@spec</span> build((() <span style="color:#000;font-weight:bold">-&gt;</span> acc), (any, acc <span style="color:#000;font-weight:bold">-&gt;</span> acc), (acc <span style="color:#000;font-weight:bold">-&gt;</span> any)) <span style="color:#000;font-weight:bold">::</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>t()
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> build(init, func, finish) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a61717;background-color:#e3d2d2">%</span>__MODULE__{<span style="color:#990073">init</span>: init, <span style="color:#990073">func</span>: func, <span style="color:#990073">finish</span>: finish}
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@spec</span> init(<span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>t()) <span style="color:#000;font-weight:bold">::</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>t()
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> init(%<span style="color:#458;font-weight:bold">PushContainer</span>{<span style="color:#990073">init</span>: init} <span style="color:#000;font-weight:bold">=</span> pc) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    %<span style="color:#458;font-weight:bold">PushContainer</span>{pc <span style="color:#000;font-weight:bold">|</span> <span style="color:#990073">acc</span>: init<span style="color:#000;font-weight:bold">.</span>(), <span style="color:#990073">init</span>: <span style="color:#990073">:done</span>}
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@spec</span> push(<span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>t(), any) <span style="color:#000;font-weight:bold">::</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>t()
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> push(%<span style="color:#458;font-weight:bold">PushContainer</span>{<span style="color:#990073">acc</span>: acc, <span style="color:#990073">func</span>: func} <span style="color:#000;font-weight:bold">=</span> pc, value) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    %<span style="color:#458;font-weight:bold">PushContainer</span>{pc <span style="color:#000;font-weight:bold">|</span> <span style="color:#990073">acc</span>: func<span style="color:#000;font-weight:bold">.</span>(value, acc)}
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@spec</span> push(<span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>t()) <span style="color:#000;font-weight:bold">::</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>t()
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> finish(%<span style="color:#458;font-weight:bold">PushContainer</span>{<span style="color:#990073">acc</span>: acc, <span style="color:#990073">finish</span>: finish}) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    finish<span style="color:#000;font-weight:bold">.</span>(acc)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># change exmaple to adopt this new interface</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">Example</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> random_binaries(%<span style="color:#458;font-weight:bold">PushContainer</span>{} <span style="color:#000;font-weight:bold">=</span> pc, count) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    pc <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>init(pc)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pc <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>reduce(<span style="color:#099">1</span><span style="color:#000;font-weight:bold">..</span>count, pc, <span style="color:#000;font-weight:bold">fn</span> _, pc <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        bin <span style="color:#000;font-weight:bold">=</span> <span style="color:#990073">:crypto</span><span style="color:#000;font-weight:bold">.</span>strong_rand_bytes(<span style="color:#099">5</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>push(pc, bin)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>finish(pc)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span></code></pre></div><p>Lets build few push containers using new interface:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>binary_pc <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>build(
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> <span style="color:#000;font-weight:bold">-&gt;</span> &lt;&lt;&gt;&gt; <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> val, acc <span style="color:#000;font-weight:bold">-&gt;</span> acc <span style="color:#000;font-weight:bold">&lt;&gt;</span> val <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> acc <span style="color:#000;font-weight:bold">-&gt;</span> acc <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>list_pc <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>build(
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> <span style="color:#000;font-weight:bold">-&gt;</span> [] <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> val, acc <span style="color:#000;font-weight:bold">-&gt;</span> acc <span style="color:#000;font-weight:bold">++</span> [val] <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> acc <span style="color:#000;font-weight:bold">-&gt;</span> acc <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>file_pc <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>build(
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> <span style="color:#000;font-weight:bold">-&gt;</span> <span style="color:#458;font-weight:bold">File</span><span style="color:#000;font-weight:bold">.</span>open!(<span style="color:#d14">&#34;somefile.txt&#34;</span>, [<span style="color:#990073">:write</span>, <span style="color:#990073">:binary</span>]) <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> val, file <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#990073">:ok</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>binwrite(file, val)
+</span></span><span style="display:flex;"><span>      file
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> file <span style="color:#000;font-weight:bold">-&gt;</span> <span style="color:#458;font-weight:bold">File</span><span style="color:#000;font-weight:bold">.</span>close(file) <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">Example</span>
+</span></span><span style="display:flex;"><span>random_binaries(binary_pc, <span style="color:#099">10</span>) <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>inspect(<span style="color:#990073">label</span>: <span style="color:#990073">:binary</span>)
+</span></span><span style="display:flex;"><span>random_binaries(list_pc, <span style="color:#099">10</span>) <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>inspect(<span style="color:#990073">label</span>: <span style="color:#990073">:list</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#990073">:ok</span> <span style="color:#000;font-weight:bold">=</span> random_binaries(file_pc, <span style="color:#099">10</span>)
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">File</span><span style="color:#000;font-weight:bold">.</span>read!(<span style="color:#d14">&#34;somefile.txt&#34;</span>)
+</span></span></code></pre></div><p>Now that we are familiar with push containers as building
+blocks. Let&rsquo;s head back to composability aspect.</p>
+<h2 id="composing-push-containers">Composing push containers</h2>
+<p>In the above example the function call <code>random_binaries(..., 1000)</code> is
+pushing binaries to the container. Now say we want to encode the
+binaries using base64 before we push. How would we support this?</p>
+<p>As before, let&rsquo;s create a function called <code>map</code> which wraps the
+original <code>push</code> for the container with a given function and return it
+as a new push container. It is same as <code>Enum.map</code> but for push
+container.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">PushContainerHelpers</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@spec</span> map(<span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>t(), (any <span style="color:#000;font-weight:bold">-&gt;</span> any)) <span style="color:#000;font-weight:bold">::</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>t()
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> map(%<span style="color:#458;font-weight:bold">PushContainer</span>{} <span style="color:#000;font-weight:bold">=</span> inner_pc, func) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>build(
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> <span style="color:#000;font-weight:bold">-&gt;</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>init(inner_pc) <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> elem, inner_pc <span style="color:#000;font-weight:bold">-&gt;</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>push(inner_pc, func<span style="color:#000;font-weight:bold">.</span>(elem)) <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> inner_pc <span style="color:#000;font-weight:bold">-&gt;</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>finish(inner_pc) <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span></code></pre></div><p>Notice that <code>map</code> takes a push container and returns a push container.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">PushContainerHelpers</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>encoded <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  random_binaries(
+</span></span><span style="display:flex;"><span>    map(binary_pc, <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#099">10</span>
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>puts(<span style="color:#d14">&#34;Base64 encoded binaries: </span><span style="color:#d14">#{</span>strinencoded_binaries<span style="color:#d14">}</span><span style="color:#d14">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># string -&gt; encode64 -&gt; upcase -&gt; collect</span>
+</span></span><span style="display:flex;"><span>upcased_encoded <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  random_binaries(
+</span></span><span style="display:flex;"><span>    map(
+</span></span><span style="display:flex;"><span>      map(
+</span></span><span style="display:flex;"><span>        binary_pc,
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>upcase<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>      ),
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>    ),
+</span></span><span style="display:flex;"><span>    <span style="color:#099">10</span>
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>puts(<span style="color:#d14">&#34;Base64 encoded binaries in upcase: </span><span style="color:#d14">#{</span>upcased_encoded_binaries<span style="color:#d14">}</span><span style="color:#d14">&#34;</span>)
+</span></span></code></pre></div><p>We can compose push container like this by plugging functions
+dynamically and building new push containers on-the-fly. This works
+but as you can see in the last example it not easy to read. Let&rsquo;s see
+if it improves if we format it differently or if we use pipe.</p>
+<h2 id="readability">Readability</h2>
+<p>Does formatting improves the readability in the above examples?</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">PushContainerHelpers</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># string -&gt; encode64 -&gt; upcase -&gt; collect-as-string</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># formatting as single line</span>
+</span></span><span style="display:flex;"><span>random_binaries(map(map(binary_pc, <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>upcase<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>), <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>), <span style="color:#099">10</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># formatting using pipe</span>
+</span></span><span style="display:flex;"><span>binary_pc
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> map(<span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>upcase<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> map(<span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> random_binaries(<span style="color:#099">10</span>)
+</span></span></code></pre></div><p>As you can see formatting is not helping. Using our beloved pipe makes
+reading even worse! We have to read the expressions from bottom-to-top
+to understand what is going on. We can visualise it to make the issue
+more clear.</p>
+<figure class="image">
+    <img src="/images/composable-collectable/push-left-to-right.gif" alt="Push without pipe">
+    <figcaption>Without pipe</figcaption>
+</figure>
+<p>Sort of works for small chains, but we still need to address it for
+long expressions.</p>
+<figure class="image">
+    <img src="/images/composable-collectable/push-pipe.gif" alt="With pipe">
+    <figcaption>With pipe</figcaption>
+</figure>
+<p>Using pipes does not work at all with push containers!</p>
+<h3 id="what-is-going-on-here">What is going on here?</h3>
+<p>The issue is that we prefer to read an expression as <code>INPUT, FUNCTION, OUTPUT</code> in that exact order. This is especially important when we have
+nested function calls with multiple parameters. Why we like
+expressions to be in this order? I don&rsquo;t know for sure but my guess is
+that, it is so because that&rsquo;s how most programming languages are
+modelled. We are trained to read code like that and expect
+order-of-reading with logical order-of-execution. It also might be
+because most our languages are written from left-to-right,
+top-to-bottom (there are few exceptions to this). Or more
+fundamentally the natural order of <em>cause and effect</em>. If order of an
+expression is not <code>INPUT, FUNCTION, OUTPUT</code> then that will counter
+intuitive. This is also the reason why we have pipe operator <code>|&gt;</code> in
+the first place. Pipe is basically a macro-magic we use to make
+function chaining more readable by changing the order expressions.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Enum functions without pipe:</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Enum.map(...)</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># FUNCTION, INPUT</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># OUPUT is implicit here as return value</span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>map(<span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>map(random_binaries(<span style="color:#099">10</span>), <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>upcase<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>), <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Enum functions with pipe</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># ... |&gt; Enum.map()</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># INPUT, FUNCTION</span>
+</span></span><span style="display:flex;"><span>random_binaries(<span style="color:#099">10</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>map(<span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>upcase<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>map(<span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>)
+</span></span></code></pre></div><p>Pipe works for Enum because first argument we pass to the <code>Enum</code>
+function is the &ldquo;input&rdquo;. So moving <em>input</em> expression a line before
+the function call makes the movement of values appear natural.</p>
+<p>It is more obvious if we visualise this:</p>
+<figure class="image">
+    <img src="/images/composable-collectable/enum-left-to-right.gif" alt="Without pipe">
+    <figcaption>Without pipe</figcaption>
+</figure>
+<figure class="image">
+    <img src="/images/composable-collectable/enum-top-to-bottom.gif" alt="With pipe">
+    <figcaption>With pipe</figcaption>
+</figure>
+<p>As we can see, using pipe with when multiple functions are involved is
+pleasant to read. By using pipe we turned <code>FUNCTION INPUT</code> into
+<code>INPUT FUNCTION</code> which matches perfectly with how we read code.</p>
+<p><strong>Why pipe is not working for push container?</strong></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Without pipe:</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># FUNCTION, OUTPUT, INPUT</span>
+</span></span><span style="display:flex;"><span>random_binaries(binary_pc, <span style="color:#099">10</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># With pipe:</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># OUTPUT, FUNCTION, INPUT</span>
+</span></span><span style="display:flex;"><span>binary_pc
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> random_binaries(<span style="color:#099">10</span>)
+</span></span></code></pre></div><p>The &ldquo;push container&rdquo; value (<code>binary_pc</code> in the example) we are passing
+is not an input we pass to the operation in logical sense. It is
+something where the function should <em>push</em> the output. So using pipe
+here breaks our expectation and looks confusing.</p>
+<p><strong>How to solve this?</strong></p>
+<p>Let&rsquo;s correct the order <code>FUNCTION, OUTPUT, INPUT</code> to <code>FUNCTION, INPUT, OUTPUT</code> by making push-container (<code>binary_pc</code>) value as last argument
+to the function.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># formatting as single line</span>
+</span></span><span style="display:flex;"><span>random_binaries(<span style="color:#099">10</span>, map(<span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>, map(<span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>upcase<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>, binary_pc)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># formatting as multiple lines</span>
+</span></span><span style="display:flex;"><span>random_binaries(
+</span></span><span style="display:flex;"><span>  <span style="color:#099">10</span>,
+</span></span><span style="display:flex;"><span>  map(
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>,
+</span></span><span style="display:flex;"><span>    map(
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>upcase<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>,
+</span></span><span style="display:flex;"><span>      binary_pc
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>When visualise this:</p>
+<figure class="image">
+    <img src="/images/composable-collectable/push-last-param-oneline.gif" alt="Container as last param">
+    <figcaption>Container as last param</figcaption>
+</figure>
+<figure class="image">
+    <img src="/images/composable-collectable/push-last-param-chain.gif" alt="Container as last param with multi line formatting">
+    <figcaption>Container as last param with multi line formatting</figcaption>
+</figure>
+<p>This reads much better and nearly addresses our concern. Although
+formatting function nested function calls as multiple lines make it
+more readable, we could go one step further and create a new operator
+like <code>|&gt;</code> for cases like this. Our new operator takes two expressions
+A and B, and appends B as last argument to A. One important thing to
+note is that the operator must be <em>right associative</em> for this to
+work. Why it won&rsquo;t work otherwise is left as exercise to readers :)</p>
+<p>Let&rsquo;s pick <code>+++</code> operator for demonstration purpose which is right
+associate.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">PushOp</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">defmacro</span> left <span style="color:#000;font-weight:bold">+++</span> right <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    {func, meta, args} <span style="color:#000;font-weight:bold">=</span> left
+</span></span><span style="display:flex;"><span>    {func, meta, args <span style="color:#000;font-weight:bold">++</span> [unq]}
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">require</span> <span style="color:#458;font-weight:bold">PushOp</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">PushOp</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>string <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  random_binaries(<span style="color:#099">10</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> map(<span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> map(<span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>upcase<span style="color:#000;font-weight:bold">/</span><span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> binary_pc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>puts(<span style="color:#d14">&#34;=&gt; </span><span style="color:#d14">#{</span>string<span style="color:#d14">}</span><span style="color:#d14">&#34;</span>)
+</span></span></code></pre></div><p>This is even better than previous code, since we got back to our
+<code>INPUT, FUNCTION, OUTPUT</code> ordering. Exactly like how pipe operator
+worked for Enum. To recap, all we did was to make collectable param as
+last param and created helper macro to improve the ordering of the
+expression.</p>
+<p>Now that readability side quest is complete, lets get back to the main
+mission.</p>
+<h2 id="remaining-push-container-functions">Remaining push container functions</h2>
+<p>Implementing other basic helper functions like reduce, filter etc is
+straight forward. Let&rsquo;s bundle all functions as <code>Contr</code>
+module. Similar to <code>Enum</code> module for <code>Enumerable</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">Contr</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> reduce(func, %<span style="color:#458;font-weight:bold">PushContainer</span>{} <span style="color:#000;font-weight:bold">=</span> pc) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>new(
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>init(pc)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> elem, pc <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        func<span style="color:#000;font-weight:bold">.</span>(elem, pc)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> pc <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>finish(pc)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic"># redefining map using reduce</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> map(func, %<span style="color:#458;font-weight:bold">PushContainer</span>{} <span style="color:#000;font-weight:bold">=</span> pc) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    reduce(
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> elem, pc <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>call(pc, func<span style="color:#000;font-weight:bold">.</span>(elem))
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      pc
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> filter(func, %<span style="color:#458;font-weight:bold">PushContainer</span>{} <span style="color:#000;font-weight:bold">=</span> pc) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    reduce(
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> elem, pc <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> func<span style="color:#000;font-weight:bold">.</span>(elem) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>call(pc, elem)
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">else</span>
+</span></span><span style="display:flex;"><span>          pc
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      pc
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> split(func, %<span style="color:#458;font-weight:bold">PushContainer</span>{} <span style="color:#000;font-weight:bold">=</span> true_pc, %<span style="color:#458;font-weight:bold">PushContainer</span>{} <span style="color:#000;font-weight:bold">=</span> false_pc) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>new(
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        {<span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>init(true_pc), <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>init(false_pc)}
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> elem, {t, f} <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> func<span style="color:#000;font-weight:bold">.</span>(elem) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>          {<span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>push(t, elem), f}
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">else</span>
+</span></span><span style="display:flex;"><span>          {t, <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>push(f, elem)}
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> {t, f} <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        {<span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>finish(t), <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>finish(f)}
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span></code></pre></div><p>Equipped with these, we can compose push containers in multiple ways
+similar to Enum.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">Example</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">PushOp</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>_string <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  random_binaries(<span style="color:#099">10</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> <span style="color:#458;font-weight:bold">Contr</span><span style="color:#000;font-weight:bold">.</span>map(<span style="color:#000;font-weight:bold">fn</span> bin <span style="color:#000;font-weight:bold">-&gt;</span> <span style="color:#458;font-weight:bold">Base</span><span style="color:#000;font-weight:bold">.</span>encode64(bin) <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> <span style="color:#458;font-weight:bold">Contr</span><span style="color:#000;font-weight:bold">.</span>filter(<span style="color:#000;font-weight:bold">fn</span> str <span style="color:#000;font-weight:bold">-&gt;</span> str <span style="color:#000;font-weight:bold">=~</span> <span style="color:#d14">~r/^[a-zA-Z=]+$/</span> <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> binary_pc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># =&gt; &#34;olHQItQ=OWPYlAY=&#34;</span>
+</span></span></code></pre></div><p>Only thing pending now is to bridge the <code>PushContainer</code> and
+<code>Collectable</code> protocol for interoperability, so we can take advantage
+of modules which already implements Collectable protocol.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">PushContainer</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">defstruct</span> [<span style="color:#990073">:acc</span>, <span style="color:#990073">:init</span>, <span style="color:#990073">:func</span>, <span style="color:#990073">:finish</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> build(init, func, finish) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a61717;background-color:#e3d2d2">%</span>__MODULE__{<span style="color:#990073">init</span>: init, <span style="color:#990073">func</span>: func, <span style="color:#990073">finish</span>: finish}
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> init(%<span style="color:#458;font-weight:bold">PushContainer</span>{<span style="color:#990073">init</span>: init} <span style="color:#000;font-weight:bold">=</span> pc) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    %<span style="color:#458;font-weight:bold">PushContainer</span>{pc <span style="color:#000;font-weight:bold">|</span> <span style="color:#990073">acc</span>: init<span style="color:#000;font-weight:bold">.</span>(), <span style="color:#990073">init</span>: <span style="color:#990073">:done</span>}
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> push(%<span style="color:#458;font-weight:bold">PushContainer</span>{<span style="color:#990073">acc</span>: acc, <span style="color:#990073">func</span>: func} <span style="color:#000;font-weight:bold">=</span> pc, value) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    %<span style="color:#458;font-weight:bold">PushContainer</span>{pc <span style="color:#000;font-weight:bold">|</span> <span style="color:#990073">acc</span>: func<span style="color:#000;font-weight:bold">.</span>(value, acc)}
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> finish(%<span style="color:#458;font-weight:bold">PushContainer</span>{<span style="color:#990073">acc</span>: acc, <span style="color:#990073">finish</span>: finish}, status) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">if</span> is_function(finish, <span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>      finish<span style="color:#000;font-weight:bold">.</span>(acc)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">else</span>
+</span></span><span style="display:flex;"><span>      finish<span style="color:#000;font-weight:bold">.</span>(acc, status)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> from_collectable(collectable) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>build(
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">Collectable</span><span style="color:#000;font-weight:bold">.</span>into(collectable)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> {acc, collector_func}, elem <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        collector_func<span style="color:#000;font-weight:bold">.</span>(acc, {<span style="color:#990073">:cont</span>, elem})
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">fn</span> {acc, collector_func}, status <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        collector_func<span style="color:#000;font-weight:bold">.</span>(acc, status)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defimpl</span> <span style="color:#458;font-weight:bold">Collectable</span>, <span style="color:#990073">for</span>: <span style="color:#458;font-weight:bold">PushContainer</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> into(%<span style="color:#458;font-weight:bold">PushContainer</span>{} <span style="color:#000;font-weight:bold">=</span> pc) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    collector_func <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">fn</span>
+</span></span><span style="display:flex;"><span>      acc, {<span style="color:#990073">:cont</span>, elem} <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>push(acc, elem)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      acc, <span style="color:#990073">:halt</span> <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>finish(acc, <span style="color:#990073">:halt</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      acc, <span style="color:#990073">:done</span> <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>finish(acc, <span style="color:#990073">:done</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    acc <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>init(pc)
+</span></span><span style="display:flex;"><span>    {acc, collector_func}
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">Example</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">PushOp</span>, <span style="color:#990073">only</span>: [{<span style="color:#990073">:++</span><span style="color:#000;font-weight:bold">+</span>, <span style="color:#099">2</span>}]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>square_set_container <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Contr</span><span style="color:#000;font-weight:bold">.</span>map(
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">fn</span> num <span style="color:#000;font-weight:bold">-&gt;</span> num <span style="color:#000;font-weight:bold">*</span> num <span style="color:#000;font-weight:bold">end</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">PushContainer</span><span style="color:#000;font-weight:bold">.</span>from_collectable(<span style="color:#458;font-weight:bold">MapSet</span><span style="color:#000;font-weight:bold">.</span>new())
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>square_set <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>into(<span style="color:#099">1</span><span style="color:#000;font-weight:bold">..</span><span style="color:#099">10</span>, square_set_container)
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># =&gt; #MapSet&lt;[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]&gt;</span>
+</span></span></code></pre></div><p><strong>As for the original sample problem about stream of logs:</strong></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">Example</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#458;font-weight:bold">PushOp</span>, <span style="color:#990073">only</span>: [{<span style="color:#990073">:++</span><span style="color:#000;font-weight:bold">+</span>, <span style="color:#099">2</span>}]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">Demo</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> collect_logs(sink) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    log_stream
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Stream</span><span style="color:#000;font-weight:bold">.</span>take(<span style="color:#099">10</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>into(sink)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>error_sink <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Contr</span><span style="color:#000;font-weight:bold">.</span>map(<span style="color:#000;font-weight:bold">fn</span> <span style="color:#d14">&#34;error: &#34;</span> <span style="color:#000;font-weight:bold">&lt;&gt;</span> line <span style="color:#000;font-weight:bold">-&gt;</span> line <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> <span style="color:#458;font-weight:bold">Contr</span><span style="color:#000;font-weight:bold">.</span>map(<span style="color:#000;font-weight:bold">fn</span> line <span style="color:#000;font-weight:bold">-&gt;</span> <span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>upcase(line) <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> list_pc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>warn_sink <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Contr</span><span style="color:#000;font-weight:bold">.</span>map(<span style="color:#000;font-weight:bold">fn</span> <span style="color:#d14">&#34;warn: &#34;</span> <span style="color:#000;font-weight:bold">&lt;&gt;</span> line <span style="color:#000;font-weight:bold">-&gt;</span> line <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> <span style="color:#458;font-weight:bold">Contr</span><span style="color:#000;font-weight:bold">.</span>map(<span style="color:#000;font-weight:bold">fn</span> line <span style="color:#000;font-weight:bold">-&gt;</span> line <span style="color:#000;font-weight:bold">&lt;&gt;</span> <span style="color:#d14">&#34;</span><span style="color:#d14">\n</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">+++</span> binary_pc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Demo</span><span style="color:#000;font-weight:bold">.</span>collect_logs(
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">Contr</span><span style="color:#000;font-weight:bold">.</span>split(
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>starts_with?(<span style="color:#800080">&amp;1</span>, <span style="color:#d14">&#34;warn: &#34;</span>),
+</span></span><span style="display:flex;"><span>    warn_sink,
+</span></span><span style="display:flex;"><span>    error_sink
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>To read more about streams in Elixir:</p>
+<ul>
+<li><a href="https://ananthakumaran.in/2017/11/28/stream.html">https://ananthakumaran.in/2017/11/28/stream.html</a></li>
+<li><a href="https://hexdocs.pm/elixir/Collectable.html">https://hexdocs.pm/elixir/Collectable.html</a></li>
+</ul>
+
+
+<div class="footer">
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/elixir">Elixir</a> &NonBreakingSpace;
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/programming">Programming</a> &NonBreakingSpace;
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/collectable">Collectable</a> &NonBreakingSpace;
+    
+    
+    <a class="tag no-underline" href="https://akash-akya.github.io/tags/stream">Stream</a> &NonBreakingSpace;
+    
+</div>
+
+
+</div>
+    </div>
+</body>
+
+</html>

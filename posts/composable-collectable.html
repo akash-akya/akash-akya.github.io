@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>composable-collectable.html</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+</head>
+
+<body>
+
+<h2 id="collectable">Collectable</h2>
+<p>If you are not familiar with collectable, check out <a href="https://hexdocs.pm/elixir/1.14.0-rc.0/Collectable.html">Hex Docs</a> for more detailed introduction.</p>
+<blockquote>
+<p>If the functions in Enumerable are about taking values out, then Collectable is about collecting those values into a structure.</p>
+</blockquote>
+<p>While Enumerable is about the act of pulling values out of something. Collectable is about the act of <strong>pushing values into a something</strong>. Emphasis is on the act part. <strong>The something</strong> itself is not important. The something might be a list, map, TCP connection or a file on disk. Elixir’s <code>Enumerable</code> and <code>Collectable</code> protocols are an implementation of this abstraction.</p>
+<p>In this article we will understand how to make collectable (the act of pushing something) composable, and why we should care about it. We also address an unique readability issue related to Collectable. And ensure back-pressure, error handling is in check while building it.</p>
+<h2 id="why-we-need-collectable-to-be-composable">Why we need collectable to be composable ?</h2>
+<p>We need it to be composable for the same reason why we need <code>Enum</code> and <code>Stream</code> module to work with Enumerable. Currently there is no equivalent modules to compose Collectable values.</p>
+<p>Let’s take an example to illustrate this better.</p>
+<p>You have infinite stream of some kind of logs. Each line in the stream can be of different level – info, warn, error. Our task is to push logs to <em>somewhere</em>, and this somewhere is unknown at this point. Not only that we need the destination to be configurable, you also need complete control over how it is pushed. You might want to push logs to AWS s3, to a file on disk, push error logs to console and skip remaining logs, or buffer logs before making expensive network calls.</p>
+<p>The log stream might look like this:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>log_stream <span class="op">=</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="cn">Stream</span><span class="op">.</span>repeatedly(<span class="kw">fn</span> <span class="op">-&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    random_str <span class="op">=</span> <span class="cn">Base</span><span class="op">.</span>encode64(<span class="va">:crypto</span><span class="op">.</span>strong_rand_bytes(<span class="dv">5</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="va">:rand</span><span class="op">.</span>uniform_real() <span class="op">&lt;</span> <span class="fl">0.5</span> <span class="kw">do</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;warn: </span><span class="ot">#{</span>random_str<span class="ot">}</span><span class="st">&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;error: </span><span class="ot">#{</span>random_str<span class="ot">}</span><span class="st">&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">## `sink` can be aws S3, File on disk, list, string</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Stream.into(log_stream, sink)</span></span></code></pre></div>
+<p>How would you model this keeping the flexibility in mind?</p>
+<p>Cases like these are the reason why we need collectable to be composable. Hopefully at the end of the post we solve this better using composable collectable.</p>
+<h2 id="push-container">Push Container</h2>
+<p>Elixir’s Collectable protocol is an implementation of the idea. To avoid getting lost in the details of the protocol, let’s build our own push container from bottom-up approach. We will get back to Collectable protocol after a while.</p>
+<p>So what we we want is something where we can push stuff. We don’t care about implementation details of this <em>something</em>.</p>
+<p>Lets represent this aspect using function called <code>push</code>. We call <code>push</code> function with the “where we want to push” as first argument and “the thing we want to push” as second argument. So if something wants to be a push container, it only has to implement <code>push(something, anything)</code> function.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">defmodule</span> <span class="cn">PushContainer</span> <span class="kw">do</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># string container</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> push(string, value) <span class="kw">when</span> is_binary(string) <span class="kw">do</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    string <span class="op">&lt;&gt;</span> value</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># list container</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> push(list, value) <span class="kw">when</span> is_list(list) <span class="kw">do</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    list <span class="op">++</span> [value]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># void container</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> push(<span class="cn">nil</span>, _) <span class="kw">do</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="cn">nil</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">defmodule</span> <span class="cn">Example</span> <span class="kw">do</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="im">import</span> <span class="cn">PushContainer</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> random_binaries(container, count) <span class="kw">do</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="cn">Enum</span><span class="op">.</span>reduce(<span class="dv">1</span><span class="op">..</span>count, container, <span class="kw">fn</span> _, container <span class="op">-&gt;</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>      bin <span class="op">=</span> <span class="va">:crypto</span><span class="op">.</span>strong_rand_bytes(<span class="dv">5</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>      push(container, bin)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">Example</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co"># returns values as a single binary</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>random_binaries(<span class="op">&lt;&lt;&gt;&gt;</span>, <span class="dv">10</span>) <span class="op">|&gt;</span> <span class="cn">IO</span><span class="op">.</span>inspect(<span class="va">label:</span> <span class="st">&quot;binary&quot;</span>)</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co"># returns values as a list of binaries</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>random_binaries([], <span class="dv">10</span>) <span class="op">|&gt;</span> <span class="cn">IO</span><span class="op">.</span>inspect(<span class="va">label:</span> <span class="st">&quot;list&quot;</span>)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co"># discards the values and returns nil (similar to /dev/null)</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>random_binaries(<span class="cn">nil</span>, <span class="dv">10</span>) <span class="op">|&gt;</span> <span class="cn">IO</span><span class="op">.</span>inspect(<span class="va">label:</span> <span class="st">&quot;nil&quot;</span>)</span></code></pre></div>
+<p>Container here does not have to be a data structure, It can be a process, gen-server, socket or file. While data structure only need <code>push</code> function to work, for resources we need a way to initialise and release. For example, to create a file container, first step (initialise) to open it, then push values and at the end close it (release). So let’s add support to these stages. While at it lets group all these 3 functions into a module so it is easier to build container for different type.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">defmodule</span> <span class="cn">PushContainer</span> <span class="kw">do</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">defstruct</span> [<span class="va">:acc</span>, <span class="va">:init</span>, <span class="va">:func</span>, <span class="va">:finish</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@type</span> acc :: any</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@spec</span> build((() <span class="op">-&gt;</span> acc), (any, acc <span class="op">-&gt;</span> acc), (acc <span class="op">-&gt;</span> any)) :: <span class="cn">PushContainer</span><span class="op">.</span>t()</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> build(init, func, finish) <span class="kw">do</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    %<span class="cn">__MODULE__</span>{<span class="va">init:</span> init, <span class="va">func:</span> func, <span class="va">finish:</span> finish}</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@spec</span> init(<span class="cn">PushContainer</span><span class="op">.</span>t()) :: <span class="cn">PushContainer</span><span class="op">.</span>t()</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> init(%<span class="cn">PushContainer</span>{<span class="va">init:</span> init} <span class="op">=</span> pc) <span class="kw">do</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    %<span class="cn">PushContainer</span>{pc <span class="op">|</span> <span class="va">acc:</span> init<span class="op">.</span>(), <span class="va">init:</span> <span class="va">:done</span>}</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@spec</span> push(<span class="cn">PushContainer</span><span class="op">.</span>t(), any) :: <span class="cn">PushContainer</span><span class="op">.</span>t()</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> push(%<span class="cn">PushContainer</span>{<span class="va">acc:</span> acc, <span class="va">func:</span> func} <span class="op">=</span> pc, value) <span class="kw">do</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    %<span class="cn">PushContainer</span>{pc <span class="op">|</span> <span class="va">acc:</span> func<span class="op">.</span>(value, acc)}</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@spec</span> push(<span class="cn">PushContainer</span><span class="op">.</span>t()) :: <span class="cn">PushContainer</span><span class="op">.</span>t()</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> finish(%<span class="cn">PushContainer</span>{<span class="va">acc:</span> acc, <span class="va">finish:</span> finish}) <span class="kw">do</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    finish<span class="op">.</span>(acc)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co"># change exmaple to adopt this new interface</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="kw">defmodule</span> <span class="cn">Example</span> <span class="kw">do</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> random_binaries(%<span class="cn">PushContainer</span>{} <span class="op">=</span> pc, count) <span class="kw">do</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    pc <span class="op">=</span> <span class="cn">PushContainer</span><span class="op">.</span>init(pc)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    pc <span class="op">=</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>      <span class="cn">Enum</span><span class="op">.</span>reduce(<span class="dv">1</span><span class="op">..</span>count, pc, <span class="kw">fn</span> _, pc <span class="op">-&gt;</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>        bin <span class="op">=</span> <span class="va">:crypto</span><span class="op">.</span>strong_rand_bytes(<span class="dv">5</span>)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>        <span class="cn">PushContainer</span><span class="op">.</span>push(pc, bin)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span>)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="cn">PushContainer</span><span class="op">.</span>finish(pc)</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<p>Lets build few push containers using new interface:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>binary_pc <span class="op">=</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="cn">PushContainer</span><span class="op">.</span>build(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> <span class="op">-&gt;</span> <span class="op">&lt;&lt;&gt;&gt;</span> <span class="kw">end</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> val, acc <span class="op">-&gt;</span> acc <span class="op">&lt;&gt;</span> val <span class="kw">end</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> acc <span class="op">-&gt;</span> acc <span class="kw">end</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>list_pc <span class="op">=</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="cn">PushContainer</span><span class="op">.</span>build(</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> <span class="op">-&gt;</span> [] <span class="kw">end</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> val, acc <span class="op">-&gt;</span> acc <span class="op">++</span> [val] <span class="kw">end</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> acc <span class="op">-&gt;</span> acc <span class="kw">end</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>file_pc <span class="op">=</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="cn">PushContainer</span><span class="op">.</span>build(</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> <span class="op">-&gt;</span> <span class="cn">File</span><span class="op">.</span>open!(<span class="st">&quot;somefile.txt&quot;</span>, [<span class="va">:write</span>, <span class="va">:binary</span>]) <span class="kw">end</span>,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> val, file <span class="op">-&gt;</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>      <span class="va">:ok</span> <span class="op">=</span> <span class="cn">IO</span><span class="op">.</span>binwrite(file, val)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>      file</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> file <span class="op">-&gt;</span> <span class="cn">File</span><span class="op">.</span>close(file) <span class="kw">end</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">Example</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>random_binaries(binary_pc, <span class="dv">10</span>) <span class="op">|&gt;</span> <span class="cn">IO</span><span class="op">.</span>inspect(<span class="va">label:</span> <span class="va">:binary</span>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>random_binaries(list_pc, <span class="dv">10</span>) <span class="op">|&gt;</span> <span class="cn">IO</span><span class="op">.</span>inspect(<span class="va">label:</span> <span class="va">:list</span>)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="va">:ok</span> <span class="op">=</span> random_binaries(file_pc, <span class="dv">10</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="cn">File</span><span class="op">.</span>read!(<span class="st">&quot;somefile.txt&quot;</span>)</span></code></pre></div>
+<p>Now that we are familiar with push containers as building blocks. Let’s head back to composability aspect.</p>
+<h2 id="composing-push-containers">Composing push containers</h2>
+<p>In the above example the function call <code>random_binaries(..., 1000)</code> is pushing binaries to the container. Now say we want to encode the binaries using base64 before we push. How would we support this?</p>
+<p>As before, let’s create a function called <code>map</code> which wraps the original <code>push</code> for the container with a given function and return it as a new push container. It is same as <code>Enum.map</code> but for push container.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">defmodule</span> <span class="cn">PushContainerHelpers</span> <span class="kw">do</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@spec</span> map(<span class="cn">PushContainer</span><span class="op">.</span>t(), (any <span class="op">-&gt;</span> any)) :: <span class="cn">PushContainer</span><span class="op">.</span>t()</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map(%<span class="cn">PushContainer</span>{} <span class="op">=</span> inner_pc, func) <span class="kw">do</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cn">PushContainer</span><span class="op">.</span>build(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> <span class="op">-&gt;</span> <span class="cn">PushContainer</span><span class="op">.</span>init(inner_pc) <span class="kw">end</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> elem, inner_pc <span class="op">-&gt;</span> <span class="cn">PushContainer</span><span class="op">.</span>push(inner_pc, func<span class="op">.</span>(elem)) <span class="kw">end</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> inner_pc <span class="op">-&gt;</span> <span class="cn">PushContainer</span><span class="op">.</span>finish(inner_pc) <span class="kw">end</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<p>Notice that <code>map</code> takes a push container and returns a push container.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">PushContainerHelpers</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>encoded <span class="op">=</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  random_binaries(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    map(binary_pc, <span class="op">&amp;</span><span class="cn">Base</span><span class="op">.</span>encode64<span class="op">/</span><span class="dv">1</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">10</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="cn">IO</span><span class="op">.</span>puts(<span class="st">&quot;Base64 encoded binaries: </span><span class="ot">#{</span>strinencoded_binaries<span class="ot">}</span><span class="st">&quot;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># string -&gt; encode64 -&gt; upcase -&gt; collect</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>upcased_encoded <span class="op">=</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  random_binaries(</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    map(</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>      map(</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        binary_pc,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span><span class="cn">String</span><span class="op">.</span>upcase<span class="op">/</span><span class="dv">1</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;</span><span class="cn">Base</span><span class="op">.</span>encode64<span class="op">/</span><span class="dv">1</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="dv">10</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="cn">IO</span><span class="op">.</span>puts(<span class="st">&quot;Base64 encoded binaries in upcase: </span><span class="ot">#{</span>upcased_encoded_binaries<span class="ot">}</span><span class="st">&quot;</span>)</span></code></pre></div>
+<p>We can compose push container like this by plugging functions dynamically and building new push containers on-the-fly. This works but as you can see in the last example it not easy to read. Let’s see if it improves if we format it differently or if we use pipe.</p>
+<h2 id="readability">Readability</h2>
+<p>Does formatting improves the readability in the above examples?</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">PushContainerHelpers</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># string -&gt; encode64 -&gt; upcase -&gt; collect-as-string</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># formatting as single line</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>random_binaries(map(map(binary_pc, <span class="op">&amp;</span><span class="cn">String</span><span class="op">.</span>upcase<span class="op">/</span><span class="dv">1</span>), <span class="op">&amp;</span><span class="cn">Base</span><span class="op">.</span>encode64<span class="op">/</span><span class="dv">1</span>), <span class="dv">10</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># formatting using pipe</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>binary_pc</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="op">|&gt;</span> map(<span class="op">&amp;</span><span class="cn">String</span><span class="op">.</span>upcase<span class="op">/</span><span class="dv">1</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="op">|&gt;</span> map(<span class="op">&amp;</span><span class="cn">Base</span><span class="op">.</span>encode64<span class="op">/</span><span class="dv">1</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">|&gt;</span> random_binaries(<span class="dv">10</span>)</span></code></pre></div>
+<p>As you can see formatting is not helping. Using our beloved pipe makes reading even worse! We have to read the expressions from bottom-to-top to understand what is going on. We can visualise it to make the issue more clear.</p>
+<figure class="image">
+<figcaption>
+Without pipe:
+</figcaption>
+<img src="/images/composable-collectable/push-left-to-right.gif" alt="Push without pipe">
+</figure>
+<p>Sort of works for small chains, but we still need to address it for long expressions.</p>
+<figure class="image">
+<figcaption>
+With pipe:
+</figcaption>
+<img src="/images/composable-collectable/push-pipe.gif" alt="With pipe">
+</figure>
+<p>Using pipes does not work at all with push containers!</p>
+<h3 id="what-is-going-on-here">What is going on here?</h3>
+<p>The issue is that we prefer to read an expression as <code>INPUT, FUNCTION, OUTPUT</code> in that exact order. This is especially important when we have nested function calls with multiple parameters. Why we like expressions to be in this order? I don’t know for sure but my guess is that, it is so because that’s how most programming languages are modelled. We are trained to read code like that and expect order-of-reading with logical order-of-execution. It also might be because most our languages are written from left-to-right, top-to-bottom (there are few exceptions to this). Or more fundamentally the natural order of <em>cause and effect</em>. If order of an expression is not <code>INPUT, FUNCTION, OUTPUT</code> then that will counter intuitive. This is also the reason why we have pipe operator <code>|&gt;</code> in the first place. Pipe is basically a macro-magic we use to make function chaining more readable by changing the order expressions.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Enum functions without pipe:</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Enum.map(...)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># FUNCTION, INPUT</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># OUPUT is implicit here as return value</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="cn">Enum</span><span class="op">.</span>map(<span class="cn">Enum</span><span class="op">.</span>map(random_binaries(<span class="dv">10</span>), <span class="op">&amp;</span><span class="cn">String</span><span class="op">.</span>upcase<span class="op">/</span><span class="dv">1</span>), <span class="op">&amp;</span><span class="cn">Base</span><span class="op">.</span>encode64<span class="op">/</span><span class="dv">1</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Enum functions with pipe</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># ... |&gt; Enum.map()</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># INPUT, FUNCTION</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>random_binaries(<span class="dv">10</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="op">|&gt;</span> <span class="cn">Enum</span><span class="op">.</span>map(<span class="op">&amp;</span><span class="cn">String</span><span class="op">.</span>upcase<span class="op">/</span><span class="dv">1</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="op">|&gt;</span> <span class="cn">Enum</span><span class="op">.</span>map(<span class="op">&amp;</span><span class="cn">Base</span><span class="op">.</span>encode64<span class="op">/</span><span class="dv">1</span>)</span></code></pre></div>
+<p>Pipe works for Enum because first argument we pass to the <code>Enum</code> function is the “input”. So moving <em>input</em> expression a line before the function call makes the movement of values appear natural.</p>
+<p>It is more obvious if we visualise this:</p>
+<figure class="image">
+<figcaption>
+Without pipe:
+</figcaption>
+<img src="/images/composable-collectable/enum-left-to-right.gif" alt="Without pipe">
+</figure>
+<figure class="image">
+<figcaption>
+With pipe:
+</figcaption>
+<img src="/images/composable-collectable/enum-top-to-bottom.gif" alt="With pipe">
+</figure>
+<p>As we can see, using pipe with when multiple functions are involved is pleasant to read. By using pipe we turned <code>FUNCTION INPUT</code> into <code>INPUT FUNCTION</code> which matches perfectly with how we read code.</p>
+<p><strong>Why pipe is not working for push container?</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Without pipe:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># FUNCTION, OUTPUT, INPUT</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>random_binaries(binary_pc, <span class="dv">10</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># With pipe:</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># OUTPUT, FUNCTION, INPUT</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>binary_pc</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="op">|&gt;</span> random_binaries(<span class="dv">10</span>)</span></code></pre></div>
+<p>The “push container” value (<code>binary_pc</code> in the example) we are passing is not an input we pass to the operation in logical sense. It is something where the function should <em>push</em> the output. So using pipe here breaks our expectation and looks confusing.</p>
+<p><strong>How to solve this?</strong></p>
+<p>Let’s correct the order <code>FUNCTION, OUTPUT, INPUT</code> to <code>FUNCTION, INPUT, OUTPUT</code> by making push-container (<code>binary_pc</code>) value as last argument to the function.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># formatting as single line</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>random_binaries(<span class="dv">10</span>, map(<span class="op">&amp;</span><span class="cn">Base</span><span class="op">.</span>encode64<span class="op">/</span><span class="dv">1</span>, map(<span class="op">&amp;</span><span class="cn">String</span><span class="op">.</span>upcase<span class="op">/</span><span class="dv">1</span>, binary_pc)))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># formatting as multiple lines</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>random_binaries(</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="dv">10</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  map(</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span><span class="cn">Base</span><span class="op">.</span>encode64<span class="op">/</span><span class="dv">1</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    map(</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;</span><span class="cn">String</span><span class="op">.</span>upcase<span class="op">/</span><span class="dv">1</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>      binary_pc</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>When visualise this:</p>
+<figure class="image">
+<figcaption>
+Container as last param:
+</figcaption>
+<img src="/images/composable-collectable/push-last-param-oneline.gif" alt="Container as last param">
+</figure>
+<figure class="image">
+<figcaption>
+Container as last param with multi line formatting:
+</figcaption>
+<img src="/images/composable-collectable/push-last-param-chain.gif" alt="Container as last param with multi line formatting">
+</figure>
+<p>This reads much better and nearly addresses our concern. Although formatting function nested function calls as multiple lines make it more readable, we could go one step further and create a new operator like <code>|&gt;</code> for cases like this. Our new operator takes two expressions A and B, and appends B as last argument to A. One important thing to note is that the operator must be <em>right associative</em> for this to work. Why it won’t work otherwise is left as exercise to readers :)</p>
+<p>Let’s pick <code>+++</code> operator for demonstration purpose which is right associate.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">defmodule</span> <span class="cn">PushOp</span> <span class="kw">do</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">defmacro</span> left <span class="op">+++</span> right <span class="kw">do</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    {func, meta, args} <span class="op">=</span> left</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    {func, meta, args <span class="op">++</span> [unq]}</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="im">require</span> <span class="cn">PushOp</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">PushOp</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>string <span class="op">=</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  random_binaries(<span class="dv">10</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> map(<span class="op">&amp;</span><span class="cn">Base</span><span class="op">.</span>encode64<span class="op">/</span><span class="dv">1</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> map(<span class="op">&amp;</span><span class="cn">String</span><span class="op">.</span>upcase<span class="op">/</span><span class="dv">1</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> binary_pc</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="cn">IO</span><span class="op">.</span>puts(<span class="st">&quot;=&gt; </span><span class="ot">#{</span>string<span class="ot">}</span><span class="st">&quot;</span>)</span></code></pre></div>
+<p>This is even better than previous code, since we got back to our <code>INPUT, FUNCTION, OUTPUT</code> ordering. Exactly like how pipe operator worked for Enum. To recap, all we did was to make collectable param as last param and created helper macro to improve the ordering of the expression.</p>
+<p>Now that readability side quest is complete, lets get back to the main mission.</p>
+<h2 id="remaining-push-container-functions">Remaining push container functions</h2>
+<p>Implementing other basic helper functions like reduce, filter etc is straight forward. Let’s bundle all functions as <code>Contr</code> module. Similar to <code>Enum</code> module for <code>Enumerable</code>.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">defmodule</span> <span class="cn">Contr</span> <span class="kw">do</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> reduce(func, %<span class="cn">PushContainer</span>{} <span class="op">=</span> pc) <span class="kw">do</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cn">PushContainer</span><span class="op">.</span>new(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> <span class="op">-&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        <span class="cn">PushContainer</span><span class="op">.</span>init(pc)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> elem, pc <span class="op">-&gt;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        func<span class="op">.</span>(elem, pc)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> pc <span class="op">-&gt;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="cn">PushContainer</span><span class="op">.</span>finish(pc)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># redefining map using reduce</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map(func, %<span class="cn">PushContainer</span>{} <span class="op">=</span> pc) <span class="kw">do</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    reduce(</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> elem, pc <span class="op">-&gt;</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        <span class="cn">PushContainer</span><span class="op">.</span>call(pc, func<span class="op">.</span>(elem))</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span>,</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>      pc</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> filter(func, %<span class="cn">PushContainer</span>{} <span class="op">=</span> pc) <span class="kw">do</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    reduce(</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> elem, pc <span class="op">-&gt;</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> func<span class="op">.</span>(elem) <span class="kw">do</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>          <span class="cn">PushContainer</span><span class="op">.</span>call(pc, elem)</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>          pc</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span>,</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>      pc</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> split(func, %<span class="cn">PushContainer</span>{} <span class="op">=</span> true_pc, %<span class="cn">PushContainer</span>{} <span class="op">=</span> false_pc) <span class="kw">do</span></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    <span class="cn">PushContainer</span><span class="op">.</span>new(</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> <span class="op">-&gt;</span></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>        {<span class="cn">PushContainer</span><span class="op">.</span>init(true_pc), <span class="cn">PushContainer</span><span class="op">.</span>init(false_pc)}</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span>,</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> elem, {t, f} <span class="op">-&gt;</span></span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> func<span class="op">.</span>(elem) <span class="kw">do</span></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>          {<span class="cn">PushContainer</span><span class="op">.</span>push(t, elem), f}</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>          {t, <span class="cn">PushContainer</span><span class="op">.</span>push(f, elem)}</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span>,</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> {t, f} <span class="op">-&gt;</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>        {<span class="cn">PushContainer</span><span class="op">.</span>finish(t), <span class="cn">PushContainer</span><span class="op">.</span>finish(f)}</span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<p>Equipped with these, we can compose push containers in multiple ways similar to Enum.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">Example</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">PushOp</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>_string <span class="op">=</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  random_binaries(<span class="dv">10</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> <span class="cn">Contr</span><span class="op">.</span>map(<span class="kw">fn</span> bin <span class="op">-&gt;</span> <span class="cn">Base</span><span class="op">.</span>encode64(bin) <span class="kw">end</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> <span class="cn">Contr</span><span class="op">.</span>filter(<span class="kw">fn</span> str <span class="op">-&gt;</span> str <span class="op">=~</span> <span class="op">~</span>r<span class="op">/^</span>[a<span class="op">-</span>zA<span class="op">-</span>Z<span class="op">=</span>]<span class="op">+</span>$<span class="op">/</span> <span class="kw">end</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> binary_pc</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># =&gt; &quot;olHQItQ=OWPYlAY=&quot;</span></span></code></pre></div>
+<p>Only thing pending now is to bridge the <code>PushContainer</code> and <code>Collectable</code> protocol for interoperability, so we can take advantage of modules which already implements Collectable protocol.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">defmodule</span> <span class="cn">PushContainer</span> <span class="kw">do</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">defstruct</span> [<span class="va">:acc</span>, <span class="va">:init</span>, <span class="va">:func</span>, <span class="va">:finish</span>]</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> build(init, func, finish) <span class="kw">do</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    %<span class="cn">__MODULE__</span>{<span class="va">init:</span> init, <span class="va">func:</span> func, <span class="va">finish:</span> finish}</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> init(%<span class="cn">PushContainer</span>{<span class="va">init:</span> init} <span class="op">=</span> pc) <span class="kw">do</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    %<span class="cn">PushContainer</span>{pc <span class="op">|</span> <span class="va">acc:</span> init<span class="op">.</span>(), <span class="va">init:</span> <span class="va">:done</span>}</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> push(%<span class="cn">PushContainer</span>{<span class="va">acc:</span> acc, <span class="va">func:</span> func} <span class="op">=</span> pc, value) <span class="kw">do</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    %<span class="cn">PushContainer</span>{pc <span class="op">|</span> <span class="va">acc:</span> func<span class="op">.</span>(value, acc)}</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> finish(%<span class="cn">PushContainer</span>{<span class="va">acc:</span> acc, <span class="va">finish:</span> finish}, status) <span class="kw">do</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> is_function(finish, <span class="dv">1</span>) <span class="kw">do</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>      finish<span class="op">.</span>(acc)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>      finish<span class="op">.</span>(acc, status)</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> from_collectable(collectable) <span class="kw">do</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="cn">PushContainer</span><span class="op">.</span>build(</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> <span class="op">-&gt;</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        <span class="cn">Collectable</span><span class="op">.</span>into(collectable)</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span>,</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> {acc, collector_func}, elem <span class="op">-&gt;</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>        collector_func<span class="op">.</span>(acc, {<span class="va">:cont</span>, elem})</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span>,</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>      <span class="kw">fn</span> {acc, collector_func}, status <span class="op">-&gt;</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        collector_func<span class="op">.</span>(acc, status)</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>      <span class="kw">end</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="kw">defimpl</span> <span class="cn">Collectable</span>, <span class="kw">for</span>: <span class="cn">PushContainer</span> <span class="kw">do</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> into(%<span class="cn">PushContainer</span>{} <span class="op">=</span> pc) <span class="kw">do</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    collector_func <span class="op">=</span> <span class="kw">fn</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>      acc, {<span class="va">:cont</span>, elem} <span class="op">-&gt;</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>        <span class="cn">PushContainer</span><span class="op">.</span>push(acc, elem)</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>      acc, <span class="va">:halt</span> <span class="op">-&gt;</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>        <span class="cn">PushContainer</span><span class="op">.</span>finish(acc, <span class="va">:halt</span>)</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>      acc, <span class="va">:done</span> <span class="op">-&gt;</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>        <span class="cn">PushContainer</span><span class="op">.</span>finish(acc, <span class="va">:done</span>)</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>    acc <span class="op">=</span> <span class="cn">PushContainer</span><span class="op">.</span>init(pc)</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>    {acc, collector_func}</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">Example</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">PushOp</span>, <span class="va">only:</span> [{:<span class="op">+++</span>, <span class="dv">2</span>}]</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>square_set_container <span class="op">=</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="cn">Contr</span><span class="op">.</span>map(</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> num <span class="op">-&gt;</span> num <span class="op">*</span> num <span class="kw">end</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="cn">PushContainer</span><span class="op">.</span>from_collectable(<span class="cn">MapSet</span><span class="op">.</span>new())</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>square_set <span class="op">=</span> <span class="cn">Enum</span><span class="op">.</span>into(<span class="dv">1</span><span class="op">..</span><span class="dv">10</span>, square_set_container)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co"># =&gt; #MapSet&lt;[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]&gt;</span></span></code></pre></div>
+<p><strong>As for the original sample problem about stream of logs:</strong></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode elixir"><code class="sourceCode elixir"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">Example</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> <span class="cn">PushOp</span>, <span class="va">only:</span> [{:<span class="op">+++</span>, <span class="dv">2</span>}]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">defmodule</span> <span class="cn">Demo</span> <span class="kw">do</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> collect_logs(sink) <span class="kw">do</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    log_stream</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">|&gt;</span> <span class="cn">Stream</span><span class="op">.</span>take(<span class="dv">10</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">|&gt;</span> <span class="cn">Enum</span><span class="op">.</span>into(sink)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>error_sink <span class="op">=</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="cn">Contr</span><span class="op">.</span>map(<span class="kw">fn</span> <span class="st">&quot;error: &quot;</span> <span class="op">&lt;&gt;</span> line <span class="op">-&gt;</span> line <span class="kw">end</span>)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> <span class="cn">Contr</span><span class="op">.</span>map(<span class="kw">fn</span> line <span class="op">-&gt;</span> <span class="cn">String</span><span class="op">.</span>upcase(line) <span class="kw">end</span>)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> list_pc</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>warn_sink <span class="op">=</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="cn">Contr</span><span class="op">.</span>map(<span class="kw">fn</span> <span class="st">&quot;warn: &quot;</span> <span class="op">&lt;&gt;</span> line <span class="op">-&gt;</span> line <span class="kw">end</span>)</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> <span class="cn">Contr</span><span class="op">.</span>map(<span class="kw">fn</span> line <span class="op">-&gt;</span> line <span class="op">&lt;&gt;</span> <span class="st">&quot;\n&quot;</span> <span class="kw">end</span>)</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">+++</span> binary_pc</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="cn">Demo</span><span class="op">.</span>collect_logs(</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>  <span class="cn">Contr</span><span class="op">.</span>split(</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span><span class="cn">String</span><span class="op">.</span>starts_with?(<span class="op">&amp;</span><span class="dv">1</span>, <span class="st">&quot;warn: &quot;</span>),</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    warn_sink,</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    error_sink</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>More about streams:</p>
+<ul>
+<li><a href="https://ananthakumaran.in/2017/11/28/stream.html" class="uri">https://ananthakumaran.in/2017/11/28/stream.html</a></li>
+<li><a href="https://hexdocs.pm/elixir/Collectable.html" class="uri">https://hexdocs.pm/elixir/Collectable.html</a></li>
+</ul>
+
+</body>
+</html>
