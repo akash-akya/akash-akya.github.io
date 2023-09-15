@@ -117,12 +117,12 @@ pre {
 
 .quiet-link {
     color: inherit;
-    text-decorations: inherit;
+    text-decoration: inherit;
 }
 
 .quiet-link:visited {
     color: inherit;
-    text-decorations: inherit;
+    text-decoration: inherit;
 }
 
 .no-underline {
