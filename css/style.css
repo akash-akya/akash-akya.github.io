@@ -273,3 +273,41 @@ a.blog-list-entry:hover {
     margin-bottom: 1.5em;
     color: #808080;
 }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  font-size: 0.8rem;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+}
+
+th {
+  background-color: rgb(235,235,235);
+}
+
+td {
+  text-align: center;
+}
+
+.border {
+  border: 1px solid #ccc;
+}
+
+.min-100px {
+  min-width: 100px;
+}
+
+/*
+tr:nth-child(even) td {
+  background-color: rgb(250,250,250);
+}
+
+tr:nth-child(odd) td {
+  background-color: rgb(250,245,245);
+}
+*/

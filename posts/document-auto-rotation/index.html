@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en-us"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    
+    
+    <title>memdump | Document Auto Rotation</title>
+</head>
+<body>
+    <div id="top-strip"></div>
+    <div class="content"><header>
+    <div class="center">
+        <a href="/" class="quiet-link">
+            <div class="monospace title">
+                <h1 style="margin-top: 0.3em; margin-bottom: 0.3em;">memdump</h1>
+            </div>
+        </a>
+
+        <div class="nav">
+            
+            
+            <a href="/">
+                home
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/posts/">
+                posts
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/tags/">
+                tags
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/about">
+                about
+            </a>
+            
+        </div>
+    </div>
+</header>
+<div class="content">
+<h1>Document Auto Rotation</h1>
+
+
+
+<div class="publish-date">
+    <time datetime="2024-03-25">25 Mar 2024</time>
+</div>
+
+
+<p><em>This is blog version of the Livebook. You can try interactive nootbook here</em></p>
+<p><a href="https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Fakash-akya%2Fvix%2Fblob%2Fmaster%2Flivebooks%2Fauto_correct_rotation.livemd"><img src="https://livebook.dev/badge/v1/blue.svg" alt="Run in Livebook"></a></p>
+<p>In this post, we&rsquo;ll explore how to correct text image rotation using image processing methods such as Fourier Transformation, complex planes, and basic arithmetic operations.</p>
+<p>This tutorial is heavily based on <a href="https://libvips.blogspot.com/2015/11/fancy-transforms.html">libvips blog post</a>
+and <a href="https://stackoverflow.com/questions/33698068/align-text-for-ocr/33707537#33707537">a Stack Overflow answer</a>.</p>
+<h2 id="setup">Setup</h2>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">alias</span> <span style="color:#458;font-weight:bold">Vix.Vips.Image</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">alias</span> <span style="color:#458;font-weight:bold">Vix.Vips.Operation</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># import convenience math operators `+`, `-`, `*` etc.</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">use</span> <span style="color:#458;font-weight:bold">Vix.Operator</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{<span style="color:#990073">:ok</span>, doc} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Image</span><span style="color:#000;font-weight:bold">.</span>new_from_file(<span style="color:#d14">&#34;test-image.png&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># convert 4 channel/band PNG image to black &amp; white</span>
+</span></span><span style="display:flex;"><span>doc <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>colourspace!(img, <span style="color:#990073">:VIPS_INTERPRETATION_B_W</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># img[1] is alpha band, skip that</span>
+</span></span><span style="display:flex;"><span>doc <span style="color:#000;font-weight:bold">=</span> img[<span style="color:#099">0</span>]
+</span></span></code></pre></div><img class="border" src="/images/document-auto-rotation/doc.png" alt="Test Image">
+<h2 id="fourier-transformation">Fourier Transformation</h2>
+<p>An image can be expressed as sum of sine and cosine waves of varying
+magnitude, frequency and phase. Fourier Transform is an operation which breaks down an image into its sine and cosine components, which is crucial for many image processing tasks.</p>
+<p>There are lot of resources online on this topic,
+I found <a href="https://web.archive.org/web/20130513181427id_/http://sharp.bu.edu/~slehar/fourier/fourier.html#filtering">this</a>
+and <a href="https://dsp.stackexchange.com/questions/1637/what-does-frequency-domain-denote-in-case-of-images/1644#1644">this</a> useful get started.</p>
+<p>Libvips provides functions like <a href="https://www.libvips.org/API/current/libvips-freqfilt.html#vips-fwfft"><code>fwfft</code></a>
+for <strong>Forward Fourier Transform</strong> and
+<a href="https://www.libvips.org/API/current/libvips-freqfilt.html#vips-invfft"><code>invfft</code></a>
+for <strong>Inverse Fourier Transform</strong>.</p>
+<h3 id="fwfft-operation">Fwfft Operation</h3>
+<p>When we perform <code>fwfft</code> operation on an image, we get a complex band format where the real part represents the wave amplitude and the imaginary part represents the wave phase. Position of the value is the frequency.</p>
+<p>However, this complex format isn&rsquo;t directly visible, so we need to convert it to a format that can be displayed.
+We do that by converting the single complex band to two bands of type float, one for real part and another for imaginary part. And then we can warp the image to center, scale values to make them more visible.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>white <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>black!(<span style="color:#099">10</span>, <span style="color:#099">200</span>) <span style="color:#000;font-weight:bold">+</span> <span style="color:#099">255</span>
+</span></span><span style="display:flex;"><span>line_img <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>embed!(white, <span style="color:#099">45</span>, <span style="color:#099">0</span>, <span style="color:#099">200</span>, <span style="color:#099">200</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># take fourier transform of the input image</span>
+</span></span><span style="display:flex;"><span>fourier_transform <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>fwfft!(line_img)
+</span></span></code></pre></div><table>
+  <tr>
+    <th></th>
+    <th> line_img </th>
+    <th> fourier_transform </th>
+   </tr>
+   <tr>
+     <td>Image</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/fwfft_input.png" alt="Test Image"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/fwfft_output.png" alt="Test Image"></td>
+  </tr>
+  <tr>
+    <td>Format</td>
+    <td><code>:VIPS_FORMAT_FLOAT</code></td>
+    <td><code>:VIPS_FORMAT_DPCOMPLEX</code></td>
+  </tr>
+  <tr>
+    <td>Bands</td>
+    <td><code>1</code></td>
+    <td><code>1</code></td>
+  </tr>
+</table>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># convert complex number to 2 band double format</span>
+</span></span><span style="display:flex;"><span>fourier_transform <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(fourier_transform, <span style="color:#990073">format</span>: <span style="color:#990073">:VIPS_FORMAT_DOUBLE</span>, <span style="color:#990073">bands</span>: <span style="color:#099">2</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># do logarithm scaling for the image so that points visible</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># and move the origin of the image to center</span>
+</span></span><span style="display:flex;"><span>scaled_fourier_transform <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  fourier_transform
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>scale!(<span style="color:#990073">log</span>: <span style="color:#008080">true</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>wrap!()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># separate amplitude and phase channels/bands</span>
+</span></span><span style="display:flex;"><span>amplitude <span style="color:#000;font-weight:bold">=</span> scaled_fourier_transform[<span style="color:#099">0</span>]
+</span></span><span style="display:flex;"><span>phase <span style="color:#000;font-weight:bold">=</span> scaled_fourier_transform[<span style="color:#099">1</span>]
+</span></span></code></pre></div><table>
+  <tr>
+    <th> amplitude </th>
+    <th> phase </th>
+   </tr>
+   <tr>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/amplitude.png" alt="Amplitude"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/phase.png" alt="Phase"></td>
+  </tr>
+</table>
+<p>Libvips simplifies this process of conversion by offering function
+<code>spectrum</code>, which compute the Fourier Transform, extract the
+amplitude, scale it logarithmically, and wrap it around the origin for
+visualization.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>spectrum <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>spectrum!(line_img)
+</span></span></code></pre></div><table>
+  <tr>
+    <th> spectrum </th>
+   </tr>
+   <tr>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/spectrum.png" alt="Spectrum Image" /></td>
+  </tr>
+</table>
+<p>Let&rsquo;s display fourier transform for few synthetic sample images to get
+the intuition behind the operation</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>lines_count <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">10</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># lets create images which black and white lines</span>
+</span></span><span style="display:flex;"><span>width <span style="color:#000;font-weight:bold">=</span> trunc(<span style="color:#099">100</span> <span style="color:#000;font-weight:bold">/</span> lines_count)
+</span></span><span style="display:flex;"><span>black_line <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>black!(width, <span style="color:#099">200</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 10 lines B&amp;W lines</span>
+</span></span><span style="display:flex;"><span>lines <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  [black_line, <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>invert!(black_line)]
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">List</span><span style="color:#000;font-weight:bold">.</span>duplicate(lines_count)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">List</span><span style="color:#000;font-weight:bold">.</span>flatten()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vert_lines <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>arrayjoin!(lines, <span style="color:#990073">across</span>: length(lines))
+</span></span><span style="display:flex;"><span>horz_lines <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>rot!(vert_lines, <span style="color:#990073">:VIPS_ANGLE_D90</span>)
+</span></span><span style="display:flex;"><span>vert_horz_lines <span style="color:#000;font-weight:bold">=</span> vert_lines <span style="color:#000;font-weight:bold">+</span> horz_lines
+</span></span></code></pre></div><table>
+  <tr>
+    <th></th>
+    <th>img</th>
+    <th>Operation.spectrum!(img)</th>
+  </tr>
+  <tr>
+     <td>vert_lines</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_vert.png" alt="Vertical"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_vert_spectrum.png" alt="Spectrum"></td>
+  </tr>
+  <tr>
+     <td>horz_lines</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_horz.png" alt="Horizontal"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_horz_spectrum.png" alt="Spectrum"></td>
+  </tr>
+  <tr>
+     <td>vert_horz_lines</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_box.png" alt="Grid"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_box_spectrum.png" alt="Spectrum"></td>
+  </tr>
+</table>
+<p>By observing the Fourier Transform outputs of various sample images,
+we notice a consistent pattern: vertical lines in the input image
+produce horizontal lines in the Fourier Transform, and vice
+versa. This pattern remains unchanged even when the number of lines in
+the input image is altered.</p>
+<p>When we apply Fourier Transform to an ideal text image, we expect to
+see vertical and/or horizontal lines precisely at 0, 90, 180, and
+270-degree angles. This alignment occurs because characters and lines
+in a text document are typically parallel or perpendicular to each
+other. If the document is rotated by some angle, this misalignment
+will be reflected in the Fourier Transform.</p>
+<table>
+  <tr>
+    <th>doc</th>
+    <th>Operation.spectrum!(doc)</th>
+  </tr>
+  <tr>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/doc.png" alt="Doc"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/doc_spectrum.png" alt="Spectrum"></td>
+  </tr>
+</table>
+<p>As observed, we can detect a slight deviation in the vertical and
+horizontal lines within the Fourier Transform. Now, our next step is
+to determine the angle of this deviation.</p>
+<h2 id="finding-the-rotation-angle">Finding the Rotation Angle</h2>
+<p>As previously mentioned, the output of the Fourier Transform is in a complex band format. This format consists of a real part, representing the amplitude (visible lines), and an imaginary part, representing the phase.</p>
+<p>To interpret these complex numbers on a 2D plane, we have two options: Cartesian (rectangular) coordinates and Polar coordinates.</p>
+<p>Libvips provides functions to convert between Cartesian and Polar coordinates. When converting from Cartesian to Polar coordinates, vertical lines in the image transform into circles, while horizontal lines become arcs or segments. Importantly, in this conversion, the radius of the circle corresponds to the x-axis, and the angle of rotation corresponds to the y-axis. See <a href="/posts/creating-rainbow-in-vix/">Creating Rainbow</a> post for more information on this.</p>
+<p>And we can do inverse operation as well. We can convert an image from the Polar plane to the Cartesian plane. In this transformation, the circular shapes in the Polar plane become vertical lines, and the arcs or segments become horizontal lines. Most significantly, the radius in the Polar plane translates to the x-axis, while the angle corresponds to the y-axis in the Cartesian plane. This transformation allows us to interpret complex numbers represented in Polar coordinates as points in the Cartesian plane, with the radius dictating the position along the x-axis and the <strong>angle determining the position along the y-axis</strong>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">ComplexOps</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> to_cartesian(img, background \\ [<span style="color:#099">0</span>, <span style="color:#099">0</span>, <span style="color:#099">0</span>]) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    %{<span style="color:#990073">width</span>: width, <span style="color:#990073">height</span>: height} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Image</span><span style="color:#000;font-weight:bold">.</span>headers(img)
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>xyz!(width, height)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># normalize the y-axis to be between 0 and 360</span>
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span> xy <span style="color:#000;font-weight:bold">*</span> [<span style="color:#099">1</span>, <span style="color:#099">360</span> <span style="color:#000;font-weight:bold">/</span> height]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>      xy
+</span></span><span style="display:flex;"><span>      <span style="color:#998;font-style:italic"># read values as complex numbers</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(<span style="color:#990073">format</span>: <span style="color:#990073">:VIPS_FORMAT_COMPLEX</span>, <span style="color:#990073">bands</span>: <span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#998;font-style:italic"># convert from polar to Cartesian plane</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>complex!(<span style="color:#990073">:VIPS_OPERATION_COMPLEX_RECT</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#998;font-style:italic"># and convert back to float</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>copy!(<span style="color:#990073">format</span>: <span style="color:#990073">:VIPS_FORMAT_FLOAT</span>, <span style="color:#990073">bands</span>: <span style="color:#099">2</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    scale <span style="color:#000;font-weight:bold">=</span> min(width, height) <span style="color:#000;font-weight:bold">/</span> width
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span> xy <span style="color:#000;font-weight:bold">*</span> (scale <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>)
+</span></span><span style="display:flex;"><span>    xy <span style="color:#000;font-weight:bold">=</span> xy <span style="color:#000;font-weight:bold">+</span> [width <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>, height <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">2</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># mapim takes an input and a `map` and generates an output image</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># where input image pixels are moved based on map.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic">#</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># [new_x, new_y] = map[x, y]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># out[x, y] = img[new_x, new_y]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic">#</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># mapim is to rotate, displace, distort, any type of spatial operations.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># where the pixel value (color) remain same but the position is changed.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>mapim!(img, xy, <span style="color:#990073">background</span>: background)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>flat_map([vert_lines, horz_lines, vert_horz_lines], <span style="color:#000;font-weight:bold">fn</span> sample <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>  polar <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>spectrum!(sample)
+</span></span><span style="display:flex;"><span>  cartesian <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">ComplexOps</span><span style="color:#000;font-weight:bold">.</span>to_cartesian(polar)
+</span></span><span style="display:flex;"><span>  [sample, polar, cartesian]
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>)
+</span></span></code></pre></div><table>
+  <tr>
+    <th></th>
+    <th>sample</th>
+    <th>polar</th>
+    <th>cartesian</th>
+  </tr>
+  <tr>
+     <td>vert_lines</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_vert.png" alt="Vertical"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_vert_spectrum.png" alt="Polar"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_vert_cart.png" alt="Cartesian"></td>
+  </tr>
+  <tr>
+     <td>horz_lines</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_horz.png" alt="Horizontal"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_horz_spectrum.png" alt="Polar"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_horz_cart.png" alt="Cartesian"></td>
+  </tr>
+  <tr>
+     <td>vert_horz_lines</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_box.png" alt="Grid"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_box_spectrum.png" alt="Polar"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_grid_cart.png" alt="Cartesian"></td>
+  </tr>
+</table>
+<p>For the input document</p>
+<table>
+  <tr>
+    <th>polar</th>
+    <th>cartesian</th>
+  </tr>
+  <tr>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/doc_spectrum.png" alt="Polar"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/doc_spectrum_cart.png" alt="Cartesian"></td>
+  </tr>
+</table>
+<p>Now, the remaining task is to identify the row with the maximum value
+in the Cartesian plane. The row number associated with this maximum
+value corresponds to the angle of rotation we&rsquo;re seeking.  Libvips
+simplifies this process with its <code>project</code> function. This function
+calculates the row-wise and column-wise sums of the image and returns
+them as an image. Then, we can use the <code>max</code> function to find the
+maximum value and its position within the image.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">Angle</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> find(cartesian) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># find the row wise and column wise sum</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># returns 2 images with respective column/row sum</span>
+</span></span><span style="display:flex;"><span>    {_columns, rows} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>project!(cartesian)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># find position of the row with maximum value</span>
+</span></span><span style="display:flex;"><span>    {_, %{<span style="color:#990073">y</span>: y_pos}} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>max!(rows)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># convert the y position back to angle.</span>
+</span></span><span style="display:flex;"><span>    y_pos <span style="color:#000;font-weight:bold">/</span> <span style="color:#458;font-weight:bold">Image</span><span style="color:#000;font-weight:bold">.</span>height(rows) <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">360</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[vert_lines, horz_lines, vert_horz_lines]
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>flat_map(<span style="color:#000;font-weight:bold">fn</span> sample <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>  ft <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>spectrum!(sample)
+</span></span><span style="display:flex;"><span>  cartesian <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">ComplexOps</span><span style="color:#000;font-weight:bold">.</span>to_cartesian(ft)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  angle <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Angle</span><span style="color:#000;font-weight:bold">.</span>find(cartesian)
+</span></span><span style="display:flex;"><span>  [sample, ft, cartesian, angle]
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>)
+</span></span></code></pre></div><table>
+  <tr>
+    <th></th>
+    <th>sample</th>
+    <th>ft</th>
+    <th>cartesian</th>
+    <th>angle</th>
+  </tr>
+  <tr>
+     <td>Vertical</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_vert.png" alt="Vertical"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_vert_spectrum.png" alt="Polar"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_vert_cart.png" alt="Cartesian"></td>
+     <td>0.0</td>
+  </tr>
+  <tr>
+     <td>Horizontal</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_horz.png" alt="Horizontal"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_horz_spectrum.png" alt="Polar"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_horz_cart.png" alt="Cartesian"></td>
+     <td>90.0</td>
+  </tr>
+  <tr>
+     <td>Grid</td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_box.png" alt="Grid"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_box_spectrum.png" alt="Polar"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/lines_grid_cart.png" alt="Cartesian"></td>
+     <td>0.0</td>
+  </tr>
+</table>
+<p>If there are multiple rows maximum values then it picks one of them.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>fourier_transform <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>spectrum!(img)
+</span></span><span style="display:flex;"><span>cartesian <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">ComplexOps</span><span style="color:#000;font-weight:bold">.</span>to_cartesian(fourier_transform)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>angle <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Utils</span><span style="color:#000;font-weight:bold">.</span>find_angle(cartesian)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># since we know that angle can only be parallel or perpendicular</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># can take mod of 90</span>
+</span></span><span style="display:flex;"><span>angle <span style="color:#000;font-weight:bold">=</span> angle <span style="color:#000;font-weight:bold">-</span> trunc(angle <span style="color:#000;font-weight:bold">/</span> <span style="color:#099">90</span>) <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">90</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#099">89.27302100161552</span>
+</span></span></code></pre></div><h2 id="correcting-the-rotation">Correcting the Rotation</h2>
+<p>With the rotation angle determined, we can now apply it to the
+original document image to correct its rotation. This involves
+calculating the difference between the determined angle and 90 degrees
+(since text documents are typically aligned parallel or perpendicular
+to the axes) and then rotating the image accordingly.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>diff <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">90</span> <span style="color:#000;font-weight:bold">-</span> angle
+</span></span><span style="display:flex;"><span>corrected <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Operation</span><span style="color:#000;font-weight:bold">.</span>rotate!(doc, diff)
+</span></span></code></pre></div><table>
+  <tr>
+    <th>doc</th>
+    <th>corrected</th>
+  </tr>
+  <tr>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/doc.png" alt="Input"></td>
+     <td><img class="border min-100px" src="/images/document-auto-rotation/doc_rotated.png" alt="Rotated"></td>
+  </tr>
+</table>
+
+
+
+</div>
+    </div>
+</body>
+
+</html>
