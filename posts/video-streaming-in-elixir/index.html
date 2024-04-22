@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en-us"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    
+    
+    <title>memdump | Video Streaming in Elixir</title>
+</head>
+<body>
+    <div id="top-strip"></div>
+    <div class="content"><header>
+    <div class="center">
+        <a href="/" class="quiet-link">
+            <div class="monospace title">
+                <h1 style="margin-top: 0.3em; margin-bottom: 0.3em;">memdump</h1>
+            </div>
+        </a>
+
+        <div class="nav">
+            
+            
+            <a href="/">
+                home
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/posts/">
+                posts
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/tags/">
+                tags
+            </a>
+            
+             &NonBreakingSpace;|&NonBreakingSpace; 
+            <a href="/about">
+                about
+            </a>
+            
+        </div>
+    </div>
+</header>
+<div class="content">
+<h1>Video Streaming in Elixir</h1>
+
+
+
+<div class="publish-date">
+    <time datetime="2024-04-22">22 Apr 2024</time>
+</div>
+
+
+<p><em>This is blog version of the Livebook. You can try interactive nootbook here</em></p>
+<p><a href="https://livebook.dev/run/?url=https://github.com/akash-akya/exile/blob/master/livebooks/ffmpeg-streaming-server.livemd"><img src="https://livebook.dev/badge/v1/blue.svg" alt="Run in Livebook"></a></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#458;font-weight:bold">Mix</span><span style="color:#000;font-weight:bold">.</span>install([
+</span></span><span style="display:flex;"><span>  {<span style="color:#990073">:req</span>, <span style="color:#d14">&#34;~&gt; 0.4.5&#34;</span>},
+</span></span><span style="display:flex;"><span>  {<span style="color:#990073">:ex_cmd</span>, <span style="color:#d14">&#34;~&gt; 0.10&#34;</span>},
+</span></span><span style="display:flex;"><span>  {<span style="color:#990073">:plug</span>, <span style="color:#d14">&#34;~&gt; 1.15&#34;</span>},
+</span></span><span style="display:flex;"><span>  {<span style="color:#990073">:kino</span>, <span style="color:#d14">&#34;~&gt; 0.11&#34;</span>},
+</span></span><span style="display:flex;"><span>  {<span style="color:#990073">:bandit</span>, <span style="color:#d14">&#34;~&gt; 1.1&#34;</span>}
+</span></span><span style="display:flex;"><span>])
+</span></span></code></pre></div><h2 id="introduction">Introduction</h2>
+<p><a href="https://hexdocs.pm/elixir/Port.html"><code>Port</code></a> is standard way to run external programs in Elixir and Erlang. However, communicating with spawned external programs over stdio can lead to <a href="https://github.com/akash-akya/exile/blob/master/README.md#port-io-issue">various issues</a>. <a href="https://hexdocs.pm/ex_cmd/readme.html"><code>ExCmd</code></a> and <a href="https://hexdocs.pm/exile/readme.html"><code>Exile</code></a> libraries tries to address these issues. On top of that they provide beloved streaming capabilities. Using them we can stream input and output <em>all the way down</em> to host machine.</p>
+<p>Let&rsquo;s take an example to illustrate the streaming capabilities. Here, we&rsquo;ll create an HTTP server to watermark a video using FFmpeg.</p>
+<p>The server should perform the following:</p>
+<ul>
+<li>Accept request with video URL and watermark text</li>
+<li>Read input video in a demand-driven streaming fashion</li>
+<li>Adds watermark to the video</li>
+<li>Stream generated video with watermark without touching disk</li>
+</ul>
+<h2 id="ffmpeg">FFmpeg</h2>
+<p>We use a sample video from wikimedia to test.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># download sample video</span>
+</span></span><span style="display:flex;"><span>video_url <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#d14">&#34;https://upload.wikimedia.org/wikipedia/commons/transcoded/8/81/Beachfront_B-Roll-_Fireworks_%28Free_to_Use_HD_Stock_Video_Footage%29.webm/Beachfront_B-Roll-_Fireworks_%28Free_to_Use_HD_Stock_Video_Footage%29.webm.480p.vp9.webm&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>tmp <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">System</span><span style="color:#000;font-weight:bold">.</span>tmp_dir!()
+</span></span><span style="display:flex;"><span>input_path <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Path</span><span style="color:#000;font-weight:bold">.</span>join(tmp, <span style="color:#d14">&#34;input.webm&#34;</span>)
+</span></span><span style="display:flex;"><span>video <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Req</span><span style="color:#000;font-weight:bold">.</span>get!(video_url)<span style="color:#000;font-weight:bold">.</span>body
+</span></span><span style="display:flex;"><span><span style="color:#990073">:ok</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">File</span><span style="color:#000;font-weight:bold">.</span>write!(input_path, video)
+</span></span></code></pre></div><video class="border" width="640" controls>
+  <source src="https://upload.wikimedia.org/wikipedia/commons/transcoded/8/81/Beachfront_B-Roll-_Fireworks_%28Free_to_Use_HD_Stock_Video_Footage%29.webm/Beachfront_B-Roll-_Fireworks_%28Free_to_Use_HD_Stock_Video_Footage%29.webm.480p.vp9.webm" type="video/webm">
+</video>
+<p><em>Beachfront B-Roll- Fireworks from <a href="https://en.wikipedia.org/wiki/File:Beachfront_B-Roll-_Fireworks_(Free_to_Use_HD_Stock_Video_Footage).webm">wikimedia</a></em></p>
+<p>We will be using the mighty <a href="https://ffmpeg.org"><code>ffmpeg</code></a> to add watermark. You need to install it if you haven&rsquo;t already. Let&rsquo;s create a helper module to wrap ffmpeg.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">FFmpeg</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@moduledoc</span> <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">  Constructs and returns ffmpeg command as list of string
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">  &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@doc</span> <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">  Returns ffmpeg command for adding watermark to the input video
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">  &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@spec</span> watermark(<span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>t(), <span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>t(), <span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>t(), map()) <span style="color:#000;font-weight:bold">::</span> [<span style="color:#458;font-weight:bold">String</span><span style="color:#000;font-weight:bold">.</span>t()]
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">def</span> watermark(input, text, output, text_opts \\ []) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic"># add text with white color font and transparency of 0.5</span>
+</span></span><span style="display:flex;"><span>    filter_graph <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>      [
+</span></span><span style="display:flex;"><span>        <span style="color:#990073">text</span>: <span style="color:#d14">&#34;&#39;</span><span style="color:#d14">#{</span>text<span style="color:#d14">}</span><span style="color:#d14">&#39;&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#990073">fontsize</span>: text_opts[<span style="color:#990073">:fontsize</span>] <span style="color:#000;font-weight:bold">||</span> <span style="color:#099">80</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#990073">fontcolor</span>: <span style="color:#d14">&#34;white&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#990073">x</span>: text_opts[<span style="color:#990073">:x</span>] <span style="color:#000;font-weight:bold">||</span> <span style="color:#099">300</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#990073">y</span>: text_opts[<span style="color:#990073">:y</span>] <span style="color:#000;font-weight:bold">||</span> <span style="color:#099">350</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#990073">alpha</span>: text_opts[<span style="color:#990073">:alpha</span>] <span style="color:#000;font-weight:bold">||</span> <span style="color:#099">0.5</span>
+</span></span><span style="display:flex;"><span>      ]
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>map(<span style="color:#000;font-weight:bold">fn</span> {k, v} <span style="color:#000;font-weight:bold">-&gt;</span> <span style="color:#d14">&#34;</span><span style="color:#d14">#{</span>k<span style="color:#d14">}</span><span style="color:#d14">=</span><span style="color:#d14">#{</span>v<span style="color:#d14">}</span><span style="color:#d14">&#34;</span> <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>join(<span style="color:#d14">&#34;:&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    [
+</span></span><span style="display:flex;"><span>      <span style="color:#d14">&#34;ffmpeg&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#d14">&#34;-y&#34;</span>,
+</span></span><span style="display:flex;"><span>      [<span style="color:#d14">&#34;-i&#34;</span>, input],
+</span></span><span style="display:flex;"><span>      [<span style="color:#d14">&#34;-vf&#34;</span>, <span style="color:#d14">&#34;drawtext=</span><span style="color:#d14">#{</span>filter_graph<span style="color:#d14">}</span><span style="color:#d14">&#34;</span>],
+</span></span><span style="display:flex;"><span>      <span style="color:#d14">~w(-codec:a copy)</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#998;font-style:italic"># output should be MP4</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#d14">~w(-f mp4)</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#998;font-style:italic"># add flag to fix error while reading the stream</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#d14">~w(-movflags empty_moov)</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#998;font-style:italic"># output location</span>
+</span></span><span style="display:flex;"><span>      output
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">|&gt;</span> <span style="color:#458;font-weight:bold">List</span><span style="color:#000;font-weight:bold">.</span>flatten()
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span></code></pre></div><p>The command arguments for watermark might look intimidating, but don&rsquo;t panic! ffmpeg details are not important for he demonstration.</p>
+<p>Let&rsquo;s have a look at it using the sample video we have.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>output_path <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Path</span><span style="color:#000;font-weight:bold">.</span>join(tmp, <span style="color:#d14">&#34;output.mp4&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#d14">&#34;ffmpeg&#34;</span> <span style="color:#000;font-weight:bold">|</span> args] <span style="color:#000;font-weight:bold">=</span> cmd <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">FFmpeg</span><span style="color:#000;font-weight:bold">.</span>watermark(input_path, <span style="color:#d14">&#34;Fireworks&#34;</span>, output_path, <span style="color:#990073">x</span>: <span style="color:#099">220</span>, <span style="color:#990073">y</span>: <span style="color:#099">30</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># print the constructed ffmpeg command</span>
+</span></span><span style="display:flex;"><span><span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>puts(<span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>join(cmd, <span style="color:#d14">&#34; &#34;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># generate the video, this might take a while</span>
+</span></span><span style="display:flex;"><span>{<span style="color:#d14">&#34;&#34;</span>, <span style="color:#099">0</span>} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">System</span><span style="color:#000;font-weight:bold">.</span>cmd(<span style="color:#458;font-weight:bold">System</span><span style="color:#000;font-weight:bold">.</span>find_executable(<span style="color:#d14">&#34;ffmpeg&#34;</span>), args)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>ffmpeg -y -i /var/folders/7m/j68yhtjd6jq7nsks6xd6nz0h0000gn/T/input.webm -vf drawtext=text=&#39;Fireworks&#39;:fontsize=80:fontcolor=white:x=220:y=30:alpha=0.5 -codec:a copy -f mp4 -movflags empty_moov /var/folders/7m/j68yhtjd6jq7nsks6xd6nz0h0000gn/T/output.mp4
+</span></span></code></pre></div><video class="border" width="640" controls>
+  <source src="/videos/video-streaming-in-elixir/output.mp4" type="video/webm">
+</video>
+<p><em>output.mp4</em></p>
+<h2 id="streaming-output">Streaming Output</h2>
+<p>Generating video using <code>System.cmd</code> works, but it leave us with temporary files. Now we have additional responsibility of managing file system. Another issue is that the generated video is not available for immediate consumption. We have to wait for the encoding to finish before we use. All that is to say we should get rid of <code>System.cmd</code> and use <code>ExCmd</code> to achieve true streaming.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># `pipe:0` : read input from STDIN</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># `-` : write output to STDOUT</span>
+</span></span><span style="display:flex;"><span>cmd <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">FFmpeg</span><span style="color:#000;font-weight:bold">.</span>watermark(<span style="color:#d14">&#34;pipe:0&#34;</span>, <span style="color:#d14">&#34;Fireworks&#34;</span>, <span style="color:#d14">&#34;-&#34;</span>, <span style="color:#990073">x</span>: <span style="color:#099">220</span>, <span style="color:#990073">y</span>: <span style="color:#099">30</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># ExCmd returns output as lazy stream. You can also use `Exile` instead of `ExCmd` here</span>
+</span></span><span style="display:flex;"><span>output_stream <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">ExCmd</span><span style="color:#000;font-weight:bold">.</span>stream!(cmd, <span style="color:#990073">input</span>: video)
+</span></span></code></pre></div><h2 id="streaming-input">Streaming Input</h2>
+<p>ExCmd also supports input streaming. Anything which implements <code>Enumerable</code> or <code>Collectable</code> protocols can be used. <code>Req</code> HTTP Client supports streaming response body <em>into</em> a <code>Collectable</code>, so we can simply leverage that to feed input video to ffmpeg.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>output_stream <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#458;font-weight:bold">ExCmd</span><span style="color:#000;font-weight:bold">.</span>stream!(cmd,
+</span></span><span style="display:flex;"><span>    <span style="color:#990073">input</span>: <span style="color:#000;font-weight:bold">fn</span> ex_cmd_sink <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#998;font-style:italic"># Req pushes response (video) body segments to ex_cmd in chunks</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#458;font-weight:bold">Req</span><span style="color:#000;font-weight:bold">.</span>get!(video_url, <span style="color:#990073">into</span>: ex_cmd_sink)
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">end</span>)
+</span></span></code></pre></div><h2 id="http-server">HTTP Server</h2>
+<p>With that, the only thing remaining is to set up a HTTP server. We use <code>Plug</code> to create a <code>GET /watermark</code> route. This route accepts a video URL and watermark text as query parameters and returns the generated video as a stream using chunked response.</p>
+<h3 id="streaming-output-1">Streaming Output</h3>
+<p>Achieving streaming response can be done using <code>Plug.Conn.chunk/2</code>, allowing us to push chunks as soon as they become available from the ffmpeg command.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">defmodule</span> <span style="color:#458;font-weight:bold">FFmpegServer</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#008080">@moduledoc</span> <span style="color:#d14">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">  HTTP server for demonstrating FFmpeg streaming
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">  &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">use</span> <span style="color:#458;font-weight:bold">Plug.Router</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">require</span> <span style="color:#458;font-weight:bold">Logger</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  plug(<span style="color:#458;font-weight:bold">Plug.Parsers</span>, <span style="color:#990073">parsers</span>: [], <span style="color:#990073">pass</span>: [<span style="color:#d14">&#34;*/*&#34;</span>])
+</span></span><span style="display:flex;"><span>  plug(<span style="color:#990073">:match</span>)
+</span></span><span style="display:flex;"><span>  plug(<span style="color:#990073">:dispatch</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  get <span style="color:#d14">&#34;/watermark&#34;</span> <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    %{<span style="color:#d14">&#34;video_url&#34;</span> <span style="color:#000;font-weight:bold">=&gt;</span> video_url, <span style="color:#d14">&#34;text&#34;</span> <span style="color:#000;font-weight:bold">=&gt;</span> text} <span style="color:#000;font-weight:bold">=</span> conn<span style="color:#000;font-weight:bold">.</span>params
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    cmd <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">FFmpeg</span><span style="color:#000;font-weight:bold">.</span>watermark(<span style="color:#d14">&#34;pipe:0&#34;</span>, text, <span style="color:#d14">&#34;-&#34;</span>, <span style="color:#990073">x</span>: <span style="color:#099">20</span>, <span style="color:#990073">y</span>: <span style="color:#099">20</span>)
+</span></span><span style="display:flex;"><span>    output_stream <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">ExCmd</span><span style="color:#000;font-weight:bold">.</span>stream!(cmd, <span style="color:#990073">input</span>: <span style="color:#000;font-weight:bold">&amp;</span><span style="color:#458;font-weight:bold">Req</span><span style="color:#000;font-weight:bold">.</span>get!(video_url, <span style="color:#990073">into</span>: <span style="color:#800080">&amp;1</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    conn <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>      conn
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> put_resp_content_type(<span style="color:#d14">&#34;video/mp4&#34;</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">|&gt;</span> send_chunked(<span style="color:#099">200</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#458;font-weight:bold">Enum</span><span style="color:#000;font-weight:bold">.</span>reduce_while(output_stream, conn, <span style="color:#000;font-weight:bold">fn</span> chunk, conn <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">case</span> chunk(conn, chunk) <span style="color:#000;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>        {<span style="color:#990073">:ok</span>, conn} <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#458;font-weight:bold">Logger</span><span style="color:#000;font-weight:bold">.</span>debug(<span style="color:#d14">&#34;Sent </span><span style="color:#d14">#{</span><span style="color:#458;font-weight:bold">IO</span><span style="color:#000;font-weight:bold">.</span>iodata_length(chunk)<span style="color:#d14">}</span><span style="color:#d14"> bytes&#34;</span>)
+</span></span><span style="display:flex;"><span>          {<span style="color:#990073">:cont</span>, conn}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        {<span style="color:#990073">:error</span>, <span style="color:#990073">:closed</span>} <span style="color:#000;font-weight:bold">-&gt;</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#458;font-weight:bold">Logger</span><span style="color:#000;font-weight:bold">.</span>debug(<span style="color:#d14">&#34;Connection closed&#34;</span>)
+</span></span><span style="display:flex;"><span>          {<span style="color:#990073">:halt</span>, conn}
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">end</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">end</span>
+</span></span></code></pre></div><p>Start the server at port <code>8989</code></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-elixir" data-lang="elixir"><span style="display:flex;"><span>webserver <span style="color:#000;font-weight:bold">=</span> {<span style="color:#458;font-weight:bold">Bandit</span>, <span style="color:#990073">plug</span>: <span style="color:#458;font-weight:bold">FFmpegServer</span>, <span style="color:#990073">scheme</span>: <span style="color:#990073">:http</span>, <span style="color:#990073">port</span>: <span style="color:#099">8989</span>}
+</span></span><span style="display:flex;"><span>{<span style="color:#990073">:ok</span>, supervisor} <span style="color:#000;font-weight:bold">=</span> <span style="color:#458;font-weight:bold">Supervisor</span><span style="color:#000;font-weight:bold">.</span>start_link([webserver], <span style="color:#990073">strategy</span>: <span style="color:#990073">:one_for_one</span>)
+</span></span></code></pre></div><p>Let&rsquo;s test it out in shell using <code>curl</code>. You can even directly play the video stream using <code>ffplay</code>!</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  --get <span style="color:#d14">&#39;http://127.0.0.1:8989/watermark&#39;</span> <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  --data-urlencode <span style="color:#d14">&#39;text=FFmpeg Rocks!&#39;</span> <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  --data-urlencode <span style="color:#d14">&#39;video_url=https://upload.wikimedia.org/wikipedia/commons/transcoded/8/81/Beachfront_B-Roll-_Fireworks_%28Free_to_Use_HD_Stock_Video_Footage%29.webm/Beachfront_B-Roll-_Fireworks_%28Free_to_Use_HD_Stock_Video_Footage%29.webm.480p.vp9.webm&#39;</span> <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  | ffplay -
+</span></span></code></pre></div><img class="border" src="/images/video-streaming-in-elixir/8e67e1919cf7590a726402b59f923f8913c4efdf.jpeg">
+<p>If you notice the server logs, we can see that video chunks are fetched, encoded, and pushed, simultaneously on the fly!</p>
+<p>Another noteworthy feature is that if the connection drops midway. For example, close <code>ffplay</code> playback by pressing <code>Ctrl+C</code>, then the streaming pipeline halts gracefully, avoiding the wasteful encoding of the entire video.</p>
+
+
+
+</div>
+    </div>
+</body>
+
+</html>

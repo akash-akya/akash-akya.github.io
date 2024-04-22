@@ -6,7 +6,17 @@
     <description>Recent content in Akash on memdump</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 25 Mar 2024 20:34:47 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 22 Apr 2024 22:26:04 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Video Streaming in Elixir</title>
+      <link>https://akash-akya.github.io/posts/video-streaming-in-elixir/</link>
+      <pubDate>Mon, 22 Apr 2024 22:26:04 +0530</pubDate>
+      
+      <guid>https://akash-akya.github.io/posts/video-streaming-in-elixir/</guid>
+      <description>This is blog version of the Livebook. You can try interactive nootbook here
+Mix.install([ {:req, &amp;#34;~&amp;gt; 0.4.5&amp;#34;}, {:ex_cmd, &amp;#34;~&amp;gt; 0.10&amp;#34;}, {:plug, &amp;#34;~&amp;gt; 1.15&amp;#34;}, {:kino, &amp;#34;~&amp;gt; 0.11&amp;#34;}, {:bandit, &amp;#34;~&amp;gt; 1.1&amp;#34;} ]) Introduction Port is standard way to run external programs in Elixir and Erlang. However, communicating with spawned external programs over stdio can lead to various issues. ExCmd and Exile libraries tries to address these issues. On top of that they provide beloved streaming capabilities.</description>
+    </item>
+    
     <item>
       <title>Document Auto Rotation</title>
       <link>https://akash-akya.github.io/posts/document-auto-rotation/</link>
