@@ -432,48 +432,97 @@
     document.getElementById('tspan22').textContent = this.value;
   });
 
+  // Fetch Google Fonts CSS, download each font file, and return CSS with
+  // embedded base64 data URIs so exported SVGs render fonts standalone.
+  var _fontCSSCache = null;
+  function getEmbeddedFontCSS() {
+    if (_fontCSSCache) return _fontCSSCache;
+    _fontCSSCache = fetch('https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@400;500;600;700;800&family=Noto+Serif+Kannada:wght@400;500;600;700&display=swap')
+      .then(function(r) { return r.text(); })
+      .then(function(css) {
+        var urlRe = /url\((https:\/\/[^)]+)\)/g;
+        var urls = [], m;
+        while ((m = urlRe.exec(css)) !== null) urls.push(m[1]);
+        urls = urls.filter(function(u, i) { return urls.indexOf(u) === i; });
+        return Promise.all(urls.map(function(u) {
+          return fetch(u).then(function(r) { return r.blob(); }).then(function(blob) {
+            return new Promise(function(resolve) {
+              var reader = new FileReader();
+              reader.onload = function() { resolve({ url: u, dataUri: reader.result }); };
+              reader.readAsDataURL(blob);
+            });
+          });
+        })).then(function(results) {
+          results.forEach(function(r) {
+            css = css.split(r.url).join(r.dataUri);
+          });
+          return css;
+        });
+      });
+    return _fontCSSCache;
+  }
+
+  // Preload fonts in the background on page load
+  getEmbeddedFontCSS();
+
+  function serializeSVGWithFonts(callback) {
+    getEmbeddedFontCSS().then(function(fontCSS) {
+      var svg = document.querySelector('.panel-right svg');
+      var clone = svg.cloneNode(true);
+      var styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+      styleEl.textContent = fontCSS;
+      clone.insertBefore(styleEl, clone.firstChild);
+      var serializer = new XMLSerializer();
+      callback(serializer.serializeToString(clone));
+    });
+  }
+
   document.getElementById('downloadBtn').addEventListener('click', function() {
-    const svg = document.querySelector('.panel-right svg');
-    const serializer = new XMLSerializer();
-    const svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + serializer.serializeToString(svg);
-    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'poster.svg';
-    a.click();
-    URL.revokeObjectURL(url);
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Preparing…';
+    serializeSVGWithFonts(function(svgString) {
+      svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + svgString;
+      var blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'poster.svg';
+      a.click();
+      URL.revokeObjectURL(url);
+      btn.disabled = false;
+      btn.textContent = 'Download SVG';
+    });
   });
 
   function renderToCanvas(callback) {
-    const DPI = 300;
-    const MM_TO_IN = 1 / 25.4;
-    const widthPx = Math.round(210 * MM_TO_IN * DPI);
-    const heightPx = Math.round(297 * MM_TO_IN * DPI);
+    var DPI = 300;
+    var MM_TO_IN = 1 / 25.4;
+    var widthPx = Math.round(210 * MM_TO_IN * DPI);
+    var heightPx = Math.round(297 * MM_TO_IN * DPI);
 
-    const svg = document.querySelector('.panel-right svg');
-    const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svg);
-    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
+    serializeSVGWithFonts(function(svgString) {
+      var blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
 
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      canvas.width = widthPx;
-      canvas.height = heightPx;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, widthPx, heightPx);
-      ctx.drawImage(img, 0, 0, widthPx, heightPx);
-      URL.revokeObjectURL(url);
-      callback(null, canvas);
-    };
-    img.onerror = function() {
-      URL.revokeObjectURL(url);
-      callback(new Error('Render failed'));
-    };
-    img.src = url;
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        canvas.width = widthPx;
+        canvas.height = heightPx;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, widthPx, heightPx);
+        ctx.drawImage(img, 0, 0, widthPx, heightPx);
+        URL.revokeObjectURL(url);
+        callback(null, canvas);
+      };
+      img.onerror = function() {
+        URL.revokeObjectURL(url);
+        callback(new Error('Render failed'));
+      };
+      img.src = url;
+    });
   }
 
   function canvasToJpgBlob(canvas, callback) {
