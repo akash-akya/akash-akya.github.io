@@ -2,20 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>ExCmd on memdump</title>
-    <link>https://akash-akya.github.io/tags/excmd/</link>
+    <link>https://akashh.in/tags/excmd/</link>
     <description>Recent content in ExCmd on memdump</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 22 Apr 2024 22:26:04 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/excmd/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 22 Apr 2024 22:26:04 +0530</lastBuildDate>
+    <atom:link href="https://akashh.in/tags/excmd/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Video Streaming in Elixir</title>
-      <link>https://akash-akya.github.io/posts/video-streaming-in-elixir/</link>
+      <link>https://akashh.in/posts/video-streaming-in-elixir/</link>
       <pubDate>Mon, 22 Apr 2024 22:26:04 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/video-streaming-in-elixir/</guid>
-      <description>This is blog version of the Livebook. You can try interactive nootbook here
-Mix.install([ {:req, &amp;#34;~&amp;gt; 0.4.5&amp;#34;}, {:ex_cmd, &amp;#34;~&amp;gt; 0.10&amp;#34;}, {:plug, &amp;#34;~&amp;gt; 1.15&amp;#34;}, {:kino, &amp;#34;~&amp;gt; 0.11&amp;#34;}, {:bandit, &amp;#34;~&amp;gt; 1.1&amp;#34;} ]) Introduction Port is standard way to run external programs in Elixir and Erlang. However, communicating with spawned external programs over stdio can lead to various issues. ExCmd and Exile libraries tries to address these issues. On top of that they provide beloved streaming capabilities.</description>
+      <guid>https://akashh.in/posts/video-streaming-in-elixir/</guid>
+      <description>&lt;p&gt;&lt;em&gt;This is blog version of the Livebook. You can try interactive nootbook here&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://livebook.dev/run/?url=https://github.com/akash-akya/exile/blob/master/livebooks/ffmpeg-streaming-server.livemd&#34;&gt;&lt;img src=&#34;https://livebook.dev/badge/v1/blue.svg&#34; alt=&#34;Run in Livebook&#34;&gt;&lt;/a&gt;&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#458;font-weight:bold&#34;&gt;Mix&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;.&lt;/span&gt;install([&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:req&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 0.4.5&amp;#34;&lt;/span&gt;},&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:ex_cmd&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 0.10&amp;#34;&lt;/span&gt;},&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:plug&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 1.15&amp;#34;&lt;/span&gt;},&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:kino&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 0.11&amp;#34;&lt;/span&gt;},&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:bandit&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 1.1&amp;#34;&lt;/span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;])&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://hexdocs.pm/elixir/Port.html&#34;&gt;&lt;code&gt;Port&lt;/code&gt;&lt;/a&gt; is standard way to run external programs in Elixir and Erlang. However, communicating with spawned external programs over stdio can lead to &lt;a href=&#34;https://github.com/akash-akya/exile/blob/master/README.md#port-io-issue&#34;&gt;various issues&lt;/a&gt;. &lt;a href=&#34;https://hexdocs.pm/ex_cmd/readme.html&#34;&gt;&lt;code&gt;ExCmd&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://hexdocs.pm/exile/readme.html&#34;&gt;&lt;code&gt;Exile&lt;/code&gt;&lt;/a&gt; libraries tries to address these issues. On top of that they provide beloved streaming capabilities. Using them we can stream input and output &lt;em&gt;all the way down&lt;/em&gt; to host machine.&lt;/p&gt;</description>
     </item>
-    
   </channel>
 </rss>

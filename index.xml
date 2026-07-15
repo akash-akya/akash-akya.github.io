@@ -2,162 +2,123 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Akash on memdump</title>
-    <link>https://akash-akya.github.io/</link>
+    <link>https://akashh.in/</link>
     <description>Recent content in Akash on memdump</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 22 Apr 2024 22:26:04 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 22 Apr 2024 22:26:04 +0530</lastBuildDate>
+    <atom:link href="https://akashh.in/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Video Streaming in Elixir</title>
-      <link>https://akash-akya.github.io/posts/video-streaming-in-elixir/</link>
+      <link>https://akashh.in/posts/video-streaming-in-elixir/</link>
       <pubDate>Mon, 22 Apr 2024 22:26:04 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/video-streaming-in-elixir/</guid>
-      <description>This is blog version of the Livebook. You can try interactive nootbook here
-Mix.install([ {:req, &amp;#34;~&amp;gt; 0.4.5&amp;#34;}, {:ex_cmd, &amp;#34;~&amp;gt; 0.10&amp;#34;}, {:plug, &amp;#34;~&amp;gt; 1.15&amp;#34;}, {:kino, &amp;#34;~&amp;gt; 0.11&amp;#34;}, {:bandit, &amp;#34;~&amp;gt; 1.1&amp;#34;} ]) Introduction Port is standard way to run external programs in Elixir and Erlang. However, communicating with spawned external programs over stdio can lead to various issues. ExCmd and Exile libraries tries to address these issues. On top of that they provide beloved streaming capabilities.</description>
+      <guid>https://akashh.in/posts/video-streaming-in-elixir/</guid>
+      <description>&lt;p&gt;&lt;em&gt;This is blog version of the Livebook. You can try interactive nootbook here&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://livebook.dev/run/?url=https://github.com/akash-akya/exile/blob/master/livebooks/ffmpeg-streaming-server.livemd&#34;&gt;&lt;img src=&#34;https://livebook.dev/badge/v1/blue.svg&#34; alt=&#34;Run in Livebook&#34;&gt;&lt;/a&gt;&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#458;font-weight:bold&#34;&gt;Mix&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;.&lt;/span&gt;install([&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:req&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 0.4.5&amp;#34;&lt;/span&gt;},&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:ex_cmd&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 0.10&amp;#34;&lt;/span&gt;},&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:plug&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 1.15&amp;#34;&lt;/span&gt;},&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:kino&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 0.11&amp;#34;&lt;/span&gt;},&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:bandit&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 1.1&amp;#34;&lt;/span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;])&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://hexdocs.pm/elixir/Port.html&#34;&gt;&lt;code&gt;Port&lt;/code&gt;&lt;/a&gt; is standard way to run external programs in Elixir and Erlang. However, communicating with spawned external programs over stdio can lead to &lt;a href=&#34;https://github.com/akash-akya/exile/blob/master/README.md#port-io-issue&#34;&gt;various issues&lt;/a&gt;. &lt;a href=&#34;https://hexdocs.pm/ex_cmd/readme.html&#34;&gt;&lt;code&gt;ExCmd&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://hexdocs.pm/exile/readme.html&#34;&gt;&lt;code&gt;Exile&lt;/code&gt;&lt;/a&gt; libraries tries to address these issues. On top of that they provide beloved streaming capabilities. Using them we can stream input and output &lt;em&gt;all the way down&lt;/em&gt; to host machine.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Document Auto Rotation</title>
-      <link>https://akash-akya.github.io/posts/document-auto-rotation/</link>
+      <link>https://akashh.in/posts/document-auto-rotation/</link>
       <pubDate>Mon, 25 Mar 2024 20:34:47 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/document-auto-rotation/</guid>
-      <description>This is blog version of the Livebook. You can try interactive nootbook here
-In this post, we&amp;rsquo;ll explore how to correct text image rotation using image processing methods such as Fourier Transformation, complex planes, and basic arithmetic operations.
-This tutorial is heavily based on libvips blog post and a Stack Overflow answer.
-Setup alias Vix.Vips.Image alias Vix.Vips.Operation # import convenience math operators `+`, `-`, `*` etc. use Vix.Operator {:ok, doc} = Image.</description>
+      <guid>https://akashh.in/posts/document-auto-rotation/</guid>
+      <description>&lt;p&gt;&lt;em&gt;This is blog version of the Livebook. You can try interactive nootbook here&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Fakash-akya%2Fvix%2Fblob%2Fmaster%2Flivebooks%2Fauto_correct_rotation.livemd&#34;&gt;&lt;img src=&#34;https://livebook.dev/badge/v1/blue.svg&#34; alt=&#34;Run in Livebook&#34;&gt;&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;In this post, we&amp;rsquo;ll explore how to correct text image rotation using image processing methods such as Fourier Transformation, complex planes, and basic arithmetic operations.&lt;/p&gt;&#xA;&lt;p&gt;This tutorial is heavily based on &lt;a href=&#34;https://libvips.blogspot.com/2015/11/fancy-transforms.html&#34;&gt;libvips blog post&lt;/a&gt;&#xA;and &lt;a href=&#34;https://stackoverflow.com/questions/33698068/align-text-for-ocr/33707537#33707537&#34;&gt;a Stack Overflow answer&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;h2 id=&#34;setup&#34;&gt;Setup&lt;/h2&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#458;font-weight:bold&#34;&gt;Vix.Vips.Image&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;alias&lt;/span&gt; &lt;span style=&#34;color:#458;font-weight:bold&#34;&gt;Vix.Vips.Operation&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#998;font-style:italic&#34;&gt;# import convenience math operators `+`, `-`, `*` etc.&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;use&lt;/span&gt; &lt;span style=&#34;color:#458;font-weight:bold&#34;&gt;Vix.Operator&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{&lt;span style=&#34;color:#990073&#34;&gt;:ok&lt;/span&gt;, doc} &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#458;font-weight:bold&#34;&gt;Image&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;.&lt;/span&gt;new_from_file(&lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;test-image.png&amp;#34;&lt;/span&gt;)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#998;font-style:italic&#34;&gt;# convert 4 channel/band PNG image to black &amp;amp; white&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;doc &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#458;font-weight:bold&#34;&gt;Operation&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;.&lt;/span&gt;colourspace!(img, &lt;span style=&#34;color:#990073&#34;&gt;:VIPS_INTERPRETATION_B_W&lt;/span&gt;)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#998;font-style:italic&#34;&gt;# img[1] is alpha band, skip that&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;doc &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;=&lt;/span&gt; img[&lt;span style=&#34;color:#099&#34;&gt;0&lt;/span&gt;]&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;img class=&#34;border&#34; src=&#34;https://akashh.in/images/document-auto-rotation/doc.png&#34; alt=&#34;Test Image&#34;&gt;&#xA;&lt;h2 id=&#34;fourier-transformation&#34;&gt;Fourier Transformation&lt;/h2&gt;&#xA;&lt;p&gt;An image can be expressed as sum of sine and cosine waves of varying&#xA;magnitude, frequency and phase. Fourier Transform is an operation which breaks down an image into its sine and cosine components, which is crucial for many image processing tasks.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Motorcycle Notes: Navigation</title>
-      <link>https://akash-akya.github.io/posts/motorcycle-notes-2/</link>
+      <link>https://akashh.in/posts/motorcycle-notes-2/</link>
       <pubDate>Fri, 01 Sep 2023 21:37:50 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/motorcycle-notes-2/</guid>
+      <guid>https://akashh.in/posts/motorcycle-notes-2/</guid>
       <description>Using a secondary phone for navigation for the bike rides</description>
     </item>
-    
     <item>
       <title>Motorcycle Notes: Tyre Pressure</title>
-      <link>https://akash-akya.github.io/posts/motorcycle-notes/</link>
+      <link>https://akashh.in/posts/motorcycle-notes/</link>
       <pubDate>Sun, 27 Aug 2023 21:54:09 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/motorcycle-notes/</guid>
+      <guid>https://akashh.in/posts/motorcycle-notes/</guid>
       <description>I bought Honda CB300R last December. These are the few things I learned after spending time with it.</description>
     </item>
-    
     <item>
       <title>Creating Rainbow using Vix 🌈</title>
-      <link>https://akash-akya.github.io/posts/creating-rainbow-in-vix/</link>
+      <link>https://akashh.in/posts/creating-rainbow-in-vix/</link>
       <pubDate>Mon, 17 Apr 2023 16:46:49 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/creating-rainbow-in-vix/</guid>
-      <description>This is a blog version of the Livebook. You can try the interactive version here
-Mix.install([ {:vix, &amp;#34;~&amp;gt; 0.17.0&amp;#34;}, {:kino, &amp;#34;~&amp;gt; 0.9.1&amp;#34;} ]) Introduction Libvips provides over 300 image processing operations, but getting the intuition behind what is possible and how to combine the primitive image processing operations can be a challenging.
-With this notebook we look into some and of the core operations while trying to achieve a simple goal, which is to generate a rainbow 🌈.</description>
+      <guid>https://akashh.in/posts/creating-rainbow-in-vix/</guid>
+      <description>&lt;p&gt;This is a blog version of the Livebook. You can try the interactive version here&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Fakash-akya%2Fvix%2Fblob%2Fmaster%2Flivebooks%2Frainbow.livemd&#34;&gt;&lt;img src=&#34;https://livebook.dev/badge/v1/blue.svg&#34; alt=&#34;Run in Livebook&#34;&gt;&lt;/a&gt;&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-elixir&#34; data-lang=&#34;elixir&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#458;font-weight:bold&#34;&gt;Mix&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;.&lt;/span&gt;install([&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:vix&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 0.17.0&amp;#34;&lt;/span&gt;},&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  {&lt;span style=&#34;color:#990073&#34;&gt;:kino&lt;/span&gt;, &lt;span style=&#34;color:#d14&#34;&gt;&amp;#34;~&amp;gt; 0.9.1&amp;#34;&lt;/span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;])&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;Libvips provides over 300 image processing operations, but getting the&#xA;intuition behind what is possible and how to combine the primitive&#xA;image processing operations can be a challenging.&lt;/p&gt;&#xA;&lt;p&gt;With this notebook we look into some and of the core operations while&#xA;trying to achieve a simple goal, which is to generate a rainbow&#xA;🌈. Rainbow should have the half-circular arch, there should be a&#xA;smooth blend between the colors.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Composable Collectable in Elixir</title>
-      <link>https://akash-akya.github.io/posts/composable-collectable/</link>
+      <link>https://akashh.in/posts/composable-collectable/</link>
       <pubDate>Sun, 14 Nov 2021 08:47:00 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/composable-collectable/</guid>
+      <guid>https://akashh.in/posts/composable-collectable/</guid>
       <description>Building composable collectable for fun and profit</description>
     </item>
-    
     <item>
       <title>Art in Old Textbook</title>
-      <link>https://akash-akya.github.io/posts/old_textbook_art/</link>
+      <link>https://akashh.in/posts/old_textbook_art/</link>
       <pubDate>Thu, 06 May 2021 21:19:30 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/old_textbook_art/</guid>
+      <guid>https://akashh.in/posts/old_textbook_art/</guid>
       <description>Photo-realistic art form old textbook</description>
     </item>
-    
     <item>
       <title>ಗುಂಡನ ಫಿಲಾಸಫಿ</title>
-      <link>https://akash-akya.github.io/posts/gundana_philosophy/</link>
+      <link>https://akashh.in/posts/gundana_philosophy/</link>
       <pubDate>Tue, 16 Feb 2021 22:40:57 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/gundana_philosophy/</guid>
+      <guid>https://akashh.in/posts/gundana_philosophy/</guid>
       <description>ಕಿರುಕಥೆ</description>
     </item>
-    
     <item>
       <title>ಕರ್ಣಾಟ ಭಾರತ ಕಥಾಮಂಜರಿಯ ಮನನ: ಕರ್ಣನ ಜನನ ಮತ್ತು ಬಾಲ್ಯ</title>
-      <link>https://akash-akya.github.io/posts/kvb_karnana_janana/</link>
+      <link>https://akashh.in/posts/kvb_karnana_janana/</link>
       <pubDate>Tue, 08 Sep 2020 23:49:19 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/kvb_karnana_janana/</guid>
+      <guid>https://akashh.in/posts/kvb_karnana_janana/</guid>
       <description>ನನಗಿಷ್ಟವಾದ ಆಯ್ದ ಭಾಗಗಳು</description>
     </item>
-    
     <item>
       <title>Better Kubectl Interaction</title>
-      <link>https://akash-akya.github.io/posts/better-kubectl-interaction/</link>
+      <link>https://akashh.in/posts/better-kubectl-interaction/</link>
       <pubDate>Fri, 14 Aug 2020 22:40:57 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/better-kubectl-interaction/</guid>
+      <guid>https://akashh.in/posts/better-kubectl-interaction/</guid>
       <description>It&amp;rsquo;s just about using &lt;code&gt;fzf&lt;/code&gt; with &lt;code&gt;kubectl&lt;/code&gt;</description>
     </item>
-    
     <item>
       <title>Elixir GitHub Action for Windows</title>
-      <link>https://akash-akya.github.io/posts/setting_up_elixir_in_github_actions_for_windows/</link>
+      <link>https://akashh.in/posts/setting_up_elixir_in_github_actions_for_windows/</link>
       <pubDate>Sun, 09 Aug 2020 15:00:00 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/setting_up_elixir_in_github_actions_for_windows/</guid>
+      <guid>https://akashh.in/posts/setting_up_elixir_in_github_actions_for_windows/</guid>
       <description>Setting up Elixir in github actions for windows</description>
     </item>
-    
     <item>
       <title>Navigating Elixir Standard Library in Emacs</title>
-      <link>https://akash-akya.github.io/posts/elixir_source_in_emacs/</link>
+      <link>https://akashh.in/posts/elixir_source_in_emacs/</link>
       <pubDate>Mon, 13 May 2019 16:26:24 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/elixir_source_in_emacs/</guid>
+      <guid>https://akashh.in/posts/elixir_source_in_emacs/</guid>
       <description>Getting goto-definition work for Elixir core functions in Emacs</description>
     </item>
-    
     <item>
       <title>Atoms in Elixir</title>
-      <link>https://akash-akya.github.io/posts/atoms_in_elixir/</link>
+      <link>https://akashh.in/posts/atoms_in_elixir/</link>
       <pubDate>Tue, 01 Jan 2019 22:08:03 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/atoms_in_elixir/</guid>
+      <guid>https://akashh.in/posts/atoms_in_elixir/</guid>
       <description>Exploring Atoms in Elixir with REPL</description>
     </item>
-    
     <item>
       <title>ಆ ದಿನಗಳು</title>
-      <link>https://akash-akya.github.io/posts/college-days/</link>
+      <link>https://akashh.in/posts/college-days/</link>
       <pubDate>Mon, 11 Jun 2018 23:54:51 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/college-days/</guid>
+      <guid>https://akashh.in/posts/college-days/</guid>
       <description>ಉಜಿರೆಯ ಕಾಲೇಜಿನ ದಿನಗಳ ನೆನಪುಗಳು</description>
     </item>
-    
     <item>
       <title>Programming Languages for Teaching</title>
-      <link>https://akash-akya.github.io/posts/programming-for-teaching/</link>
+      <link>https://akashh.in/posts/programming-for-teaching/</link>
       <pubDate>Mon, 11 Jun 2018 11:34:51 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/posts/programming-for-teaching/</guid>
+      <guid>https://akashh.in/posts/programming-for-teaching/</guid>
       <description>Dated rant about programming and limited understanding of teaching</description>
     </item>
-    
     <item>
       <title>Akash</title>
-      <link>https://akash-akya.github.io/about/</link>
+      <link>https://akashh.in/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://akash-akya.github.io/about/</guid>
-      <description>Hey there, I&amp;rsquo;m Akash – a passionate programmer and devourer of creative works.
-After working with a few large and small companies, I am currently operating as a Freelance Software Engineer based in Bengaluru.
-It all began when I delved into the depths of programming while tinkering with Android Firmware, and I&amp;rsquo;ve been stuck in this world ever since. You&amp;rsquo;ll often find me engrossed in my Open Source projects. Some of these projects address real-world needs, while others are born purely out of the joy of building and the curiosity of &amp;ldquo;What If.</description>
+      <guid>https://akashh.in/about/</guid>
+      <description>&lt;p&gt;Hey there, I&amp;rsquo;m Akash – a passionate programmer and devourer of creative works.&lt;/p&gt;&#xA;&lt;p&gt;After working with a few large and small companies, I am currently operating as a Freelance Software Engineer based in Bengaluru.&lt;/p&gt;&#xA;&lt;p&gt;It all began when I delved into the depths of programming while tinkering with Android Firmware, and I&amp;rsquo;ve been stuck in this world ever since. You&amp;rsquo;ll often find me engrossed in my &lt;a href=&#34;https://github.com/akash-akya&#34;&gt;Open Source&lt;/a&gt; projects. Some of these projects address real-world needs, while others are born purely out of the joy of building and the curiosity of &amp;ldquo;What If.&amp;rdquo;&lt;/p&gt;</description>
     </item>
-    
   </channel>
 </rss>

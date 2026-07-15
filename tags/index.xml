@@ -2,190 +2,151 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on memdump</title>
-    <link>https://akash-akya.github.io/tags/</link>
+    <link>https://akashh.in/tags/</link>
     <description>Recent content in Tags on memdump</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 22 Apr 2024 22:26:04 +0530</lastBuildDate><atom:link href="https://akash-akya.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 22 Apr 2024 22:26:04 +0530</lastBuildDate>
+    <atom:link href="https://akashh.in/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Elixir</title>
-      <link>https://akash-akya.github.io/tags/elixir/</link>
+      <link>https://akashh.in/tags/elixir/</link>
       <pubDate>Mon, 22 Apr 2024 22:26:04 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/elixir/</guid>
+      <guid>https://akashh.in/tags/elixir/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>ExCmd</title>
-      <link>https://akash-akya.github.io/tags/excmd/</link>
+      <link>https://akashh.in/tags/excmd/</link>
       <pubDate>Mon, 22 Apr 2024 22:26:04 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/excmd/</guid>
+      <guid>https://akashh.in/tags/excmd/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Exile</title>
-      <link>https://akash-akya.github.io/tags/exile/</link>
+      <link>https://akashh.in/tags/exile/</link>
       <pubDate>Mon, 22 Apr 2024 22:26:04 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/exile/</guid>
+      <guid>https://akashh.in/tags/exile/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>FFmpeg</title>
-      <link>https://akash-akya.github.io/tags/ffmpeg/</link>
+      <link>https://akashh.in/tags/ffmpeg/</link>
       <pubDate>Mon, 22 Apr 2024 22:26:04 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/ffmpeg/</guid>
+      <guid>https://akashh.in/tags/ffmpeg/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Port</title>
-      <link>https://akash-akya.github.io/tags/port/</link>
+      <link>https://akashh.in/tags/port/</link>
       <pubDate>Mon, 22 Apr 2024 22:26:04 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/port/</guid>
+      <guid>https://akashh.in/tags/port/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Programming</title>
-      <link>https://akash-akya.github.io/tags/programming/</link>
+      <link>https://akashh.in/tags/programming/</link>
       <pubDate>Mon, 22 Apr 2024 22:26:04 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/programming/</guid>
+      <guid>https://akashh.in/tags/programming/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Image Processing</title>
-      <link>https://akash-akya.github.io/tags/image-processing/</link>
+      <link>https://akashh.in/tags/image-processing/</link>
       <pubDate>Mon, 25 Mar 2024 20:34:47 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/image-processing/</guid>
+      <guid>https://akashh.in/tags/image-processing/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Vix</title>
-      <link>https://akash-akya.github.io/tags/vix/</link>
+      <link>https://akashh.in/tags/vix/</link>
       <pubDate>Mon, 25 Mar 2024 20:34:47 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/vix/</guid>
+      <guid>https://akashh.in/tags/vix/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>CB300R</title>
-      <link>https://akash-akya.github.io/tags/cb300r/</link>
+      <link>https://akashh.in/tags/cb300r/</link>
       <pubDate>Fri, 01 Sep 2023 21:37:50 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/cb300r/</guid>
+      <guid>https://akashh.in/tags/cb300r/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Motorcycle</title>
-      <link>https://akash-akya.github.io/tags/motorcycle/</link>
+      <link>https://akashh.in/tags/motorcycle/</link>
       <pubDate>Fri, 01 Sep 2023 21:37:50 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/motorcycle/</guid>
+      <guid>https://akashh.in/tags/motorcycle/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Collectable</title>
-      <link>https://akash-akya.github.io/tags/collectable/</link>
+      <link>https://akashh.in/tags/collectable/</link>
       <pubDate>Sun, 14 Nov 2021 08:47:00 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/collectable/</guid>
+      <guid>https://akashh.in/tags/collectable/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Stream</title>
-      <link>https://akash-akya.github.io/tags/stream/</link>
+      <link>https://akashh.in/tags/stream/</link>
       <pubDate>Sun, 14 Nov 2021 08:47:00 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/stream/</guid>
+      <guid>https://akashh.in/tags/stream/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Art</title>
-      <link>https://akash-akya.github.io/tags/art/</link>
+      <link>https://akashh.in/tags/art/</link>
       <pubDate>Thu, 06 May 2021 21:19:30 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/art/</guid>
+      <guid>https://akashh.in/tags/art/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Kannada</title>
-      <link>https://akash-akya.github.io/tags/kannada/</link>
+      <link>https://akashh.in/tags/kannada/</link>
       <pubDate>Tue, 16 Feb 2021 22:40:57 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/kannada/</guid>
+      <guid>https://akashh.in/tags/kannada/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Short Story</title>
-      <link>https://akash-akya.github.io/tags/short-story/</link>
+      <link>https://akashh.in/tags/short-story/</link>
       <pubDate>Tue, 16 Feb 2021 22:40:57 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/short-story/</guid>
+      <guid>https://akashh.in/tags/short-story/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Kumara Vyasa Bharatha</title>
-      <link>https://akash-akya.github.io/tags/kumara-vyasa-bharatha/</link>
+      <link>https://akashh.in/tags/kumara-vyasa-bharatha/</link>
       <pubDate>Tue, 08 Sep 2020 23:49:19 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/kumara-vyasa-bharatha/</guid>
+      <guid>https://akashh.in/tags/kumara-vyasa-bharatha/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Kubernetes</title>
-      <link>https://akash-akya.github.io/tags/kubernetes/</link>
+      <link>https://akashh.in/tags/kubernetes/</link>
       <pubDate>Fri, 14 Aug 2020 22:40:57 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/kubernetes/</guid>
+      <guid>https://akashh.in/tags/kubernetes/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Shell</title>
-      <link>https://akash-akya.github.io/tags/shell/</link>
+      <link>https://akashh.in/tags/shell/</link>
       <pubDate>Fri, 14 Aug 2020 22:40:57 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/shell/</guid>
+      <guid>https://akashh.in/tags/shell/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>GitHub</title>
-      <link>https://akash-akya.github.io/tags/github/</link>
+      <link>https://akashh.in/tags/github/</link>
       <pubDate>Sun, 09 Aug 2020 15:00:00 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/github/</guid>
+      <guid>https://akashh.in/tags/github/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Emacs</title>
-      <link>https://akash-akya.github.io/tags/emacs/</link>
+      <link>https://akashh.in/tags/emacs/</link>
       <pubDate>Mon, 13 May 2019 16:26:24 +0530</pubDate>
-      
-      <guid>https://akash-akya.github.io/tags/emacs/</guid>
+      <guid>https://akashh.in/tags/emacs/</guid>
       <description></description>
     </item>
-    
   </channel>
 </rss>
